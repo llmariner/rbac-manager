@@ -14,7 +14,6 @@ spec:
       labels:
         {{- include "dex-server.labels" . | nindent 8 }}
     spec:
-      serviceAccountName: {{ include "dex-server.serviceAccountName" . }}
       containers:
         - name: dex
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"

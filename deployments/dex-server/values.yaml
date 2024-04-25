@@ -1,3 +1,7 @@
+global:
+  ingress:
+    ingressClassName: kong
+
 issuerUrl: http://kong-kong-proxy.kong/dex
 httpPort: 5556
 
@@ -20,10 +24,3 @@ image:
   tag: latest
 
 replicaCount: 1
-
-serviceAccount:
-  create: true
-  name: dex-server
-
-ingress:
-  ingressClassName: kong
