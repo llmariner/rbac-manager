@@ -15,7 +15,7 @@ jobs:
   update-tag:
     runs-on: ubuntu-latest
     outputs:
-      new_tag: ${{ steps.tag_version.outputs.new_tag }}
+      new_version: ${{ steps.tag_version.outputs.new_version }}
     steps:
     - uses: actions/checkout@v4
     - name: Bump version and push tag
@@ -41,7 +41,7 @@ jobs:
     - name: Set up charts directory
       run: mkdir charts
     - name: build dex helm chart
-      run: helm package --version ${{ needs.update-tag.outputs.new_tag }} --destination ./charts ./deployments/dex-server
+      run: helm package --version ${{ needs.update-tag.outputs.new_version }} --destination ./charts ./deployments/dex-server
     - name: Rebuild index.yaml and push
       run: |
         curl -o index.yaml http://llm-operator-charts.s3-website-us-west-2.amazonaws.com/index.yaml
