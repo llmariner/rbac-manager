@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "dex-server.fullname" . }}
+  labels:
+    {{- include "dex-server.labels" . | nindent 4 }}
+data:
+  config.yaml: |
+    issuer: {{ .Values.issuerUrl }}
+    storage:
+      type: sqlite3
+      config:
+        file: var/dex/dex.db
+
+    # TODO(aya): set up grpc API
+    web:
+      http: 0.0.0.0:{{ .Values.httpPort }}
+
+    oauth2:
+      skipApprovalScreen: true
+      passwordConnector: local
+
+    staticClients:
+    - id: {{ .Values.client.id }}
+      redirectURIs:
+      - {{ .Values.client.redirectUrl }}
+      name: {{ .Values.client.name }}
+      secret: {{ .Values.client.secret }}
+
+    enablePasswordDB: true
+    staticPasswords:
+    - userID: {{ .Values.admin.id }}
+      username: {{ .Values.admin.user }}
+      email: {{ .Values.admin.email }}
+      hash: {{ .Values.admin.password }}

@@ -1,0 +1,26 @@
+global:
+  ingress:
+    ingressClassName: kong
+
+issuerUrl: http://kong-kong-proxy.kong/dex
+httpPort: 5556
+
+client:
+  id: llm-operator
+  name: LLM Operator
+  secret: ZXhhbXBsZS1hcHAtc2VjcmV0
+  redirectUrl: http://127.0.0.1:5555/callback
+
+admin:
+  id: 08a8684b-db88-4b73-90a9-3cd1661f5466
+  name: admin
+  email: admin@example.com
+  # bcrypt hash of the string: $(echo password | htpasswd -BinC 10 admin | cut -d: -f2)
+  password: "$2a$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W"
+
+image:
+  repository: dexidp/dex
+  pullPolicy: IfNotPresent
+  tag: latest
+
+replicaCount: 1
