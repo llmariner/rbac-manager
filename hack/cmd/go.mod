@@ -3,8 +3,8 @@ module github.com/llm-operator/rbac-manager/hack/cmd
 go 1.22.2
 
 require (
+	github.com/cli/browser v1.3.0
 	github.com/coreos/go-oidc/v3 v3.10.0
-	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
 	github.com/spf13/cobra v1.8.0
 	golang.org/x/oauth2 v0.13.0
 )

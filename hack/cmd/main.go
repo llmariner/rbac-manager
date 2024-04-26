@@ -10,17 +10,18 @@ import (
 	"path"
 	"time"
 
+	"github.com/cli/browser"
 	"github.com/coreos/go-oidc/v3/oidc"
-	"github.com/pkg/browser"
 	"github.com/spf13/cobra"
 	"golang.org/x/oauth2"
 )
 
-var (
+const (
 	defaultClientID     = "llm-operator"
 	defaultClientSecret = "ZXhhbXBsZS1hcHAtc2VjcmV0"
 	defaultRedirectURI  = "http://127.0.0.1:5555/callback"
 	defaultIssuerURL    = "http://kong-kong-proxy.kong/dex"
+	defaultNodeIP       = "127.0.0.1"
 )
 
 type client struct {
@@ -44,6 +45,7 @@ func cmd() *cobra.Command {
 	var (
 		cli       client
 		issuerURL string
+		nodeIP    string
 	)
 	cmd := cobra.Command{
 		Use: "login",
@@ -51,6 +53,18 @@ func cmd() *cobra.Command {
 			ru, err := url.Parse(cli.redirectURI)
 			if err != nil {
 				return fmt.Errorf("parse redirect-uri: %v", err)
+			}
+			iu, err := url.Parse(issuerURL)
+			if err != nil {
+				return fmt.Errorf("parse redirect-uri: %v", err)
+			}
+
+			dialer := &net.Dialer{}
+			http.DefaultTransport.(*http.Transport).DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
+				if addr == fmt.Sprintf("%s:80", iu.Host) {
+					addr = fmt.Sprintf("%s:80", nodeIP)
+				}
+				return dialer.DialContext(ctx, network, addr)
 			}
 
 			ctx := oidc.ClientContext(context.Background(), http.DefaultClient)
@@ -61,18 +75,16 @@ func cmd() *cobra.Command {
 			cli.provider = provider
 			cli.verifier = provider.Verifier(&oidc.Config{ClientID: cli.clientID})
 
-			u, err := url.Parse(path.Join(issuerURL, "auth"))
-			if err != nil {
-				return fmt.Errorf("parse redirect-uri: %v", err)
-			}
-			q := u.Query()
+			iu.Host = nodeIP
+			iu.Path = path.Join(iu.Path, "auth")
+			q := iu.Query()
 			q.Add("client_id", cli.clientID)
 			q.Add("redirect_uri", cli.redirectURI)
 			q.Add("response_type", "code")
 			q.Add("scope", "openid profile email")
-			u.RawQuery = q.Encode()
+			iu.RawQuery = q.Encode()
 			fmt.Println("Open browser...")
-			if err := browser.OpenURL(u.String()); err != nil {
+			if err := browser.OpenURL(iu.String()); err != nil {
 				return err
 			}
 
@@ -90,6 +102,7 @@ func cmd() *cobra.Command {
 	cmd.Flags().StringVar(&cli.clientSecret, "client-secret", defaultClientSecret, "OAuth2 client secret of this application.")
 	cmd.Flags().StringVar(&cli.redirectURI, "redirect-uri", defaultRedirectURI, "Callback URL for OAuth2 responses.")
 	cmd.Flags().StringVar(&issuerURL, "issuer", defaultIssuerURL, "URL of the OpenID Connect issuer.")
+	cmd.Flags().StringVar(&nodeIP, "node-ip", defaultNodeIP, "IP address of the k8s node.")
 	return &cmd
 }
 

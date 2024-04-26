@@ -2,7 +2,7 @@
 
 ## Procedure
 
-### Step 1. Install dex server to the kind cluster with kong
+Install dex server to the kind cluster with kong
 
 ```
 helm install dex -n auth deployments/dex-server --create-namespace
@@ -10,16 +10,6 @@ helm install dex -n auth deployments/dex-server --create-namespace
 
 > [!NOTE]
 > see [llm-operator](https://github.com/llm-operator/llm-operator/tree/main/hack) for the kong installation.
-
-### Step 2. map issuer name
-
-Map the service name to the node IP (or localhost for Docker Desktop), and align it with the issuer URL.
-
-Example /etc/hosts setting for the Docker Desktop:
-
-```
-127.0.0.1 kong-kong-proxy.kong
-```
 
 ## Get id token
 
