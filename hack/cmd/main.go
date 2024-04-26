@@ -56,7 +56,7 @@ func cmd() *cobra.Command {
 			}
 			iu, err := url.Parse(issuerURL)
 			if err != nil {
-				return fmt.Errorf("parse redirect-uri: %v", err)
+				return fmt.Errorf("parse issuer-uri: %v", err)
 			}
 
 			dialer := &net.Dialer{}
