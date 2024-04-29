@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "rbac-server.fullname" . }}
+  labels:
+    {{- include "rbac-server.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "rbac-server.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "rbac-server.labels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: rbac
+          image: "{{ .Values.image.repository }}:{{ default .Chart.Version .Values.version }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - run
+            - --config
+            - /etc/config/config.yaml
+          ports:
+            - name: internal-grpc
+              containerPort: {{ .Values.internalGrpcPort }}
+              protocol: TCP
+          volumeMounts:
+            - name: config
+              mountPath: /etc/config
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "rbac-server.fullname" . }}

@@ -1,0 +1,25 @@
+internalGrpcPort: 8081 
+
+issuerUrl: http://kong-kong-proxy.kong/dex
+
+debug:
+  userOrgMap:
+    admin@example.com: example-org
+  orgRoleMap:
+    example-org: all
+  roleScopesMap:
+    all:
+    - api.model.read
+    - api.model.write
+    - api.fine_tuning.jobs.read
+    - api.fine_tuning.jobs.write
+    - api.files.read
+    - api.files.write
+
+replicaCount: 1
+
+image:
+  repository: public.ecr.aws/v8n3t7y5/llm-operator/rbac-server
+  pullPolicy: IfNotPresent
+
+version: latest
