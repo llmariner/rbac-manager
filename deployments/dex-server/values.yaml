@@ -1,4 +1,11 @@
 global:
+  database:
+    host:
+    port:
+    username:
+    ssl:
+      mode:
+
   ingress:
     ingressClassName:
 
@@ -6,6 +13,10 @@ global:
     oidcIssuerUrl:
 
 httpPort: 5556
+
+database:
+  database: dex
+  password:
 
 client:
   id: llm-operator

@@ -8,9 +8,15 @@ data:
   config.yaml: |
     issuer: {{ .Values.global.auth.oidcIssuerUrl }}
     storage:
-      type: sqlite3
+      type: postgres
       config:
-        file: var/dex/dex.db
+        host: {{ .Values.global.database.host }}
+        port: {{ .Values.global.database.port }}
+        database: {{ .Values.database.database }}
+        user: {{ .Values.global.database.username }}
+        password: {{ .Values.database.password }}
+        ssl:
+          mode: {{ .Values.global.database.ssl.mode }}
 
     # TODO(aya): set up grpc API
     web:
