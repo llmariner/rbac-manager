@@ -59,7 +59,7 @@ jobs:
     - name: Build, tag, and push envsubst to Amazon ECR
       uses: docker/build-push-action@v5
       with:
-        file: ./build/server/Dockerfile
+        file: ./build/envsubst/Dockerfile
         push: true
         platforms: linux/amd64,linux/arm64
         tags: |
