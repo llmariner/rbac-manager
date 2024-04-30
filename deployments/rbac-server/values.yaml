@@ -2,7 +2,7 @@ global:
   auth:
     oidcIssuerUrl:
 
-internalGrpcPort: 8081
+internalGrpcPort: 8082
 
 debug:
   userOrgMap:
