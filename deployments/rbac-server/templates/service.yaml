@@ -7,9 +7,9 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-    - port: {{ .Values.internalGrpcPort }}
-      targetPort: internal-grpc
-      protocol: TCP
-      name: internal-grpc
+  - port: {{ .Values.internalGrpcPort }}
+    targetPort: internal-grpc
+    protocol: TCP
+    name: internal-grpc
   selector:
     {{- include "rbac-server.selectorLabels" . | nindent 4 }}

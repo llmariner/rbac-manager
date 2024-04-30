@@ -17,22 +17,22 @@ spec:
         checksum/config: {{ sha256sum (toJson .Values) }}
     spec:
       containers:
-        - name: dex
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          args:
-            - dex
-            - serve
-            - /etc/config/config.yaml
-          ports:
-            - name: http
-              containerPort: {{ .Values.httpPort }}
-              protocol: TCP
-          volumeMounts:
-            - name: config
-              mountPath: /etc/config
-              readOnly: true
-      volumes:
+      - name: dex
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        args:
+        - dex
+        - serve
+        - /etc/config/config.yaml
+        ports:
+        - name: http
+          containerPort: {{ .Values.httpPort }}
+          protocol: TCP
+        volumeMounts:
         - name: config
-          configMap:
-            name: {{ include "dex-server.fullname" . }}
+          mountPath: /etc/config
+          readOnly: true
+      volumes:
+      - name: config
+        configMap:
+          name: {{ include "dex-server.fullname" . }}
