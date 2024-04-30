@@ -21,13 +21,19 @@ func (c *Config) Validate() error {
 	if c.InternalGRPCPort <= 0 {
 		return fmt.Errorf("internalGrpcPort must be greater than 0")
 	}
+	if c.IssuerURL == "" {
+		return fmt.Errorf("issuerUrl must be set")
+	}
 	return nil
 }
 
 // DebugConfig specifies the debug configurations.
 type DebugConfig struct {
-	UserOrgMap    map[string]string   `yaml:"userOrgMap"`
-	OrgRoleMap    map[string]string   `yaml:"orgRoleMap"`
+	// UserOrgMap maps a registered user(email) to an organization name.
+	UserOrgMap map[string]string `yaml:"userOrgMap"`
+	// OrgRoleMap maps an organization name to a role name.
+	OrgRoleMap map[string]string `yaml:"orgRoleMap"`
+	// RoleScopesMap maps a role name to a list of scopes.
 	RoleScopesMap map[string][]string `yaml:"roleScopesMap"`
 }
 

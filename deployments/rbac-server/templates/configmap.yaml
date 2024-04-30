@@ -7,6 +7,6 @@ metadata:
 data:
   config.yaml: |
     internalGrpcPort: {{ .Values.internalGrpcPort }}
-    issuerUrl: {{ .Values.issuerUrl }}
+    issuerUrl: {{ .Values.global.auth.oidcIssuerUrl }}
     debug:
       {{- toYaml .Values.debug | nindent 6 }}

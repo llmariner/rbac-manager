@@ -1,6 +1,8 @@
-internalGrpcPort: 8081 
+global:
+  auth:
+    oidcIssuerUrl:
 
-issuerUrl: http://kong-kong-proxy.kong/dex
+internalGrpcPort: 8081 
 
 debug:
   userOrgMap:
