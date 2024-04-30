@@ -1,8 +1,10 @@
 global:
   ingress:
-    ingressClassName: kong
+    ingressClassName:
 
-issuerUrl: http://kong-kong-proxy.kong/dex
+  auth:
+    oidcIssuerUrl:
+
 httpPort: 5556
 
 client:
