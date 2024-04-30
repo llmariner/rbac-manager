@@ -20,7 +20,7 @@ const (
 	defaultClientID     = "llm-operator"
 	defaultClientSecret = "ZXhhbXBsZS1hcHAtc2VjcmV0"
 	defaultRedirectURI  = "http://127.0.0.1:5555/callback"
-	defaultIssuerURL    = "http://kong-kong-proxy.kong/dex"
+	defaultIssuerURL    = "http://kong-kong-proxy.kong/v1/dex"
 	defaultNodeIP       = "127.0.0.1"
 )
 
