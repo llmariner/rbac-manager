@@ -157,8 +157,13 @@ func (c *client) handleCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	accessToken, ok := token.Extra("access_token").(string)
+	if !ok {
+		http.Error(w, "no access_token in token response", http.StatusInternalServerError)
+		return
+	}
+
 	w.Write([]byte("Successfully logged in"))
-	fmt.Println("token:", rawIDToken)
+	fmt.Println("token:", accessToken)
 	c.stop()
-	return
 }
