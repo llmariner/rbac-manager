@@ -1,4 +1,12 @@
 global:
+  database:
+    host:
+    port:
+    username:
+    passwordEnvName:
+    ssl:
+      mode:
+
   ingress:
     ingressClassName:
 
@@ -6,6 +14,10 @@ global:
     oidcIssuerUrl:
 
 httpPort: 5556
+
+database:
+  database: dex
+
 
 client:
   id: llm-operator
@@ -24,5 +36,11 @@ image:
   repository: dexidp/dex
   pullPolicy: IfNotPresent
   tag: latest
+
+envsubst:
+  image:
+    repository: public.ecr.aws/v8n3t7y5/llm-operator/envsubst
+    pullPolicy: IfNotPresent
+
 
 replicaCount: 1

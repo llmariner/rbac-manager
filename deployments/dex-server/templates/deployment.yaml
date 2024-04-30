@@ -16,6 +16,25 @@ spec:
       annotations:
         checksum/config: {{ sha256sum (toJson .Values) }}
     spec:
+      initContainers:
+      - name: envsubst
+        image: "{{ .Values.envsubst.image.repository }}:{{ default .Chart.Version .Values.version }}"
+        args:
+        - /bin/sh
+        - -c
+        - envsubst < /original-config/config.yaml > /processed-config/config.yaml
+        env:
+        - name: PASSWORD_ENV_VAR
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.global.databaseSecret.name }}
+              key: {{ .Values.global.databaseSecret.key }}
+        volumeMounts:
+        - name: original-config
+          mountPath: /original-config
+          readOnly: true
+        - name: processed-config
+          mountPath: /processed-config
       containers:
       - name: dex
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -29,10 +48,12 @@ spec:
           containerPort: {{ .Values.httpPort }}
           protocol: TCP
         volumeMounts:
-        - name: config
+        - name: processed-config
           mountPath: /etc/config
           readOnly: true
       volumes:
-      - name: config
+      - name: original-config
         configMap:
           name: {{ include "dex-server.fullname" . }}
+      - name: processed-config
+        emptyDir:
