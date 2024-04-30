@@ -7,9 +7,9 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-    - port: {{ .Values.httpPort }}
-      targetPort: http
-      protocol: TCP
-      name: http
+  - port: {{ .Values.httpPort }}
+    targetPort: http
+    protocol: TCP
+    name: http
   selector:
     {{- include "dex-server.selectorLabels" . | nindent 4 }}
