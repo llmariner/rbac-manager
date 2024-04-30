@@ -20,7 +20,8 @@ func NewInterceptor(ctx context.Context, rbacServerAddr, accessResource string) 
 		return nil, err
 	}
 	return &Interceptor{
-		client: rbacv1.NewRbacInternalServiceClient(conn),
+		client:         rbacv1.NewRbacInternalServiceClient(conn),
+		accessResource: accessResource,
 	}, nil
 }
 
