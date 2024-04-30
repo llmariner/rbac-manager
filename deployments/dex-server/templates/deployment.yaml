@@ -13,6 +13,8 @@ spec:
     metadata:
       labels:
         {{- include "dex-server.labels" . | nindent 8 }}
+      annotations:
+        checksum/config: {{ sha256sum (toJson .Values) }}
     spec:
       containers:
         - name: dex
