@@ -3,6 +3,7 @@ global:
     host:
     port:
     username:
+    passwordEnvName:
     ssl:
       mode:
 
@@ -16,7 +17,7 @@ httpPort: 5556
 
 database:
   database: dex
-  password:
+
 
 client:
   id: llm-operator
@@ -35,5 +36,11 @@ image:
   repository: dexidp/dex
   pullPolicy: IfNotPresent
   tag: latest
+
+envsubst:
+  image:
+    repository: public.ecr.aws/v8n3t7y5/llm-operator/envsubst
+    pullPolicy: IfNotPresent
+
 
 replicaCount: 1

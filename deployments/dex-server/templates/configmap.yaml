@@ -14,7 +14,7 @@ data:
         port: {{ .Values.global.database.port }}
         database: {{ .Values.database.database }}
         user: {{ .Values.global.database.username }}
-        password: {{ .Values.database.password }}
+        password: $PASSWORD_ENV_VAR
         ssl:
           mode: {{ .Values.global.database.ssl.mode }}
 
