@@ -6,7 +6,7 @@ metadata:
     {{- include "dex-server.labels" . | nindent 4 }}
 data:
   config.yaml: |
-    issuer: {{ .Values.issuerUrl }}
+    issuer: {{ .Values.global.auth.oidcIssuerUrl }}
     storage:
       type: sqlite3
       config:
