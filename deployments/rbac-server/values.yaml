@@ -17,6 +17,8 @@ debug:
     - api.fine_tuning.jobs.write
     - api.files.read
     - api.files.write
+    - api.users.api_keys.read
+    - api.users.api_keys.write
 
 replicaCount: 1
 
