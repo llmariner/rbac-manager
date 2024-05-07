@@ -37,11 +37,11 @@ func TestAuthorize(t *testing.T) {
 		{
 			name: "authorized with API key",
 			req: &v1.AuthorizeRequest{
-				Token: "keyID",
+				Token: "keySecret",
 				Scope: "api.object.read",
 			},
 			cache: map[string]*apikey.K{
-				"keyID": {
+				"keySecret": {
 					Role: "all",
 				},
 			},
@@ -50,11 +50,11 @@ func TestAuthorize(t *testing.T) {
 		{
 			name: "unauthorized with invalid role in API key",
 			req: &v1.AuthorizeRequest{
-				Token: "keyID",
+				Token: "keySecret",
 				Scope: "api.object.read",
 			},
 			cache: map[string]*apikey.K{
-				"keyID": {
+				"keySecret": {
 					Role: "different-role",
 				},
 			},
@@ -63,7 +63,7 @@ func TestAuthorize(t *testing.T) {
 		{
 			name: "authorized with dex",
 			req: &v1.AuthorizeRequest{
-				Token: "keyID",
+				Token: "jwt",
 				Scope: "api.object.read",
 			},
 			cache: map[string]*apikey.K{},
@@ -78,7 +78,7 @@ func TestAuthorize(t *testing.T) {
 		{
 			name: "unauthorized with inactive token",
 			req: &v1.AuthorizeRequest{
-				Token: "keyID",
+				Token: "jwt",
 				Scope: "api.object.read",
 			},
 			cache: map[string]*apikey.K{},
@@ -93,7 +93,7 @@ func TestAuthorize(t *testing.T) {
 		{
 			name: "unauthorized with invalid user",
 			req: &v1.AuthorizeRequest{
-				Token: "keyID",
+				Token: "jwt",
 				Scope: "api.object.read",
 			},
 			cache: map[string]*apikey.K{},
@@ -109,7 +109,7 @@ func TestAuthorize(t *testing.T) {
 		{
 			name: "unauthorized with scope",
 			req: &v1.AuthorizeRequest{
-				Token: "keyID",
+				Token: "jwt",
 				Scope: "api.different-object.read",
 			},
 			cache: map[string]*apikey.K{},
@@ -156,7 +156,7 @@ type fakeAPIKeyCache struct {
 	cache map[string]*apikey.K
 }
 
-func (c *fakeAPIKeyCache) GetAPIKey(keyID string) (*apikey.K, bool) {
-	k, ok := c.cache[keyID]
+func (c *fakeAPIKeyCache) GetAPIKeyBySecret(secret string) (*apikey.K, bool) {
+	k, ok := c.cache[secret]
 	return k, ok
 }

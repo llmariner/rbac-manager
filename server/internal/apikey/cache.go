@@ -25,9 +25,9 @@ func NewCache(
 	debug *config.DebugConfig,
 ) *Cache {
 	return &Cache{
-		apiKeyLister: apiKeyLister,
-		apiKeysByID:  map[string]*K{},
-		apiKeyRole:   debug.APIKeyRole,
+		apiKeyLister:    apiKeyLister,
+		apiKeysBySecret: map[string]*K{},
+		apiKeyRole:      debug.APIKeyRole,
 	}
 }
 
@@ -35,19 +35,19 @@ func NewCache(
 type Cache struct {
 	apiKeyLister apiKeyLister
 
-	// apiKeysByID is a set of API keys, keyed by its ID.
-	apiKeysByID map[string]*K
-	mu          sync.RWMutex
+	// apiKeysBySecret is a set of API keys, keyed by its secret.
+	apiKeysBySecret map[string]*K
+	mu              sync.RWMutex
 
 	apiKeyRole string
 }
 
-// GetAPIKey returns an API key by its ID.
-func (c *Cache) GetAPIKey(keyID string) (*K, bool) {
+// GetAPIKeyBySecret returns an API key by its secret.
+func (c *Cache) GetAPIKeyBySecret(secret string) (*K, bool) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
-	k, ok := c.apiKeysByID[keyID]
+	k, ok := c.apiKeysBySecret[secret]
 	if !ok {
 		return nil, false
 	}
@@ -81,7 +81,7 @@ func (c *Cache) updateCache(ctx context.Context) error {
 
 	m := map[string]*K{}
 	for _, apiKey := range resp.Data {
-		m[apiKey.Id] = &K{
+		m[apiKey.Secret] = &K{
 			// TODO(kenji): Fill this properly.
 			Role: c.apiKeyRole,
 		}
@@ -89,6 +89,6 @@ func (c *Cache) updateCache(ctx context.Context) error {
 
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	c.apiKeysByID = m
+	c.apiKeysBySecret = m
 	return nil
 }
