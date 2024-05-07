@@ -13,7 +13,7 @@ import (
 )
 
 type apikeyCache interface {
-	GetAPIKey(keyID string) (*apikey.K, bool)
+	GetAPIKeyBySecret(secret string) (*apikey.K, bool)
 }
 
 type tokenIntrospector interface {

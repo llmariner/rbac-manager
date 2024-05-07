@@ -15,10 +15,12 @@ func TestCache(t *testing.T) {
 		resp: &uv1.ListAPIKeysResponse{
 			Data: []*uv1.APIKey{
 				{
-					Id: "id0",
+					Id:     "id0",
+					Secret: "s0",
 				},
 				{
-					Id: "id1",
+					Id:     "id1",
+					Secret: "s1",
 				},
 			},
 		},
@@ -31,17 +33,17 @@ func TestCache(t *testing.T) {
 	assert.NoError(t, err)
 
 	want := map[string]*K{
-		"id0": {
+		"s0": {
 			Role: "role",
 		},
-		"id1": {
+		"s1": {
 			Role: "role",
 		},
-		"id2": nil,
+		"s2": nil,
 	}
 
 	for k, v := range want {
-		got, ok := c.GetAPIKey(k)
+		got, ok := c.GetAPIKeyBySecret(k)
 		if v == nil {
 			assert.False(t, ok)
 			continue
