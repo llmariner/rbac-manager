@@ -4,6 +4,7 @@ import (
 	"context"
 
 	v1 "github.com/llm-operator/rbac-manager/api/v1"
+	"github.com/llm-operator/rbac-manager/server/internal/apikey"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -17,10 +18,20 @@ func (s *Server) Authorize(ctx context.Context, req *v1.AuthorizeRequest) (*v1.A
 		return nil, status.Errorf(codes.InvalidArgument, "scope is required")
 	}
 
-	is, err := s.dexClient.TokenIntrospect(req.Token)
+	// Check if the token is the API key.
+	key, ok := s.apiKeyCache.GetAPIKey(req.Token)
+	if ok {
+		return &v1.AuthorizeResponse{
+			Authorized: s.authorizedAPIKey(key, req.Scope),
+		}, nil
+	}
+
+	is, err := s.tokenIntrospector.TokenIntrospect(req.Token)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to introspect token: %v", err)
-	} else if !is.Active {
+	}
+
+	if !is.Active {
 		return &v1.AuthorizeResponse{Authorized: false}, nil
 	}
 
@@ -39,6 +50,19 @@ func (s *Server) authorized(user, requestScope string) bool {
 		return false
 	}
 	allowedScopes, ok := s.roleScopesMapper[role]
+	if !ok {
+		return false
+	}
+	for _, s := range allowedScopes {
+		if s == requestScope {
+			return true
+		}
+	}
+	return false
+}
+
+func (s *Server) authorizedAPIKey(apiKey *apikey.K, requestScope string) bool {
+	allowedScopes, ok := s.roleScopesMapper[apiKey.Role]
 	if !ok {
 		return false
 	}

@@ -4,9 +4,13 @@ import (
 	"context"
 	"log"
 
+	"github.com/llm-operator/rbac-manager/server/internal/apikey"
 	"github.com/llm-operator/rbac-manager/server/internal/config"
 	"github.com/llm-operator/rbac-manager/server/internal/server"
+	uv1 "github.com/llm-operator/user-manager/api/v1"
 	"github.com/spf13/cobra"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 const flagConfig = "config"
@@ -38,8 +42,33 @@ var runCmd = &cobra.Command{
 
 func run(ctx context.Context, c *config.Config) error {
 	log.Printf("Starting internal-grpc server on port %d", c.InternalGRPCPort)
-	srv := server.New(c.IssuerURL, &c.Debug)
-	return srv.Run(ctx, c.InternalGRPCPort)
+
+	conn, err := grpc.Dial(
+		c.APIKeyCacheConfig.UserManagerServerInternalAddr,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		return err
+	}
+	cache := apikey.NewCache(
+		uv1.NewUsersInternalServiceClient(conn),
+		&c.Debug,
+	)
+	errCh := make(chan error)
+	go func() {
+		errCh <- cache.Sync(ctx, c.APIKeyCacheConfig.SyncInterval)
+	}()
+
+	// We could wait for the cache to be populated before starting the server, but
+	// we intentionally avoid that here to avoid hard dependency to user-manager-server.
+	// TODO(kenji): Consider revisit this.
+
+	go func() {
+		srv := server.New(c.IssuerURL, cache, &c.Debug)
+		errCh <- srv.Run(ctx, c.InternalGRPCPort)
+	}()
+
+	return <-errCh
 }
 
 func init() {

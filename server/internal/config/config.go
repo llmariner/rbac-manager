@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"gopkg.in/yaml.v3"
 )
@@ -12,6 +13,8 @@ type Config struct {
 	InternalGRPCPort int `yaml:"internalGrpcPort"`
 
 	IssuerURL string `yaml:"issuerUrl"`
+
+	APIKeyCacheConfig APIKeyCacheConfig `yaml:"apiKeyCache"`
 
 	Debug DebugConfig `yaml:"debug"`
 }
@@ -24,6 +27,9 @@ func (c *Config) Validate() error {
 	if c.IssuerURL == "" {
 		return fmt.Errorf("issuerUrl must be set")
 	}
+	if err := c.APIKeyCacheConfig.validate(); err != nil {
+		return fmt.Errorf("apiKeyCache: %s", err)
+	}
 	return nil
 }
 
@@ -35,6 +41,25 @@ type DebugConfig struct {
 	OrgRoleMap map[string]string `yaml:"orgRoleMap"`
 	// RoleScopesMap maps a role name to a list of scopes.
 	RoleScopesMap map[string][]string `yaml:"roleScopesMap"`
+
+	// APIKeyRole is the role name associated with the API key.
+	APIKeyRole string `yaml:"apiKeyRole"`
+}
+
+// APIKeyCacheConfig is the API key cache configuration.
+type APIKeyCacheConfig struct {
+	SyncInterval                  time.Duration `yaml:"syncInterval"`
+	UserManagerServerInternalAddr string        `yaml:"userManagerServerInternalAddr"`
+}
+
+func (c *APIKeyCacheConfig) validate() error {
+	if c.SyncInterval <= 0 {
+		return fmt.Errorf("syncInterval must be greater than 0")
+	}
+	if c.UserManagerServerInternalAddr == "" {
+		return fmt.Errorf("userManagerServerInternalAddr must be set")
+	}
+	return nil
 }
 
 // Parse parses the configuration file at the given path, returning a new

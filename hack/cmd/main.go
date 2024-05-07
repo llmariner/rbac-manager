@@ -81,7 +81,7 @@ func cmd() *cobra.Command {
 			q.Add("client_id", cli.clientID)
 			q.Add("redirect_uri", cli.redirectURI)
 			q.Add("response_type", "code")
-			q.Add("scope", "openid profile email")
+			q.Add("scope", "openid")
 			iu.RawQuery = q.Encode()
 			fmt.Println("Open browser...")
 			if err := browser.OpenURL(iu.String()); err != nil {
