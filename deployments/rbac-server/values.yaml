@@ -4,6 +4,10 @@ global:
 
 internalGrpcPort: 8082
 
+apiKeyCache:
+  syncInterval: 10s
+  userManagerServerInternalAddr: llm-operator-user-manager-server-internal-grpc:8082
+
 debug:
   userOrgMap:
     admin@example.com: example-org
@@ -19,6 +23,7 @@ debug:
     - api.files.write
     - api.users.api_keys.read
     - api.users.api_keys.write
+  apiKeyRole: all
 
 replicaCount: 1
 

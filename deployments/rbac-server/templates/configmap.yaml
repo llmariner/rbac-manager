@@ -8,5 +8,8 @@ data:
   config.yaml: |
     internalGrpcPort: {{ .Values.internalGrpcPort }}
     issuerUrl: {{ .Values.global.auth.oidcIssuerUrl }}
+    apiKeyCache:
+      syncInterval: {{ .Values.apiKeyCache.syncInterval }}
+      userManagerServerInternalAddr: {{ .Values.apiKeyCache.userManagerServerInternalAddr }}
     debug:
       {{- toYaml .Values.debug | nindent 6 }}

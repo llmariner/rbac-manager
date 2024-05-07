@@ -6,15 +6,26 @@ import (
 	"net"
 
 	v1 "github.com/llm-operator/rbac-manager/api/v1"
+	"github.com/llm-operator/rbac-manager/server/internal/apikey"
 	"github.com/llm-operator/rbac-manager/server/internal/config"
 	"github.com/llm-operator/rbac-manager/server/internal/dex"
 	"google.golang.org/grpc"
 )
 
+type apikeyCache interface {
+	GetAPIKey(keyID string) (*apikey.K, bool)
+}
+
+type tokenIntrospector interface {
+	TokenIntrospect(token string) (*dex.Introspection, error)
+}
+
 // New returns a new Server.
-func New(issuerURL string, debug *config.DebugConfig) *Server {
+func New(issuerURL string, apiKeyCache apikeyCache, debug *config.DebugConfig) *Server {
 	return &Server{
-		dexClient: dex.NewDefaultClient(issuerURL),
+		tokenIntrospector: dex.NewDefaultClient(issuerURL),
+
+		apiKeyCache: apiKeyCache,
 
 		userOrgMapper:    debug.UserOrgMap,
 		orgRoleMapper:    debug.OrgRoleMap,
@@ -26,7 +37,9 @@ func New(issuerURL string, debug *config.DebugConfig) *Server {
 type Server struct {
 	v1.UnimplementedRbacInternalServiceServer
 
-	dexClient dex.Client
+	tokenIntrospector tokenIntrospector
+
+	apiKeyCache apikeyCache
 
 	// TODO(aya): replace this after implementing the user-manager.
 	userOrgMapper    map[string]string
