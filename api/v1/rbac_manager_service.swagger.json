@@ -49,6 +49,28 @@
       "properties": {
         "authorized": {
           "type": "boolean"
+        },
+        "user": {
+          "$ref": "#/definitions/v1User"
+        },
+        "organization": {
+          "$ref": "#/definitions/v1Organization"
+        }
+      }
+    },
+    "v1Organization": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      }
+    },
+    "v1User": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
         }
       }
     }

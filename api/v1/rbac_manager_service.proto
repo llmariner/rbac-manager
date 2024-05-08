@@ -11,6 +11,17 @@ message AuthorizeRequest {
 
 message AuthorizeResponse {
   bool authorized = 1;
+
+  User user = 2;
+  Organization organization = 3;
+}
+
+message User {
+  string id = 1;
+}
+
+message Organization {
+  string id = 1;
 }
 
 service RbacInternalService {
