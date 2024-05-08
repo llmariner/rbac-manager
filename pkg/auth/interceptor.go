@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"strings"
 
 	rbacv1 "github.com/llm-operator/rbac-manager/api/v1"
@@ -11,6 +12,11 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
+)
+
+const (
+	capRead  = "read"
+	capWrite = "write"
 )
 
 // NewInterceptor creates a new Interceptor.
@@ -47,15 +53,12 @@ func (a *Interceptor) Unary() grpc.UnaryServerInterceptor {
 		switch {
 		case strings.HasPrefix(method, "Get"),
 			strings.HasPrefix(method, "List"):
-			cap = "read"
+			cap = capRead
 		default:
-			cap = "write"
+			cap = capWrite
 		}
 
-		user, err := a.client.Authorize(ctx, &rbacv1.AuthorizeRequest{
-			Token: token,
-			Scope: fmt.Sprintf("%s.%s", a.accessResource, cap),
-		})
+		user, err := a.authorize(ctx, token, cap)
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "failed to authorize: %v", err)
 		}
@@ -65,6 +68,39 @@ func (a *Interceptor) Unary() grpc.UnaryServerInterceptor {
 
 		return handler(ctx, req)
 	}
+}
+
+// InterceptHTTPRequest intercepts an HTTP request and returns an HTTP status code.
+func (a *Interceptor) InterceptHTTPRequest(req *http.Request) (int, error) {
+	token, found := extractTokenFromHeader(req.Header)
+	if !found {
+		return http.StatusUnauthorized, fmt.Errorf("missing authorization")
+	}
+
+	var cap string
+	switch req.Method {
+	case http.MethodGet:
+		cap = capRead
+	default:
+		cap = capWrite
+	}
+
+	user, err := a.authorize(req.Context(), token, cap)
+	if err != nil {
+		return http.StatusInternalServerError, fmt.Errorf("failed to authorize: %v", err)
+	}
+	if !user.Authorized {
+		return http.StatusUnauthorized, fmt.Errorf("permission denied")
+	}
+
+	return http.StatusOK, nil
+}
+
+func (a *Interceptor) authorize(ctx context.Context, token, cap string) (*rbacv1.AuthorizeResponse, error) {
+	return a.client.Authorize(ctx, &rbacv1.AuthorizeRequest{
+		Token: token,
+		Scope: fmt.Sprintf("%s.%s", a.accessResource, cap),
+	})
 }
 
 func extractTokenFromContext(ctx context.Context) (string, error) {
@@ -77,4 +113,12 @@ func extractTokenFromContext(ctx context.Context) (string, error) {
 		return "", status.Errorf(codes.Unauthenticated, "missing authorization")
 	}
 	return strings.TrimPrefix(auth[0], "Bearer "), nil
+}
+
+func extractTokenFromHeader(header http.Header) (string, bool) {
+	auth := header["Authorization"]
+	if len(auth) < 1 {
+		return "", false
+	}
+	return strings.TrimPrefix(auth[0], "Bearer "), true
 }
