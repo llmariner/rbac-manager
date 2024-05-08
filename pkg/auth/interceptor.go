@@ -66,6 +66,8 @@ func (a *Interceptor) Unary() grpc.UnaryServerInterceptor {
 			return nil, status.Errorf(codes.PermissionDenied, "permission denied")
 		}
 
+		ctx = appendUserInfoToContext(ctx, user)
+
 		return handler(ctx, req)
 	}
 }

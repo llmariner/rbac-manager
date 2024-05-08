@@ -35,17 +35,29 @@ func (s *Server) Authorize(ctx context.Context, req *v1.AuthorizeRequest) (*v1.A
 		return &v1.AuthorizeResponse{Authorized: false}, nil
 	}
 
+	user := &v1.User{Id: is.Extra.Email}
+	org := s.getOrg(user)
+	if org == nil {
+		return &v1.AuthorizeResponse{Authorized: false}, nil
+	}
+
 	return &v1.AuthorizeResponse{
-		Authorized: s.authorized(is.Extra.Email, req.Scope),
+		Authorized:   s.authorized(org, req.Scope),
+		User:         user,
+		Organization: org,
 	}, nil
 }
 
-func (s *Server) authorized(user, requestScope string) bool {
-	org, ok := s.userOrgMapper[user]
+func (s *Server) getOrg(user *v1.User) *v1.Organization {
+	org, ok := s.userOrgMapper[user.Id]
 	if !ok {
-		return false
+		return nil
 	}
-	role, ok := s.orgRoleMapper[org]
+	return &v1.Organization{Id: org}
+}
+
+func (s *Server) authorized(org *v1.Organization, requestScope string) bool {
+	role, ok := s.orgRoleMapper[org.Id]
 	if !ok {
 		return false
 	}
