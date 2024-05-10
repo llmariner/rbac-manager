@@ -22,7 +22,9 @@ func (s *Server) Authorize(ctx context.Context, req *v1.AuthorizeRequest) (*v1.A
 	key, ok := s.apiKeyCache.GetAPIKeyBySecret(req.Token)
 	if ok {
 		return &v1.AuthorizeResponse{
-			Authorized: s.authorizedAPIKey(key, req.Scope),
+			Authorized:   s.authorizedAPIKey(key, req.Scope),
+			User:         &v1.User{Id: key.UserID},
+			Organization: &v1.Organization{Id: key.OrganizationID},
 		}, nil
 	}
 

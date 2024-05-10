@@ -15,12 +15,16 @@ func TestCache(t *testing.T) {
 		resp: &uv1.ListAPIKeysResponse{
 			Data: []*uv1.APIKey{
 				{
-					Id:     "id0",
-					Secret: "s0",
+					Id:           "id0",
+					Secret:       "s0",
+					User:         &uv1.User{Id: "u0"},
+					Organization: &uv1.Organization{Id: "o0"},
 				},
 				{
-					Id:     "id1",
-					Secret: "s1",
+					Id:           "id1",
+					Secret:       "s1",
+					User:         &uv1.User{Id: "u1"},
+					Organization: &uv1.Organization{Id: "o1"},
 				},
 			},
 		},
@@ -34,10 +38,14 @@ func TestCache(t *testing.T) {
 
 	want := map[string]*K{
 		"s0": {
-			Role: "role",
+			Role:           "role",
+			UserID:         "u0",
+			OrganizationID: "o0",
 		},
 		"s1": {
-			Role: "role",
+			Role:           "role",
+			UserID:         "u1",
+			OrganizationID: "o1",
 		},
 		"s2": nil,
 	}

@@ -12,7 +12,9 @@ import (
 
 // K represents a role associated with an API key.
 type K struct {
-	Role string
+	Role           string
+	UserID         string
+	OrganizationID string
 }
 
 type apiKeyLister interface {
@@ -83,7 +85,9 @@ func (c *Cache) updateCache(ctx context.Context) error {
 	for _, apiKey := range resp.Data {
 		m[apiKey.Secret] = &K{
 			// TODO(kenji): Fill this properly.
-			Role: c.apiKeyRole,
+			Role:           c.apiKeyRole,
+			UserID:         apiKey.User.Id,
+			OrganizationID: apiKey.Organization.Id,
 		}
 	}
 
