@@ -66,7 +66,13 @@ func (a *Interceptor) Unary() grpc.UnaryServerInterceptor {
 			return nil, status.Errorf(codes.PermissionDenied, "permission denied")
 		}
 
-		ctx = appendUserInfoToContext(ctx, user)
+		// TODO(aya): revisit this after implement org management
+		if user.User != nil && user.Organization != nil {
+			ctx = appendUserInfoToContext(ctx, UserInfo{
+				UserID:         user.User.Id,
+				OrganizationID: user.Organization.Id,
+			})
+		}
 
 		return handler(ctx, req)
 	}
