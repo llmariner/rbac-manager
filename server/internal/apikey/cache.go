@@ -83,18 +83,11 @@ func (c *Cache) updateCache(ctx context.Context) error {
 
 	m := map[string]*K{}
 	for _, apiKey := range resp.Data {
-		var usrID, orgID string
-		if apiKey.User != nil {
-			usrID = apiKey.User.Id
-		}
-		if apiKey.Organization != nil {
-			orgID = apiKey.Organization.Id
-		}
 		m[apiKey.Secret] = &K{
 			// TODO(kenji): Fill this properly.
 			Role:           c.apiKeyRole,
-			UserID:         usrID,
-			OrganizationID: orgID,
+			UserID:         apiKey.User.Id,
+			OrganizationID: apiKey.Organization.Id,
 		}
 	}
 
