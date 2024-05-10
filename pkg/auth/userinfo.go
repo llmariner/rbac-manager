@@ -13,7 +13,7 @@ type UserInfo struct {
 }
 
 func appendUserInfoToContext(ctx context.Context, info UserInfo) context.Context {
-	return context.WithValue(ctx, userInfoKey{}, info)
+	return context.WithValue(ctx, userInfoKey{}, &info)
 }
 
 // ExtractUserInfoFromContext extracts the user info from the context.
