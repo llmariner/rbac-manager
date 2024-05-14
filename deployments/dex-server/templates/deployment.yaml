@@ -47,6 +47,9 @@ spec:
         - name: http
           containerPort: {{ .Values.httpPort }}
           protocol: TCP
+        - name: internal-grpc
+          containerPort: {{ .Values.internalGrpcPort }}
+          protocol: TCP
         volumeMounts:
         - name: processed-config
           mountPath: /etc/config
