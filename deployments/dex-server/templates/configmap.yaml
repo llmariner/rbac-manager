@@ -18,9 +18,10 @@ data:
         ssl:
           mode: {{ .Values.global.database.ssl.mode }}
 
-    # TODO(aya): set up grpc API
     web:
       http: 0.0.0.0:{{ .Values.httpPort }}
+    grpc:
+      addr: 0.0.0.0:{{ .Values.internalGrpcPort }}
 
     oauth2:
       skipApprovalScreen: true
