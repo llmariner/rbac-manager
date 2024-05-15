@@ -10,9 +10,9 @@ apiKeyCache:
 
 debug:
   userOrgMap:
-    admin@example.com: example-org
+    admin@example.com: default
   orgRoleMap:
-    example-org: all
+    default: all
   roleScopesMap:
     all:
     - api.model.read
