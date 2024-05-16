@@ -6,14 +6,14 @@ import (
 	"net"
 
 	v1 "github.com/llm-operator/rbac-manager/api/v1"
-	"github.com/llm-operator/rbac-manager/server/internal/apikey"
-	"github.com/llm-operator/rbac-manager/server/internal/config"
+	"github.com/llm-operator/rbac-manager/server/internal/cache"
 	"github.com/llm-operator/rbac-manager/server/internal/dex"
 	"google.golang.org/grpc"
 )
 
-type apikeyCache interface {
-	GetAPIKeyBySecret(secret string) (*apikey.K, bool)
+type cacheGetter interface {
+	GetAPIKeyBySecret(secret string) (*cache.K, bool)
+	GetOrganizationsByUserID(userID string) ([]cache.O, bool)
 }
 
 type tokenIntrospector interface {
@@ -21,15 +21,13 @@ type tokenIntrospector interface {
 }
 
 // New returns a new Server.
-func New(issuerURL string, apiKeyCache apikeyCache, debug *config.DebugConfig) *Server {
+func New(issuerURL string, cache cacheGetter, roleScopes map[string][]string) *Server {
 	return &Server{
 		tokenIntrospector: dex.NewDefaultClient(issuerURL),
 
-		apiKeyCache: apiKeyCache,
+		cache: cache,
 
-		userOrgMapper:    debug.UserOrgMap,
-		orgRoleMapper:    debug.OrgRoleMap,
-		roleScopesMapper: debug.RoleScopesMap,
+		roleScopesMapper: roleScopes,
 	}
 }
 
@@ -39,11 +37,8 @@ type Server struct {
 
 	tokenIntrospector tokenIntrospector
 
-	apiKeyCache apikeyCache
+	cache cacheGetter
 
-	// TODO(aya): replace this after implementing the user-manager.
-	userOrgMapper    map[string]string
-	orgRoleMapper    map[string]string
 	roleScopesMapper map[string][]string
 }
 

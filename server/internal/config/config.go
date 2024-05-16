@@ -16,6 +16,9 @@ type Config struct {
 
 	APIKeyCacheConfig APIKeyCacheConfig `yaml:"apiKeyCache"`
 
+	// RoleScopesMap maps a role name to a list of scopes.
+	RoleScopesMap map[string][]string `yaml:"roleScopesMap"`
+
 	Debug DebugConfig `yaml:"debug"`
 }
 
@@ -35,13 +38,6 @@ func (c *Config) Validate() error {
 
 // DebugConfig specifies the debug configurations.
 type DebugConfig struct {
-	// UserOrgMap maps a registered user(email) to an organization name.
-	UserOrgMap map[string]string `yaml:"userOrgMap"`
-	// OrgRoleMap maps an organization name to a role name.
-	OrgRoleMap map[string]string `yaml:"orgRoleMap"`
-	// RoleScopesMap maps a role name to a list of scopes.
-	RoleScopesMap map[string][]string `yaml:"roleScopesMap"`
-
 	// APIKeyRole is the role name associated with the API key.
 	APIKeyRole string `yaml:"apiKeyRole"`
 }
