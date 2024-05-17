@@ -92,7 +92,9 @@ func (c *Store) Sync(ctx context.Context, interval time.Duration) error {
 			return ctx.Err()
 		case <-ticker.C:
 			if err := c.updateCache(ctx); err != nil {
-				return err
+				// Gracefully ignore the error.
+				// TODO(kenji): Make the pod unready.
+				log.Printf("Failed to update the cache: %s. Ignoring.", err)
 			}
 		}
 	}
@@ -101,10 +103,7 @@ func (c *Store) Sync(ctx context.Context, interval time.Duration) error {
 func (c *Store) updateCache(ctx context.Context) error {
 	resp, err := c.userInfoLister.ListAPIKeys(ctx, &uv1.ListAPIKeysRequest{})
 	if err != nil {
-		// Gracefully ignore the error.
-		// TODO(kenji): Make the pod unready.
-		log.Printf("Failed to list API keys: %s. Ignoring.", err)
-		return nil
+		return err
 	}
 
 	m := map[string]*K{}
