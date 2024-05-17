@@ -3,6 +3,7 @@ package cache
 import (
 	"context"
 	"log"
+	"strings"
 	"sync"
 	"time"
 
@@ -124,7 +125,7 @@ func (c *Store) updateCache(ctx context.Context) error {
 	for _, user := range orgUsers.Users {
 		orguserByUserID[user.UserId] = append(orguserByUserID[user.UserId], O{
 			OrganizationID: user.OrganizationId,
-			Role:           user.Role.String(),
+			Role:           strings.ToLower(user.Role.String()),
 		})
 	}
 
