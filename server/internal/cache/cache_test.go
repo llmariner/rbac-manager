@@ -1,4 +1,4 @@
-package apikey
+package cache
 
 import (
 	"context"
@@ -11,8 +11,8 @@ import (
 )
 
 func TestCache(t *testing.T) {
-	l := &fakeAPIKeyLister{
-		resp: &uv1.ListAPIKeysResponse{
+	l := &fakeUserInfoLister{
+		apikeys: &uv1.ListAPIKeysResponse{
 			Data: []*uv1.APIKey{
 				{
 					Id:           "id0",
@@ -28,8 +28,22 @@ func TestCache(t *testing.T) {
 				},
 			},
 		},
+		orgusers: &uv1.ListOrganizationUsersResponse{
+			Users: []*uv1.OrganizationUser{
+				{
+					UserId:         "u0",
+					OrganizationId: "o0",
+					Role:           uv1.Role_OWNER,
+				},
+				{
+					UserId:         "u0",
+					OrganizationId: "o1",
+					Role:           uv1.Role_READER,
+				},
+			},
+		},
 	}
-	c := NewCache(l, &config.DebugConfig{
+	c := NewStore(l, &config.DebugConfig{
 		APIKeyRole: "role",
 	})
 
@@ -60,12 +74,23 @@ func TestCache(t *testing.T) {
 		assert.True(t, ok)
 		assert.Equal(t, v.Role, got.Role)
 	}
+
+	userorgs, ok := c.GetOrganizationsByUserID("u0")
+	assert.True(t, ok)
+	assert.Len(t, userorgs, 2)
+	_, ok = c.GetOrganizationsByUserID("u1")
+	assert.False(t, ok)
 }
 
-type fakeAPIKeyLister struct {
-	resp *uv1.ListAPIKeysResponse
+type fakeUserInfoLister struct {
+	apikeys  *uv1.ListAPIKeysResponse
+	orgusers *uv1.ListOrganizationUsersResponse
 }
 
-func (l *fakeAPIKeyLister) ListAPIKeys(ctx context.Context, in *uv1.ListAPIKeysRequest, opts ...grpc.CallOption) (*uv1.ListAPIKeysResponse, error) {
-	return l.resp, nil
+func (l *fakeUserInfoLister) ListAPIKeys(ctx context.Context, in *uv1.ListAPIKeysRequest, opts ...grpc.CallOption) (*uv1.ListAPIKeysResponse, error) {
+	return l.apikeys, nil
+}
+
+func (l *fakeUserInfoLister) ListOrganizationUsers(ctx context.Context, in *uv1.ListOrganizationUsersRequest, opts ...grpc.CallOption) (*uv1.ListOrganizationUsersResponse, error) {
+	return l.orgusers, nil
 }

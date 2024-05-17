@@ -8,22 +8,24 @@ apiKeyCache:
   syncInterval: 10s
   userManagerServerInternalAddr: llm-operator-user-manager-server-internal-grpc:8082
 
+roleScopesMap:
+  owner:
+  - api.model.read
+  - api.model.write
+  - api.fine_tuning.jobs.read
+  - api.fine_tuning.jobs.write
+  - api.files.read
+  - api.files.write
+  - api.users.api_keys.read
+  - api.users.api_keys.write
+  reader:
+  - api.model.read
+  - api.fine_tuning.jobs.read
+  - api.files.read
+  - api.users.api_keys.read
+
 debug:
-  userOrgMap:
-    admin@example.com: default
-  orgRoleMap:
-    default: all
-  roleScopesMap:
-    all:
-    - api.model.read
-    - api.model.write
-    - api.fine_tuning.jobs.read
-    - api.fine_tuning.jobs.write
-    - api.files.read
-    - api.files.write
-    - api.users.api_keys.read
-    - api.users.api_keys.write
-  apiKeyRole: all
+  apiKeyRole: owner
 
 replicaCount: 1
 

@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/llm-operator/rbac-manager/server/internal/apikey"
+	"github.com/llm-operator/rbac-manager/server/internal/cache"
 	"github.com/llm-operator/rbac-manager/server/internal/config"
 	"github.com/llm-operator/rbac-manager/server/internal/server"
 	uv1 "github.com/llm-operator/user-manager/api/v1"
@@ -50,13 +50,13 @@ func run(ctx context.Context, c *config.Config) error {
 	if err != nil {
 		return err
 	}
-	cache := apikey.NewCache(
+	cstore := cache.NewStore(
 		uv1.NewUsersInternalServiceClient(conn),
 		&c.Debug,
 	)
 	errCh := make(chan error)
 	go func() {
-		errCh <- cache.Sync(ctx, c.APIKeyCacheConfig.SyncInterval)
+		errCh <- cstore.Sync(ctx, c.APIKeyCacheConfig.SyncInterval)
 	}()
 
 	// We could wait for the cache to be populated before starting the server, but
@@ -64,7 +64,7 @@ func run(ctx context.Context, c *config.Config) error {
 	// TODO(kenji): Consider revisit this.
 
 	go func() {
-		srv := server.New(c.IssuerURL, cache, &c.Debug)
+		srv := server.New(c.IssuerURL, cstore, c.RoleScopesMap)
 		errCh <- srv.Run(ctx, c.InternalGRPCPort)
 	}()
 

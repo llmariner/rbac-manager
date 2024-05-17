@@ -11,5 +11,7 @@ data:
     apiKeyCache:
       syncInterval: {{ .Values.apiKeyCache.syncInterval }}
       userManagerServerInternalAddr: {{ .Values.apiKeyCache.userManagerServerInternalAddr }}
+    roleScopesMap:
+      {{- toYaml .Values.roleScopesMap | nindent 6 }}
     debug:
       {{- toYaml .Values.debug | nindent 6 }}

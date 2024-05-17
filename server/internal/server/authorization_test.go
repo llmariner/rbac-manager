@@ -5,34 +5,26 @@ import (
 	"testing"
 
 	v1 "github.com/llm-operator/rbac-manager/api/v1"
-	"github.com/llm-operator/rbac-manager/server/internal/apikey"
-	"github.com/llm-operator/rbac-manager/server/internal/config"
+	"github.com/llm-operator/rbac-manager/server/internal/cache"
 	"github.com/llm-operator/rbac-manager/server/internal/dex"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestAuthorize(t *testing.T) {
-	debug := &config.DebugConfig{
-		UserOrgMap: map[string]string{
-			"my-user": "my-org",
-		},
-		OrgRoleMap: map[string]string{
-			"my-org": "all",
-		},
-		RoleScopesMap: map[string][]string{
-			"all": {
-				"api.object.read",
-				"api.object.write",
-			},
+	roleScopesMap := map[string][]string{
+		"owner": {
+			"api.object.read",
+			"api.object.write",
 		},
 	}
 
 	tcs := []struct {
-		name  string
-		req   *v1.AuthorizeRequest
-		cache map[string]*apikey.K
-		is    *dex.Introspection
-		want  bool
+		name     string
+		req      *v1.AuthorizeRequest
+		apikeys  map[string]*cache.K
+		orgroles map[string][]cache.O
+		is       *dex.Introspection
+		want     bool
 	}{
 		{
 			name: "authorized with API key",
@@ -40,9 +32,9 @@ func TestAuthorize(t *testing.T) {
 				Token: "keySecret",
 				Scope: "api.object.read",
 			},
-			cache: map[string]*apikey.K{
+			apikeys: map[string]*cache.K{
 				"keySecret": {
-					Role: "all",
+					Role: "owner",
 				},
 			},
 			want: true,
@@ -53,7 +45,7 @@ func TestAuthorize(t *testing.T) {
 				Token: "keySecret",
 				Scope: "api.object.read",
 			},
-			cache: map[string]*apikey.K{
+			apikeys: map[string]*cache.K{
 				"keySecret": {
 					Role: "different-role",
 				},
@@ -66,7 +58,12 @@ func TestAuthorize(t *testing.T) {
 				Token: "jwt",
 				Scope: "api.object.read",
 			},
-			cache: map[string]*apikey.K{},
+			apikeys: map[string]*cache.K{},
+			orgroles: map[string][]cache.O{
+				"my-user": {
+					{Role: "owner"},
+				},
+			},
 			is: &dex.Introspection{
 				Active: true,
 				Extra: dex.IntrospectionExtra{
@@ -81,7 +78,7 @@ func TestAuthorize(t *testing.T) {
 				Token: "jwt",
 				Scope: "api.object.read",
 			},
-			cache: map[string]*apikey.K{},
+			apikeys: map[string]*cache.K{},
 			is: &dex.Introspection{
 				Active: false,
 				Extra: dex.IntrospectionExtra{
@@ -96,7 +93,7 @@ func TestAuthorize(t *testing.T) {
 				Token: "jwt",
 				Scope: "api.object.read",
 			},
-			cache: map[string]*apikey.K{},
+			apikeys: map[string]*cache.K{},
 			is: &dex.Introspection{
 				Active: true,
 				Extra: dex.IntrospectionExtra{
@@ -112,7 +109,7 @@ func TestAuthorize(t *testing.T) {
 				Token: "jwt",
 				Scope: "api.different-object.read",
 			},
-			cache: map[string]*apikey.K{},
+			apikeys: map[string]*cache.K{},
 			is: &dex.Introspection{
 				Active: true,
 				Extra: dex.IntrospectionExtra{
@@ -129,13 +126,11 @@ func TestAuthorize(t *testing.T) {
 				tokenIntrospector: &fakeTokenIntrospector{
 					is: tc.is,
 				},
-				apiKeyCache: &fakeAPIKeyCache{
-					cache: tc.cache,
+				cache: &fakeCacheGetter{
+					apikeys:  tc.apikeys,
+					orgroles: tc.orgroles,
 				},
-
-				userOrgMapper:    debug.UserOrgMap,
-				orgRoleMapper:    debug.OrgRoleMap,
-				roleScopesMapper: debug.RoleScopesMap,
+				roleScopesMapper: roleScopesMap,
 			}
 			resp, err := srv.Authorize(context.Background(), tc.req)
 			assert.NoError(t, err)
@@ -152,11 +147,17 @@ func (f *fakeTokenIntrospector) TokenIntrospect(token string) (*dex.Introspectio
 	return f.is, nil
 }
 
-type fakeAPIKeyCache struct {
-	cache map[string]*apikey.K
+type fakeCacheGetter struct {
+	apikeys  map[string]*cache.K
+	orgroles map[string][]cache.O
 }
 
-func (c *fakeAPIKeyCache) GetAPIKeyBySecret(secret string) (*apikey.K, bool) {
-	k, ok := c.cache[secret]
+func (c *fakeCacheGetter) GetAPIKeyBySecret(secret string) (*cache.K, bool) {
+	k, ok := c.apikeys[secret]
 	return k, ok
+}
+
+func (c *fakeCacheGetter) GetOrganizationsByUserID(userID string) ([]cache.O, bool) {
+	users, ok := c.orgroles[userID]
+	return users, ok
 }
