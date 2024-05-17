@@ -2,6 +2,7 @@ package cache
 
 import (
 	"context"
+	"log"
 	"sync"
 	"time"
 
@@ -91,7 +92,9 @@ func (c *Store) Sync(ctx context.Context, interval time.Duration) error {
 			return ctx.Err()
 		case <-ticker.C:
 			if err := c.updateCache(ctx); err != nil {
-				return err
+				// Gracefully ignore the error.
+				// TODO(kenji): Make the pod unready.
+				log.Printf("Failed to update the cache: %s. Ignoring.", err)
 			}
 		}
 	}
