@@ -6,7 +6,7 @@ internalGrpcPort: 8082
 
 apiKeyCache:
   syncInterval: 10s
-  userManagerServerInternalAddr: llm-operator-user-manager-server-internal-grpc:8082
+  userManagerServerInternalAddr: user-manager-server-internal-grpc:8082
 
 roleScopesMap:
   owner:
