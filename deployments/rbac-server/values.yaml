@@ -4,7 +4,7 @@ global:
 
 internalGrpcPort: 8082
 
-apiKeyCache:
+cache:
   syncInterval: 10s
   userManagerServerInternalAddr: llm-operator-user-manager-server-internal-grpc:8082
 

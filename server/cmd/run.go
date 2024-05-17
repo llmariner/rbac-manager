@@ -44,7 +44,7 @@ func run(ctx context.Context, c *config.Config) error {
 	log.Printf("Starting internal-grpc server on port %d", c.InternalGRPCPort)
 
 	conn, err := grpc.Dial(
-		c.APIKeyCacheConfig.UserManagerServerInternalAddr,
+		c.CacheConfig.UserManagerServerInternalAddr,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
@@ -56,7 +56,7 @@ func run(ctx context.Context, c *config.Config) error {
 	)
 	errCh := make(chan error)
 	go func() {
-		errCh <- cstore.Sync(ctx, c.APIKeyCacheConfig.SyncInterval)
+		errCh <- cstore.Sync(ctx, c.CacheConfig.SyncInterval)
 	}()
 
 	// We could wait for the cache to be populated before starting the server, but

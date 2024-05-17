@@ -14,7 +14,7 @@ type Config struct {
 
 	IssuerURL string `yaml:"issuerUrl"`
 
-	APIKeyCacheConfig APIKeyCacheConfig `yaml:"apiKeyCache"`
+	CacheConfig CacheConfig `yaml:"cache"`
 
 	// RoleScopesMap maps a role name to a list of scopes.
 	RoleScopesMap map[string][]string `yaml:"roleScopesMap"`
@@ -30,8 +30,8 @@ func (c *Config) Validate() error {
 	if c.IssuerURL == "" {
 		return fmt.Errorf("issuerUrl must be set")
 	}
-	if err := c.APIKeyCacheConfig.validate(); err != nil {
-		return fmt.Errorf("apiKeyCache: %s", err)
+	if err := c.CacheConfig.validate(); err != nil {
+		return fmt.Errorf("cache: %s", err)
 	}
 	return nil
 }
@@ -42,13 +42,13 @@ type DebugConfig struct {
 	APIKeyRole string `yaml:"apiKeyRole"`
 }
 
-// APIKeyCacheConfig is the API key cache configuration.
-type APIKeyCacheConfig struct {
+// CacheConfig is the API key cache configuration.
+type CacheConfig struct {
 	SyncInterval                  time.Duration `yaml:"syncInterval"`
 	UserManagerServerInternalAddr string        `yaml:"userManagerServerInternalAddr"`
 }
 
-func (c *APIKeyCacheConfig) validate() error {
+func (c *CacheConfig) validate() error {
 	if c.SyncInterval <= 0 {
 		return fmt.Errorf("syncInterval must be greater than 0")
 	}
