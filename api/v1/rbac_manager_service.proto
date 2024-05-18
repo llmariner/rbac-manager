@@ -6,7 +6,10 @@ option go_package = "github.com/llm-operator/rbac-manager/api/v1";
 
 message AuthorizeRequest {
   string token = 1;
-  string scope = 2;
+  string access_resource = 2;
+  string capability = 3;
+  string organization_id = 4;
+  string project_id = 5;
 }
 
 message AuthorizeResponse {
@@ -14,6 +17,7 @@ message AuthorizeResponse {
 
   User user = 2;
   Organization organization = 3;
+  Project project = 4;
 }
 
 message User {
@@ -21,6 +25,10 @@ message User {
 }
 
 message Organization {
+  string id = 1;
+}
+
+message Project {
   string id = 1;
 }
 

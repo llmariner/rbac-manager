@@ -55,10 +55,21 @@
         },
         "organization": {
           "$ref": "#/definitions/v1Organization"
+        },
+        "project": {
+          "$ref": "#/definitions/v1Project"
         }
       }
     },
     "v1Organization": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      }
+    },
+    "v1Project": {
       "type": "object",
       "properties": {
         "id": {
