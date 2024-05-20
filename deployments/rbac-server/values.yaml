@@ -18,11 +18,17 @@ roleScopesMap:
   - api.files.write
   - api.users.api_keys.read
   - api.users.api_keys.write
+  - api.organizations.read
+  - api.organizations.write
+  - api.projects.read
+  - api.projects.write
   reader:
   - api.model.read
   - api.fine_tuning.jobs.read
   - api.files.read
   - api.users.api_keys.read
+  - api.organizations.read
+  - api.projects.read
 
 debug:
   apiKeyRole: owner
