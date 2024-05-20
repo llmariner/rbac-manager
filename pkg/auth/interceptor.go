@@ -17,6 +17,13 @@ import (
 const (
 	capRead  = "read"
 	capWrite = "write"
+
+	// orgHeader is the header key for organization ID.
+	// The header defined in https://platform.openai.com/docs/api-reference/authentication
+	// "OpenAI-Organization", but what we receive is "Openai-Organization".
+	orgHeader = "Openai-Organization"
+	// projectHeader is the header key for project ID.
+	projectHeader = "Openai-Project"
 )
 
 // NewInterceptor creates a new Interceptor.
@@ -58,7 +65,10 @@ func (a *Interceptor) Unary() grpc.UnaryServerInterceptor {
 			cap = capWrite
 		}
 
-		user, err := a.authorize(ctx, token, cap)
+		orgID := extractOrgIDFromContext(ctx)
+		projectID := extractProjectIDFromContext(ctx)
+
+		user, err := a.authorize(ctx, token, cap, orgID, projectID)
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "failed to authorize: %v", err)
 		}
@@ -85,6 +95,9 @@ func (a *Interceptor) InterceptHTTPRequest(req *http.Request) (int, error) {
 		return http.StatusUnauthorized, fmt.Errorf("missing authorization")
 	}
 
+	orgID := extractOrgIDFromHeader(req.Header)
+	projectID := extractProjectIDFromHeader(req.Header)
+
 	var cap string
 	switch req.Method {
 	case http.MethodGet:
@@ -93,7 +106,7 @@ func (a *Interceptor) InterceptHTTPRequest(req *http.Request) (int, error) {
 		cap = capWrite
 	}
 
-	user, err := a.authorize(req.Context(), token, cap)
+	user, err := a.authorize(req.Context(), token, cap, orgID, projectID)
 	if err != nil {
 		return http.StatusInternalServerError, fmt.Errorf("failed to authorize: %v", err)
 	}
@@ -104,10 +117,19 @@ func (a *Interceptor) InterceptHTTPRequest(req *http.Request) (int, error) {
 	return http.StatusOK, nil
 }
 
-func (a *Interceptor) authorize(ctx context.Context, token, cap string) (*rbacv1.AuthorizeResponse, error) {
+func (a *Interceptor) authorize(
+	ctx context.Context,
+	token string,
+	cap string,
+	orgID string,
+	projectID string,
+) (*rbacv1.AuthorizeResponse, error) {
 	return a.client.Authorize(ctx, &rbacv1.AuthorizeRequest{
-		Token: token,
-		Scope: fmt.Sprintf("%s.%s", a.accessResource, cap),
+		Token:          token,
+		AccessResource: a.accessResource,
+		Capability:     cap,
+		OrganizationId: orgID,
+		ProjectId:      projectID,
 	})
 }
 
@@ -123,10 +145,50 @@ func extractTokenFromContext(ctx context.Context) (string, error) {
 	return strings.TrimPrefix(auth[0], "Bearer "), nil
 }
 
+func extractOrgIDFromContext(ctx context.Context) string {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return ""
+	}
+	org := md[strings.ToLower(orgHeader)]
+	if len(org) < 1 {
+		return ""
+	}
+	return org[0]
+}
+
+func extractProjectIDFromContext(ctx context.Context) string {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return ""
+	}
+	project := md[strings.ToLower(projectHeader)]
+	if len(project) < 1 {
+		return ""
+	}
+	return project[0]
+}
+
 func extractTokenFromHeader(header http.Header) (string, bool) {
 	auth := header["Authorization"]
 	if len(auth) < 1 {
 		return "", false
 	}
 	return strings.TrimPrefix(auth[0], "Bearer "), true
+}
+
+func extractOrgIDFromHeader(header http.Header) string {
+	v := header[orgHeader]
+	if len(v) < 1 {
+		return ""
+	}
+	return v[0]
+}
+
+func extractProjectIDFromHeader(header http.Header) string {
+	v := header[projectHeader]
+	if len(v) < 1 {
+		return ""
+	}
+	return v[0]
 }

@@ -29,8 +29,9 @@ func TestAuthorize(t *testing.T) {
 		{
 			name: "authorized with API key",
 			req: &v1.AuthorizeRequest{
-				Token: "keySecret",
-				Scope: "api.object.read",
+				Token:          "keySecret",
+				AccessResource: "api.object",
+				Capability:     "read",
 			},
 			apikeys: map[string]*cache.K{
 				"keySecret": {
@@ -42,8 +43,9 @@ func TestAuthorize(t *testing.T) {
 		{
 			name: "unauthorized with invalid role in API key",
 			req: &v1.AuthorizeRequest{
-				Token: "keySecret",
-				Scope: "api.object.read",
+				Token:          "keySecret",
+				AccessResource: "api.object",
+				Capability:     "read",
 			},
 			apikeys: map[string]*cache.K{
 				"keySecret": {
@@ -55,8 +57,9 @@ func TestAuthorize(t *testing.T) {
 		{
 			name: "authorized with dex",
 			req: &v1.AuthorizeRequest{
-				Token: "jwt",
-				Scope: "api.object.read",
+				Token:          "jwt",
+				AccessResource: "api.object",
+				Capability:     "read",
 			},
 			apikeys: map[string]*cache.K{},
 			orgroles: map[string][]cache.O{
@@ -75,8 +78,9 @@ func TestAuthorize(t *testing.T) {
 		{
 			name: "unauthorized with inactive token",
 			req: &v1.AuthorizeRequest{
-				Token: "jwt",
-				Scope: "api.object.read",
+				Token:          "jwt",
+				AccessResource: "api.object",
+				Capability:     "read",
 			},
 			apikeys: map[string]*cache.K{},
 			is: &dex.Introspection{
@@ -90,8 +94,9 @@ func TestAuthorize(t *testing.T) {
 		{
 			name: "unauthorized with invalid user",
 			req: &v1.AuthorizeRequest{
-				Token: "jwt",
-				Scope: "api.object.read",
+				Token:          "jwt",
+				AccessResource: "api.object",
+				Capability:     "read",
 			},
 			apikeys: map[string]*cache.K{},
 			is: &dex.Introspection{
@@ -106,8 +111,9 @@ func TestAuthorize(t *testing.T) {
 		{
 			name: "unauthorized with scope",
 			req: &v1.AuthorizeRequest{
-				Token: "jwt",
-				Scope: "api.different-object.read",
+				Token:          "jwt",
+				AccessResource: "api.different-object",
+				Capability:     "read",
 			},
 			apikeys: map[string]*cache.K{},
 			is: &dex.Introspection{
