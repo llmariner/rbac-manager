@@ -68,31 +68,25 @@ func (a *Interceptor) Unary() grpc.UnaryServerInterceptor {
 		orgID := extractOrgIDFromContext(ctx)
 		projectID := extractProjectIDFromContext(ctx)
 
-		user, err := a.authorize(ctx, token, cap, orgID, projectID)
+		aresp, err := a.authorize(ctx, token, cap, orgID, projectID)
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "failed to authorize: %v", err)
 		}
-		if !user.Authorized {
+		if !aresp.Authorized {
 			return nil, status.Errorf(codes.PermissionDenied, "permission denied")
 		}
 
 		// TODO(aya): revisit this after implement org management
-		if user.User != nil && user.Organization != nil {
-			ctx = appendUserInfoToContext(ctx, UserInfo{
-				UserID:         user.User.Id,
-				OrganizationID: user.Organization.Id,
-			})
-		}
-
+		ctx = appendUserInfoToContext(ctx, newUserInfoFromAuthorizeResponse(aresp))
 		return handler(ctx, req)
 	}
 }
 
 // InterceptHTTPRequest intercepts an HTTP request and returns an HTTP status code.
-func (a *Interceptor) InterceptHTTPRequest(req *http.Request) (int, error) {
+func (a *Interceptor) InterceptHTTPRequest(req *http.Request) (int, UserInfo, error) {
 	token, found := extractTokenFromHeader(req.Header)
 	if !found {
-		return http.StatusUnauthorized, fmt.Errorf("missing authorization")
+		return http.StatusUnauthorized, UserInfo{}, fmt.Errorf("missing authorization")
 	}
 
 	orgID := extractOrgIDFromHeader(req.Header)
@@ -106,15 +100,17 @@ func (a *Interceptor) InterceptHTTPRequest(req *http.Request) (int, error) {
 		cap = capWrite
 	}
 
-	user, err := a.authorize(req.Context(), token, cap, orgID, projectID)
+	resp, err := a.authorize(req.Context(), token, cap, orgID, projectID)
 	if err != nil {
-		return http.StatusInternalServerError, fmt.Errorf("failed to authorize: %v", err)
+		return http.StatusInternalServerError, UserInfo{}, fmt.Errorf("failed to authorize: %v", err)
 	}
-	if !user.Authorized {
-		return http.StatusUnauthorized, fmt.Errorf("permission denied")
+	if !resp.Authorized {
+		return http.StatusUnauthorized, UserInfo{}, fmt.Errorf("permission denied")
 	}
 
-	return http.StatusOK, nil
+	// TODO(kenji): Return user info.
+
+	return http.StatusOK, newUserInfoFromAuthorizeResponse(resp), nil
 }
 
 func (a *Interceptor) authorize(
