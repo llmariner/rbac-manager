@@ -68,10 +68,13 @@ func (s *Server) Authorize(ctx context.Context, req *v1.AuthorizeRequest) (*v1.A
 	// TODO(kenji): Validate if the project is a member of the organization.
 
 	r := &v1.AuthorizeResponse{
-		Authorized:   s.authorized(org.Role, toScope(req)),
-		User:         user,
-		Organization: &v1.Organization{Id: org.OrganizationID},
-		Project:      &v1.Project{Id: req.ProjectId},
+		Authorized: s.authorized(org.Role, toScope(req)),
+		User:       user,
+		Organization: &v1.Organization{
+			Id:                  org.OrganizationID,
+			KubernetesNamespace: org.KubernetesNamespace,
+		},
+		Project: &v1.Project{Id: req.ProjectId},
 	}
 
 	return r, nil

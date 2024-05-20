@@ -2,6 +2,7 @@ package cache
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"strings"
 	"sync"
@@ -21,12 +22,14 @@ type K struct {
 
 // O represents a role associated with a organization user.
 type O struct {
-	Role           string
-	OrganizationID string
+	Role                string
+	OrganizationID      string
+	KubernetesNamespace string
 }
 
 type userInfoLister interface {
 	ListAPIKeys(ctx context.Context, in *uv1.ListAPIKeysRequest, opts ...grpc.CallOption) (*uv1.ListAPIKeysResponse, error)
+	ListOrganizations(ctx context.Context, in *uv1.ListOrganizationsRequest, opts ...grpc.CallOption) (*uv1.ListOrganizationsResponse, error)
 	ListOrganizationUsers(ctx context.Context, in *uv1.ListOrganizationUsersRequest, opts ...grpc.CallOption) (*uv1.ListOrganizationUsersResponse, error)
 }
 
@@ -117,15 +120,29 @@ func (c *Store) updateCache(ctx context.Context) error {
 		}
 	}
 
+	orgs, err := c.userInfoLister.ListOrganizations(ctx, &uv1.ListOrganizationsRequest{})
+	if err != nil {
+		return err
+	}
+	orgsByID := map[string]*uv1.Organization{}
+	for _, org := range orgs.Organizations {
+		orgsByID[org.Id] = org
+	}
+
 	orgUsers, err := c.userInfoLister.ListOrganizationUsers(ctx, &uv1.ListOrganizationUsersRequest{})
 	if err != nil {
 		return err
 	}
 	orguserByUserID := map[string][]O{}
 	for _, user := range orgUsers.Users {
+		o, ok := orgsByID[user.OrganizationId]
+		if !ok {
+			return fmt.Errorf("Organization not found: %s", user.OrganizationId)
+		}
 		orguserByUserID[user.UserId] = append(orguserByUserID[user.UserId], O{
-			OrganizationID: user.OrganizationId,
-			Role:           strings.ToLower(user.Role.String()),
+			OrganizationID:      user.OrganizationId,
+			Role:                strings.ToLower(user.Role.String()),
+			KubernetesNamespace: o.KubernetesNamespace,
 		})
 	}
 

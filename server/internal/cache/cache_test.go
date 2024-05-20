@@ -28,6 +28,18 @@ func TestCache(t *testing.T) {
 				},
 			},
 		},
+		orgs: &uv1.ListOrganizationsResponse{
+			Organizations: []*uv1.Organization{
+				{
+					Id:                  "o0",
+					KubernetesNamespace: "ns0",
+				},
+				{
+					Id:                  "o1",
+					KubernetesNamespace: "ns1",
+				},
+			},
+		},
 		orgusers: &uv1.ListOrganizationUsersResponse{
 			Users: []*uv1.OrganizationUser{
 				{
@@ -78,17 +90,44 @@ func TestCache(t *testing.T) {
 	userorgs, ok := c.GetOrganizationsByUserID("u0")
 	assert.True(t, ok)
 	assert.Len(t, userorgs, 2)
+	userorgsByOrg := map[string]*O{}
+	for _, uo := range userorgs {
+		userorgsByOrg[uo.OrganizationID] = &uo
+	}
+	wantUOs := map[string]*O{
+		"o0": {
+			Role:                "owner",
+			OrganizationID:      "o0",
+			KubernetesNamespace: "ns0",
+		},
+		"o1": {
+			Role:                "reader",
+			OrganizationID:      "o1",
+			KubernetesNamespace: "ns1",
+		},
+	}
+	for orgID, want := range wantUOs {
+		got, ok := userorgsByOrg[orgID]
+		assert.True(t, ok)
+		assert.Equal(t, want, got)
+	}
+
 	_, ok = c.GetOrganizationsByUserID("u1")
 	assert.False(t, ok)
 }
 
 type fakeUserInfoLister struct {
 	apikeys  *uv1.ListAPIKeysResponse
+	orgs     *uv1.ListOrganizationsResponse
 	orgusers *uv1.ListOrganizationUsersResponse
 }
 
 func (l *fakeUserInfoLister) ListAPIKeys(ctx context.Context, in *uv1.ListAPIKeysRequest, opts ...grpc.CallOption) (*uv1.ListAPIKeysResponse, error) {
 	return l.apikeys, nil
+}
+
+func (l *fakeUserInfoLister) ListOrganizations(ctx context.Context, in *uv1.ListOrganizationsRequest, opts ...grpc.CallOption) (*uv1.ListOrganizationsResponse, error) {
+	return l.orgs, nil
 }
 
 func (l *fakeUserInfoLister) ListOrganizationUsers(ctx context.Context, in *uv1.ListOrganizationUsersRequest, opts ...grpc.CallOption) (*uv1.ListOrganizationUsersResponse, error) {

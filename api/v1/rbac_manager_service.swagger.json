@@ -66,6 +66,9 @@
       "properties": {
         "id": {
           "type": "string"
+        },
+        "kubernetesNamespace": {
+          "type": "string"
         }
       }
     },
