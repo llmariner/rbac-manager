@@ -4,7 +4,7 @@ go 1.22.2
 
 require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.0
-	github.com/llm-operator/user-manager v0.26.0
+	github.com/llm-operator/user-manager v0.33.0
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.9.0
 	google.golang.org/grpc v1.63.2
