@@ -13,19 +13,26 @@ import (
 
 func TestAuthorize(t *testing.T) {
 	roleScopesMap := map[string][]string{
-		"owner": {
+		"organizationOwner": {
+			"api.object.read",
+			"api.object.write",
+		},
+		"projectOwner": {
 			"api.object.read",
 			"api.object.write",
 		},
 	}
 
 	tcs := []struct {
-		name     string
-		req      *v1.AuthorizeRequest
-		apikeys  map[string]*cache.K
-		orgroles map[string][]cache.OU
-		is       *dex.Introspection
-		want     bool
+		name                     string
+		req                      *v1.AuthorizeRequest
+		apikeys                  map[string]*cache.K
+		orgsByID                 map[string]*cache.O
+		orgsByUserID             map[string][]cache.OU
+		projectsByID             map[string]*cache.P
+		projectsByOrganizationID map[string][]cache.P
+		is                       *dex.Introspection
+		want                     bool
 	}{
 		{
 			name: "authorized with API key",
@@ -36,7 +43,13 @@ func TestAuthorize(t *testing.T) {
 			},
 			apikeys: map[string]*cache.K{
 				"keySecret": {
-					Role: "owner",
+					ProjectID: "my-project",
+					Role:      "projectOwner",
+				},
+			},
+			projectsByID: map[string]*cache.P{
+				"my-project": {
+					KubernetesNamespace: "ns",
 				},
 			},
 			want: true,
@@ -53,6 +66,11 @@ func TestAuthorize(t *testing.T) {
 					Role: "different-role",
 				},
 			},
+			projectsByID: map[string]*cache.P{
+				"my-project": {
+					KubernetesNamespace: "ns",
+				},
+			},
 			want: false,
 		},
 		{
@@ -63,9 +81,33 @@ func TestAuthorize(t *testing.T) {
 				Capability:     "read",
 			},
 			apikeys: map[string]*cache.K{},
-			orgroles: map[string][]cache.OU{
+			orgsByID: map[string]*cache.O{
+				"my-org": {
+					ID: "my-org",
+				},
+			},
+			orgsByUserID: map[string][]cache.OU{
 				"my-user": {
-					{Role: uv1.OrganizationRole_ORGANIZATION_ROLE_OWNER},
+					{
+						Role:           uv1.OrganizationRole_ORGANIZATION_ROLE_OWNER,
+						OrganizationID: "my-org",
+					},
+				},
+			},
+			projectsByID: map[string]*cache.P{
+				"my-project": {
+					ID:                  "my-project",
+					OrganizationID:      "my-org",
+					KubernetesNamespace: "ns",
+				},
+			},
+			projectsByOrganizationID: map[string][]cache.P{
+				"my-org": {
+					{
+						ID:                  "my-project",
+						OrganizationID:      "my-org",
+						KubernetesNamespace: "ns",
+					},
 				},
 			},
 			is: &dex.Introspection{
@@ -134,8 +176,11 @@ func TestAuthorize(t *testing.T) {
 					is: tc.is,
 				},
 				cache: &fakeCacheGetter{
-					apikeys:  tc.apikeys,
-					orgroles: tc.orgroles,
+					apikeys:                  tc.apikeys,
+					orgsByID:                 tc.orgsByID,
+					orgsByUserID:             tc.orgsByUserID,
+					projectsByID:             tc.projectsByID,
+					projectsByOrganizationID: tc.projectsByOrganizationID,
 				},
 				roleScopesMapper: roleScopesMap,
 			}
@@ -155,8 +200,14 @@ func (f *fakeTokenIntrospector) TokenIntrospect(token string) (*dex.Introspectio
 }
 
 type fakeCacheGetter struct {
-	apikeys  map[string]*cache.K
-	orgroles map[string][]cache.OU
+	apikeys map[string]*cache.K
+
+	orgsByID     map[string]*cache.O
+	orgsByUserID map[string][]cache.OU
+
+	projectsByID             map[string]*cache.P
+	projectsByOrganizationID map[string][]cache.P
+	projectsByUserID         map[string][]cache.PU
 }
 
 func (c *fakeCacheGetter) GetAPIKeyBySecret(secret string) (*cache.K, bool) {
@@ -164,6 +215,24 @@ func (c *fakeCacheGetter) GetAPIKeyBySecret(secret string) (*cache.K, bool) {
 	return k, ok
 }
 
+func (c *fakeCacheGetter) GetOrganizationByID(organizationID string) (*cache.O, bool) {
+	o, ok := c.orgsByID[organizationID]
+	return o, ok
+}
+
 func (c *fakeCacheGetter) GetOrganizationsByUserID(userID string) []cache.OU {
-	return c.orgroles[userID]
+	return c.orgsByUserID[userID]
+}
+
+func (c *fakeCacheGetter) GetProjectsByOrganizationID(organizationID string) []cache.P {
+	return c.projectsByOrganizationID[organizationID]
+}
+
+func (c *fakeCacheGetter) GetProjectByID(projectID string) (*cache.P, bool) {
+	p, ok := c.projectsByID[projectID]
+	return p, ok
+}
+
+func (c *fakeCacheGetter) GetProjectsByUserID(userID string) []cache.PU {
+	return c.projectsByUserID[userID]
 }

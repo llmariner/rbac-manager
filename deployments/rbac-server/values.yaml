@@ -9,7 +9,7 @@ cache:
   userManagerServerInternalAddr: user-manager-server-internal-grpc:8082
 
 roleScopesMap:
-  owner:
+  orgnizationOwner:
   - api.model.read
   - api.model.write
   - api.fine_tuning.jobs.read
@@ -20,18 +20,42 @@ roleScopesMap:
   - api.users.api_keys.write
   - api.organizations.read
   - api.organizations.write
-  - api.projects.read
-  - api.projects.write
-  reader:
+  - api.organizations.users.write
+  - api.organizations.users.read
+  - api.organizations.projects.read
+  - api.organizations.projects.write
+  - api.organizations.projects.users.write
+  - api.organizations.projects.users.read
+  projectOwner:
   - api.model.read
+  - api.model.write
   - api.fine_tuning.jobs.read
+  - api.fine_tuning.jobs.write
   - api.files.read
+  - api.files.write
   - api.users.api_keys.read
-  - api.organizations.read
-  - api.projects.read
+  - api.users.api_keys.write
+  # TODO(kenji): Revisit. Other resources are scoped by a single project (e.g., view all models in a given project), but
+  # "projects" are not scoped (e.g., view all projects where I'm a member).
+  - api.organizations.projects.read
+  - api.organizations.projects.users.write
+  - api.organizations.projects.users.read
+  projectMember:
+  - api.model.read
+  - api.model.write
+  - api.fine_tuning.jobs.read
+  - api.fine_tuning.jobs.write
+  - api.files.read
+  - api.files.write
+  - api.users.api_keys.read
+  - api.users.api_keys.write
+  # TODO(kenji): Revisit. Other resources are scoped by a single project (e.g., view all models in a given project), but
+  # "projects" are not scoped (e.g., view all projects where I'm a member).
+  - api.organizations.projects.read
+  - api.organizations.projects.users.read
 
 debug:
-  apiKeyRole: owner
+  apiKeyRole: projectOwner
 
 replicaCount: 1
 
