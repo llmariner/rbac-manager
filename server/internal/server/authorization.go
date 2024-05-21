@@ -44,12 +44,12 @@ func (s *Server) Authorize(ctx context.Context, req *v1.AuthorizeRequest) (*v1.A
 	}
 
 	user := &v1.User{Id: is.Extra.Email}
-	orgs, ok := s.cache.GetOrganizationsByUserID(user.Id)
-	if !ok {
+	orgs := s.cache.GetOrganizationsByUserID(user.Id)
+	if len(orgs) == 0 {
 		return &v1.AuthorizeResponse{Authorized: false}, nil
 	}
 
-	var org *cache.O
+	var org *cache.OU
 	if req.OrganizationId == "" {
 		// TODO(aya): handle multiple organizations.
 		org = &orgs[0]
@@ -75,8 +75,7 @@ func (s *Server) Authorize(ctx context.Context, req *v1.AuthorizeRequest) (*v1.A
 		Authorized: s.authorized(role, toScope(req)),
 		User:       user,
 		Organization: &v1.Organization{
-			Id:                  org.OrganizationID,
-			KubernetesNamespace: org.KubernetesNamespace,
+			Id: org.OrganizationID,
 		},
 		Project: &v1.Project{Id: req.ProjectId},
 	}

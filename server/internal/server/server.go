@@ -13,7 +13,7 @@ import (
 
 type cacheGetter interface {
 	GetAPIKeyBySecret(secret string) (*cache.K, bool)
-	GetOrganizationsByUserID(userID string) ([]cache.O, bool)
+	GetOrganizationsByUserID(userID string) []cache.OU
 }
 
 type tokenIntrospector interface {

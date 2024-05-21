@@ -23,7 +23,7 @@ func TestAuthorize(t *testing.T) {
 		name     string
 		req      *v1.AuthorizeRequest
 		apikeys  map[string]*cache.K
-		orgroles map[string][]cache.O
+		orgroles map[string][]cache.OU
 		is       *dex.Introspection
 		want     bool
 	}{
@@ -63,7 +63,7 @@ func TestAuthorize(t *testing.T) {
 				Capability:     "read",
 			},
 			apikeys: map[string]*cache.K{},
-			orgroles: map[string][]cache.O{
+			orgroles: map[string][]cache.OU{
 				"my-user": {
 					{Role: uv1.OrganizationRole_ORGANIZATION_ROLE_OWNER},
 				},
@@ -156,7 +156,7 @@ func (f *fakeTokenIntrospector) TokenIntrospect(token string) (*dex.Introspectio
 
 type fakeCacheGetter struct {
 	apikeys  map[string]*cache.K
-	orgroles map[string][]cache.O
+	orgroles map[string][]cache.OU
 }
 
 func (c *fakeCacheGetter) GetAPIKeyBySecret(secret string) (*cache.K, bool) {
@@ -164,7 +164,6 @@ func (c *fakeCacheGetter) GetAPIKeyBySecret(secret string) (*cache.K, bool) {
 	return k, ok
 }
 
-func (c *fakeCacheGetter) GetOrganizationsByUserID(userID string) ([]cache.O, bool) {
-	users, ok := c.orgroles[userID]
-	return users, ok
+func (c *fakeCacheGetter) GetOrganizationsByUserID(userID string) []cache.OU {
+	return c.orgroles[userID]
 }

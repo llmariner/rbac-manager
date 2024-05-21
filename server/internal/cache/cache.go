@@ -2,7 +2,6 @@ package cache
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"sync"
 	"time"
@@ -17,19 +16,40 @@ type K struct {
 	Role           string
 	UserID         string
 	OrganizationID string
+	ProjectID      string
 }
 
-// O represents a role associated with a organization user.
+// O represents an organization.
 type O struct {
-	Role                uv1.OrganizationRole
+	ID string
+}
+
+// OU represents a role associated with a organization user.
+type OU struct {
+	Role           uv1.OrganizationRole
+	OrganizationID string
+}
+
+// P represents a project.
+type P struct {
+	ID                  string
 	OrganizationID      string
 	KubernetesNamespace string
+}
+
+// PU represents a role associated with a project user.
+type PU struct {
+	Role           uv1.ProjectRole
+	ProjectID      string
+	OrganizationID string
 }
 
 type userInfoLister interface {
 	ListAPIKeys(ctx context.Context, in *uv1.ListAPIKeysRequest, opts ...grpc.CallOption) (*uv1.ListAPIKeysResponse, error)
 	ListOrganizations(ctx context.Context, in *uv1.ListOrganizationsRequest, opts ...grpc.CallOption) (*uv1.ListOrganizationsResponse, error)
 	ListOrganizationUsers(ctx context.Context, in *uv1.ListOrganizationUsersRequest, opts ...grpc.CallOption) (*uv1.ListOrganizationUsersResponse, error)
+	ListProjects(ctx context.Context, in *uv1.ListProjectsRequest, opts ...grpc.CallOption) (*uv1.ListProjectsResponse, error)
+	ListProjectUsers(ctx context.Context, in *uv1.ListProjectUsersRequest, opts ...grpc.CallOption) (*uv1.ListProjectUsersResponse, error)
 }
 
 // NewStore creates a new cache store.
@@ -40,8 +60,15 @@ func NewStore(
 	return &Store{
 		userInfoLister:  userInfoLister,
 		apiKeysBySecret: map[string]*K{},
-		orgsByUserID:    map[string][]O{},
-		apiKeyRole:      debug.APIKeyRole,
+
+		orgsByID:     map[string]*O{},
+		orgsByUserID: map[string][]OU{},
+
+		projectsByID:             map[string]*P{},
+		projectsByOrganizationID: map[string][]P{},
+		projectsByUserID:         map[string][]PU{},
+
+		apiKeyRole: debug.APIKeyRole,
 	}
 }
 
@@ -51,9 +78,20 @@ type Store struct {
 
 	// apiKeysBySecret is a set of API keys, keyed by its secret.
 	apiKeysBySecret map[string]*K
+
+	// orgsByID is a set of organizations, keyed by its ID.
+	orgsByID map[string]*O
 	// orgsByUserID is a set of organization users, keyed by its user ID.
-	orgsByUserID map[string][]O
-	mu           sync.RWMutex
+	orgsByUserID map[string][]OU
+
+	// projectsByID is a set of projects, keyed by its ID.
+	projectsByID map[string]*P
+	// projectsByOrganizationID is a set of project users, keyed by its organization ID.
+	projectsByOrganizationID map[string][]P
+	// projectsByUserID is a set of project users, keyed by its user ID.
+	projectsByUserID map[string][]PU
+
+	mu sync.RWMutex
 
 	apiKeyRole string
 }
@@ -70,16 +108,42 @@ func (c *Store) GetAPIKeyBySecret(secret string) (*K, bool) {
 	return k, true
 }
 
-// GetOrganizationsByUserID returns organization users by its user ID.
-func (c *Store) GetOrganizationsByUserID(userID string) ([]O, bool) {
+// GetOrganizationByID returns an organization by its ID.
+func (c *Store) GetOrganizationByID(organizationID string) (*O, bool) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
-	users, ok := c.orgsByUserID[userID]
-	if !ok {
-		return nil, false
-	}
-	return users, true
+	o, ok := c.orgsByID[organizationID]
+	return o, ok
+}
+
+// GetOrganizationsByUserID returns organization users by its user ID.
+func (c *Store) GetOrganizationsByUserID(userID string) []OU {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return c.orgsByUserID[userID]
+}
+
+// GetProjectsByOrganizationID returns projects by its organization ID.
+func (c *Store) GetProjectsByOrganizationID(organizationID string) []P {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return c.projectsByOrganizationID[organizationID]
+}
+
+// GetProjectByID returns a project by its ID.
+func (c *Store) GetProjectByID(projectID string) (*P, bool) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	p, ok := c.projectsByID[projectID]
+	return p, ok
+}
+
+// GetProjectsByUserID returns project users by its user ID.
+func (c *Store) GetProjectsByUserID(userID string) []PU {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return c.projectsByUserID[userID]
 }
 
 // Sync synchronizes the cache.
@@ -116,6 +180,7 @@ func (c *Store) updateCache(ctx context.Context) error {
 			Role:           c.apiKeyRole,
 			UserID:         apiKey.User.Id,
 			OrganizationID: apiKey.Organization.Id,
+			ProjectID:      apiKey.Project.Id,
 		}
 	}
 
@@ -123,31 +188,67 @@ func (c *Store) updateCache(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	orgsByID := map[string]*uv1.Organization{}
-	for _, org := range orgs.Organizations {
-		orgsByID[org.Id] = org
-	}
-
 	orgUsers, err := c.userInfoLister.ListOrganizationUsers(ctx, &uv1.ListOrganizationUsersRequest{})
 	if err != nil {
 		return err
 	}
-	orguserByUserID := map[string][]O{}
-	for _, user := range orgUsers.Users {
-		o, ok := orgsByID[user.OrganizationId]
-		if !ok {
-			return fmt.Errorf("Organization not found: %s", user.OrganizationId)
+	projects, err := c.userInfoLister.ListProjects(ctx, &uv1.ListProjectsRequest{})
+	if err != nil {
+		return err
+	}
+	projectUsers, err := c.userInfoLister.ListProjectUsers(ctx, &uv1.ListProjectUsersRequest{})
+	if err != nil {
+		return err
+	}
+
+	orgsByID := map[string]*O{}
+	for _, org := range orgs.Organizations {
+		orgsByID[org.Id] = &O{
+			ID: org.Id,
 		}
-		orguserByUserID[user.UserId] = append(orguserByUserID[user.UserId], O{
-			OrganizationID:      user.OrganizationId,
-			Role:                user.Role,
-			KubernetesNamespace: o.KubernetesNamespace,
+	}
+
+	orgsByUserID := map[string][]OU{}
+	for _, user := range orgUsers.Users {
+		orgsByUserID[user.UserId] = append(orgsByUserID[user.UserId], OU{
+			OrganizationID: user.OrganizationId,
+			Role:           user.Role,
+		})
+	}
+
+	projectsByID := map[string]*P{}
+	projectsByOrganizationID := map[string][]P{}
+	for _, p := range projects.Projects {
+		oid := p.OrganizationId
+		val := P{
+			ID:                  p.Id,
+			OrganizationID:      oid,
+			KubernetesNamespace: p.KubernetesNamespace,
+		}
+		projectsByID[p.Id] = &val
+		projectsByOrganizationID[oid] = append(projectsByOrganizationID[oid], val)
+	}
+
+	projectsByUserID := map[string][]PU{}
+	for _, user := range projectUsers.Users {
+		projectsByUserID[user.UserId] = append(projectsByUserID[user.UserId], PU{
+			ProjectID:      user.ProjectId,
+			OrganizationID: user.OrganizationId,
+			Role:           user.Role,
 		})
 	}
 
 	c.mu.Lock()
 	defer c.mu.Unlock()
+
 	c.apiKeysBySecret = m
-	c.orgsByUserID = orguserByUserID
+
+	c.orgsByID = orgsByID
+	c.orgsByUserID = orgsByUserID
+
+	c.projectsByID = projectsByID
+	c.projectsByOrganizationID = projectsByOrganizationID
+	c.projectsByUserID = projectsByUserID
+
 	return nil
 }
