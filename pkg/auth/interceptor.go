@@ -18,6 +18,7 @@ const (
 	capRead  = "read"
 	capWrite = "write"
 
+	authHeader = "Authorization"
 	// orgHeader is the header key for organization ID.
 	// The header defined in https://platform.openai.com/docs/api-reference/authentication
 	// "OpenAI-Organization", but what we receive is "Openai-Organization".
@@ -134,7 +135,7 @@ func extractTokenFromContext(ctx context.Context) (string, error) {
 	if !ok {
 		return "", status.Errorf(codes.InvalidArgument, "missing metadata")
 	}
-	auth := md["authorization"]
+	auth := md[strings.ToLower(authHeader)]
 	if len(auth) < 1 {
 		return "", status.Errorf(codes.Unauthenticated, "missing authorization")
 	}
@@ -166,7 +167,7 @@ func extractProjectIDFromContext(ctx context.Context) string {
 }
 
 func extractTokenFromHeader(header http.Header) (string, bool) {
-	auth := header["Authorization"]
+	auth := header[authHeader]
 	if len(auth) < 1 {
 		return "", false
 	}
