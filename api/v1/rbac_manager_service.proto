@@ -26,11 +26,11 @@ message User {
 
 message Organization {
   string id = 1;
-  string kubernetes_namespace = 2;
 }
 
 message Project {
   string id = 1;
+  string kubernetes_namespace = 2;
 }
 
 service RbacInternalService {

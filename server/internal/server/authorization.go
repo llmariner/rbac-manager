@@ -75,8 +75,7 @@ func (s *Server) Authorize(ctx context.Context, req *v1.AuthorizeRequest) (*v1.A
 		Authorized: s.authorized(role, toScope(req)),
 		User:       user,
 		Organization: &v1.Organization{
-			Id:                  org.OrganizationID,
-			KubernetesNamespace: org.KubernetesNamespace,
+			Id: org.OrganizationID,
 		},
 		Project: &v1.Project{Id: req.ProjectId},
 	}
