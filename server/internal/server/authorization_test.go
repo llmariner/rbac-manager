@@ -7,6 +7,7 @@ import (
 	v1 "github.com/llm-operator/rbac-manager/api/v1"
 	"github.com/llm-operator/rbac-manager/server/internal/cache"
 	"github.com/llm-operator/rbac-manager/server/internal/dex"
+	uv1 "github.com/llm-operator/user-manager/api/v1"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -64,7 +65,7 @@ func TestAuthorize(t *testing.T) {
 			apikeys: map[string]*cache.K{},
 			orgroles: map[string][]cache.O{
 				"my-user": {
-					{Role: "owner"},
+					{Role: uv1.OrganizationRole_ORGANIZATION_ROLE_OWNER},
 				},
 			},
 			is: &dex.Introspection{

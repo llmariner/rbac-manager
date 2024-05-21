@@ -6,6 +6,7 @@ import (
 
 	v1 "github.com/llm-operator/rbac-manager/api/v1"
 	"github.com/llm-operator/rbac-manager/server/internal/cache"
+	"github.com/llm-operator/user-manager/pkg/role"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -66,9 +67,12 @@ func (s *Server) Authorize(ctx context.Context, req *v1.AuthorizeRequest) (*v1.A
 	}
 
 	// TODO(kenji): Validate if the project is a member of the organization.
-
+	role, found := role.OrganizationRoleToString(org.Role)
+	if !found {
+		return nil, status.Errorf(codes.Internal, "invalid role: %q", org.Role)
+	}
 	r := &v1.AuthorizeResponse{
-		Authorized: s.authorized(org.Role, toScope(req)),
+		Authorized: s.authorized(role, toScope(req)),
 		User:       user,
 		Organization: &v1.Organization{
 			Id:                  org.OrganizationID,

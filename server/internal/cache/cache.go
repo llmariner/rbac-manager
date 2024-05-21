@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"strings"
 	"sync"
 	"time"
 
@@ -22,7 +21,7 @@ type K struct {
 
 // O represents a role associated with a organization user.
 type O struct {
-	Role                string
+	Role                uv1.OrganizationRole
 	OrganizationID      string
 	KubernetesNamespace string
 }
@@ -141,7 +140,7 @@ func (c *Store) updateCache(ctx context.Context) error {
 		}
 		orguserByUserID[user.UserId] = append(orguserByUserID[user.UserId], O{
 			OrganizationID:      user.OrganizationId,
-			Role:                strings.ToLower(user.Role.String()),
+			Role:                user.Role,
 			KubernetesNamespace: o.KubernetesNamespace,
 		})
 	}

@@ -45,12 +45,12 @@ func TestCache(t *testing.T) {
 				{
 					UserId:         "u0",
 					OrganizationId: "o0",
-					Role:           uv1.Role_OWNER,
+					Role:           uv1.OrganizationRole_ORGANIZATION_ROLE_OWNER,
 				},
 				{
 					UserId:         "u0",
 					OrganizationId: "o1",
-					Role:           uv1.Role_READER,
+					Role:           uv1.OrganizationRole_ORGANIZATION_ROLE_READER,
 				},
 			},
 		},
@@ -96,12 +96,12 @@ func TestCache(t *testing.T) {
 	}
 	wantUOs := map[string]*O{
 		"o0": {
-			Role:                "owner",
+			Role:                uv1.OrganizationRole_ORGANIZATION_ROLE_OWNER,
 			OrganizationID:      "o0",
 			KubernetesNamespace: "ns0",
 		},
 		"o1": {
-			Role:                "reader",
+			Role:                uv1.OrganizationRole_ORGANIZATION_ROLE_READER,
 			OrganizationID:      "o1",
 			KubernetesNamespace: "ns1",
 		},
