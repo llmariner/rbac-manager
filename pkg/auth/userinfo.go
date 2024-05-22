@@ -10,9 +10,10 @@ type userInfoKey struct{}
 
 // UserInfo manages the user info.
 type UserInfo struct {
-	UserID         string
-	OrganizationID string
-	ProjectID      string
+	UserID               string
+	OrganizationID       string
+	ProjectID            string
+	KuberenetesNamespace string
 }
 
 func appendUserInfoToContext(ctx context.Context, info UserInfo) context.Context {
@@ -27,8 +28,9 @@ func ExtractUserInfoFromContext(ctx context.Context) (*UserInfo, bool) {
 
 func newUserInfoFromAuthorizeResponse(resp *v1.AuthorizeResponse) UserInfo {
 	return UserInfo{
-		UserID:         resp.User.Id,
-		OrganizationID: resp.Organization.Id,
-		ProjectID:      resp.Project.Id,
+		UserID:               resp.User.Id,
+		OrganizationID:       resp.Organization.Id,
+		ProjectID:            resp.Project.Id,
+		KuberenetesNamespace: resp.Project.KubernetesNamespace,
 	}
 }
