@@ -21,7 +21,7 @@ func appendUserInfoToContext(ctx context.Context, info UserInfo) context.Context
 }
 
 // ExtractUserInfoFromContext extracts the user info from the context.
-func ExtractUserInfoFromContexta(ctx context.Context) (*UserInfo, bool) {
+func ExtractUserInfoFromContext(ctx context.Context) (*UserInfo, bool) {
 	info, ok := ctx.Value(userInfoKey{}).(*UserInfo)
 	return info, ok
 }
