@@ -40,18 +40,27 @@ var runCmd = &cobra.Command{
 	},
 }
 
+type usersInternalServiceClientFactory struct {
+	addr string
+}
+
+func (f *usersInternalServiceClientFactory) Create() (cache.UserInfoLister, error) {
+	conn, err := grpc.Dial(f.addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return nil, err
+	}
+	return uv1.NewUsersInternalServiceClient(conn), nil
+}
+
 func run(ctx context.Context, c *config.Config) error {
 	log.Printf("Starting internal-grpc server on port %d", c.InternalGRPCPort)
 
-	conn, err := grpc.Dial(
-		c.CacheConfig.UserManagerServerInternalAddr,
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	)
-	if err != nil {
-		return err
-	}
 	cstore := cache.NewStore(
-		uv1.NewUsersInternalServiceClient(conn),
+		// Use a factory to delay a creation of the client until the cache is actually used.
+		// This is to gracefully handle a case wher user-manager-server is not available.
+		&usersInternalServiceClientFactory{
+			addr: c.CacheConfig.UserManagerServerInternalAddr,
+		},
 		&c.Debug,
 	)
 	errCh := make(chan error)

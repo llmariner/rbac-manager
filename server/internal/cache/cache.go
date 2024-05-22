@@ -44,7 +44,12 @@ type PU struct {
 	OrganizationID string
 }
 
-type userInfoLister interface {
+type userInfoListerFactory interface {
+	Create() (UserInfoLister, error)
+}
+
+// UserInfoLister is an interface for listing user information.
+type UserInfoLister interface {
 	ListAPIKeys(ctx context.Context, in *uv1.ListAPIKeysRequest, opts ...grpc.CallOption) (*uv1.ListAPIKeysResponse, error)
 	ListOrganizations(ctx context.Context, in *uv1.ListOrganizationsRequest, opts ...grpc.CallOption) (*uv1.ListOrganizationsResponse, error)
 	ListOrganizationUsers(ctx context.Context, in *uv1.ListOrganizationUsersRequest, opts ...grpc.CallOption) (*uv1.ListOrganizationUsersResponse, error)
@@ -54,12 +59,12 @@ type userInfoLister interface {
 
 // NewStore creates a new cache store.
 func NewStore(
-	userInfoLister userInfoLister,
+	userInfoListerFactory userInfoListerFactory,
 	debug *config.DebugConfig,
 ) *Store {
 	return &Store{
-		userInfoLister:  userInfoLister,
-		apiKeysBySecret: map[string]*K{},
+		userInfoListerFactory: userInfoListerFactory,
+		apiKeysBySecret:       map[string]*K{},
 
 		orgsByID:     map[string]*O{},
 		orgsByUserID: map[string][]OU{},
@@ -74,7 +79,7 @@ func NewStore(
 
 // Store is a cache for API keys and organization users.
 type Store struct {
-	userInfoLister userInfoLister
+	userInfoListerFactory userInfoListerFactory
 
 	// apiKeysBySecret is a set of API keys, keyed by its secret.
 	apiKeysBySecret map[string]*K
@@ -168,7 +173,12 @@ func (c *Store) Sync(ctx context.Context, interval time.Duration) error {
 }
 
 func (c *Store) updateCache(ctx context.Context) error {
-	resp, err := c.userInfoLister.ListAPIKeys(ctx, &uv1.ListAPIKeysRequest{})
+	lister, err := c.userInfoListerFactory.Create()
+	if err != nil {
+		return err
+	}
+
+	resp, err := lister.ListAPIKeys(ctx, &uv1.ListAPIKeysRequest{})
 	if err != nil {
 		return err
 	}
@@ -184,19 +194,19 @@ func (c *Store) updateCache(ctx context.Context) error {
 		}
 	}
 
-	orgs, err := c.userInfoLister.ListOrganizations(ctx, &uv1.ListOrganizationsRequest{})
+	orgs, err := lister.ListOrganizations(ctx, &uv1.ListOrganizationsRequest{})
 	if err != nil {
 		return err
 	}
-	orgUsers, err := c.userInfoLister.ListOrganizationUsers(ctx, &uv1.ListOrganizationUsersRequest{})
+	orgUsers, err := lister.ListOrganizationUsers(ctx, &uv1.ListOrganizationUsersRequest{})
 	if err != nil {
 		return err
 	}
-	projects, err := c.userInfoLister.ListProjects(ctx, &uv1.ListProjectsRequest{})
+	projects, err := lister.ListProjects(ctx, &uv1.ListProjectsRequest{})
 	if err != nil {
 		return err
 	}
-	projectUsers, err := c.userInfoLister.ListProjectUsers(ctx, &uv1.ListProjectUsersRequest{})
+	projectUsers, err := lister.ListProjectUsers(ctx, &uv1.ListProjectUsersRequest{})
 	if err != nil {
 		return err
 	}
