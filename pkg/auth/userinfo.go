@@ -13,6 +13,8 @@ type UserInfo struct {
 	UserID         string
 	OrganizationID string
 	ProjectID      string
+
+	KuberenetesNamespace string
 }
 
 func appendUserInfoToContext(ctx context.Context, info UserInfo) context.Context {
@@ -20,15 +22,16 @@ func appendUserInfoToContext(ctx context.Context, info UserInfo) context.Context
 }
 
 // ExtractUserInfoFromContext extracts the user info from the context.
-func ExtractUserInfoFromContext(ctx context.Context) (*UserInfo, bool) {
+func ExtractUserInfoFromContexta(ctx context.Context) (*UserInfo, bool) {
 	info, ok := ctx.Value(userInfoKey{}).(*UserInfo)
 	return info, ok
 }
 
 func newUserInfoFromAuthorizeResponse(resp *v1.AuthorizeResponse) UserInfo {
 	return UserInfo{
-		UserID:         resp.User.Id,
-		OrganizationID: resp.Organization.Id,
-		ProjectID:      resp.Project.Id,
+		UserID:               resp.User.Id,
+		OrganizationID:       resp.Organization.Id,
+		ProjectID:            resp.Project.Id,
+		KuberenetesNamespace: resp.Project.KubernetesNamespace,
 	}
 }
