@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 
 	rbacv1 "github.com/llm-operator/rbac-manager/api/v1"
@@ -27,23 +28,48 @@ const (
 	projectHeader = "Openai-Project"
 )
 
+// Config is the configuration for an Interceptor.
+type Config struct {
+	RBACServerAddr string
+
+	// AccessResource is the static resource name to access. This value or GetAccessResource functions must be set.
+	AccessResource string
+	// GetAccessResourceForGRPCRequest is a function to get the resource name from a gRPC method.
+	GetAccessResourceForGRPCRequest func(fullMethod string) string
+	// GetAccessResourceForHTTPRequest is a function to get the resource name from an HTTP request method and URL.
+	GetAccessResourceForHTTPRequest func(method string, url url.URL) string
+}
+
 // NewInterceptor creates a new Interceptor.
-func NewInterceptor(ctx context.Context, rbacServerAddr, accessResource string) (*Interceptor, error) {
-	conn, err := grpc.DialContext(ctx, rbacServerAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+func NewInterceptor(ctx context.Context, c Config) (*Interceptor, error) {
+	conn, err := grpc.DialContext(ctx, c.RBACServerAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
 	}
-	return &Interceptor{
-		client:         rbacv1.NewRbacInternalServiceClient(conn),
-		accessResource: accessResource,
-	}, nil
+	i := &Interceptor{client: rbacv1.NewRbacInternalServiceClient(conn)}
+
+	if c.AccessResource == "" &&
+		c.GetAccessResourceForGRPCRequest == nil &&
+		c.GetAccessResourceForHTTPRequest == nil {
+		return nil, fmt.Errorf("AccessResource or GetAccessResource functions must be set")
+	}
+	if c.AccessResource != "" {
+		i.getAccessResourceForGRPCRequest = func(string) string { return c.AccessResource }
+		i.getAccessResourceForHTTPRequest = func(string, url.URL) string { return c.AccessResource }
+	} else {
+		i.getAccessResourceForGRPCRequest = c.GetAccessResourceForGRPCRequest
+		i.getAccessResourceForHTTPRequest = c.GetAccessResourceForHTTPRequest
+	}
+
+	return i, nil
 }
 
 // Interceptor is an authentication interceptor.
 type Interceptor struct {
 	client rbacv1.RbacInternalServiceClient
 
-	accessResource string
+	getAccessResourceForGRPCRequest func(fullMethod string) string
+	getAccessResourceForHTTPRequest func(method string, url url.URL) string
 }
 
 // Unary returns a unary server interceptor.
@@ -69,7 +95,9 @@ func (a *Interceptor) Unary() grpc.UnaryServerInterceptor {
 		orgID := extractOrgIDFromContext(ctx)
 		projectID := extractProjectIDFromContext(ctx)
 
-		aresp, err := a.authorize(ctx, token, cap, orgID, projectID)
+		resource := a.getAccessResourceForGRPCRequest(info.FullMethod)
+
+		aresp, err := a.authorize(ctx, token, resource, cap, orgID, projectID)
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "failed to authorize: %v", err)
 		}
@@ -101,7 +129,9 @@ func (a *Interceptor) InterceptHTTPRequest(req *http.Request) (int, UserInfo, er
 		cap = capWrite
 	}
 
-	resp, err := a.authorize(req.Context(), token, cap, orgID, projectID)
+	resource := a.getAccessResourceForHTTPRequest(req.Method, *req.URL)
+
+	resp, err := a.authorize(req.Context(), token, resource, cap, orgID, projectID)
 	if err != nil {
 		return http.StatusInternalServerError, UserInfo{}, fmt.Errorf("failed to authorize: %v", err)
 	}
@@ -117,13 +147,14 @@ func (a *Interceptor) InterceptHTTPRequest(req *http.Request) (int, UserInfo, er
 func (a *Interceptor) authorize(
 	ctx context.Context,
 	token string,
+	resource string,
 	cap string,
 	orgID string,
 	projectID string,
 ) (*rbacv1.AuthorizeResponse, error) {
 	return a.client.Authorize(ctx, &rbacv1.AuthorizeRequest{
 		Token:          token,
-		AccessResource: a.accessResource,
+		AccessResource: resource,
 		Capability:     cap,
 		OrganizationId: orgID,
 		ProjectId:      projectID,
