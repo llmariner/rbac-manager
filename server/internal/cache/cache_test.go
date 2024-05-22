@@ -83,9 +83,12 @@ func TestCache(t *testing.T) {
 			},
 		},
 	}
-	c := NewStore(l, &config.DebugConfig{
-		APIKeyRole: "role",
-	})
+	c := NewStore(
+		&fakeUserInfoListerFactory{l},
+		&config.DebugConfig{
+			APIKeyRole: "role",
+		},
+	)
 
 	err := c.updateCache(context.Background())
 	assert.NoError(t, err)
@@ -197,6 +200,14 @@ func TestCache(t *testing.T) {
 		assert.True(t, ok)
 		assert.Equal(t, want, got)
 	}
+}
+
+type fakeUserInfoListerFactory struct {
+	l *fakeUserInfoLister
+}
+
+func (f *fakeUserInfoListerFactory) Create() (UserInfoLister, error) {
+	return f.l, nil
 }
 
 type fakeUserInfoLister struct {
