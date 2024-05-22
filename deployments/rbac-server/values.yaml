@@ -55,7 +55,7 @@ roleScopesMap:
   - api.organizations.projects.users.read
 
 debug:
-  apiKeyRole: projectOwner
+  apiKeyRole: projectMember
 
 replicaCount: 1
 
