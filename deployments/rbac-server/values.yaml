@@ -9,7 +9,7 @@ cache:
   userManagerServerInternalAddr: user-manager-server-internal-grpc:8082
 
 roleScopesMap:
-  orgnizationOwner:
+  organizationOwner:
   - api.model.read
   - api.model.write
   - api.fine_tuning.jobs.read
