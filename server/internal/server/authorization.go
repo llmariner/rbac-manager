@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"fmt"
-	"log"
 
 	v1 "github.com/llm-operator/rbac-manager/api/v1"
 	"github.com/llm-operator/rbac-manager/server/internal/cache"
@@ -255,12 +254,8 @@ func (s *Server) findAssociatedProjectID(
 		return userProjects[0].ProjectID, nil
 	}
 
-	log.Printf("userOrgs: %+v\n", userOrgs)
-
 	for _, o := range userOrgs {
-		log.Printf("o: %+v\n", o)
 		projects := s.cache.GetProjectsByOrganizationID(o.OrganizationID)
-		log.Printf("projects: %+v\n", projects)
 		if len(projects) > 0 {
 			return projects[0].ID, nil
 		}
