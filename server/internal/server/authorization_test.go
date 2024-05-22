@@ -191,6 +191,179 @@ func TestAuthorize(t *testing.T) {
 	}
 }
 
+func TestFindAssociatedProjectAndRoles(t *testing.T) {
+	const userID = "u0"
+	org0 := cache.O{
+		ID: "o0",
+	}
+	org1 := cache.O{
+		ID: "o1",
+	}
+	project0 := cache.P{
+		ID:                  "p0",
+		OrganizationID:      org0.ID,
+		KubernetesNamespace: "n0",
+	}
+	project1 := cache.P{
+		ID:                  "p1",
+		OrganizationID:      org0.ID,
+		KubernetesNamespace: "n1",
+	}
+	project2 := cache.P{
+		ID:                  "p2",
+		OrganizationID:      org1.ID,
+		KubernetesNamespace: "n2",
+	}
+
+	cache := &fakeCacheGetter{
+		orgsByID: map[string]*cache.O{
+			org0.ID: &org0,
+			org1.ID: &org1,
+		},
+		orgsByUserID: map[string][]cache.OU{
+			userID: {
+				{
+					Role:           uv1.OrganizationRole_ORGANIZATION_ROLE_READER,
+					OrganizationID: org0.ID,
+				},
+				{
+					Role:           uv1.OrganizationRole_ORGANIZATION_ROLE_OWNER,
+					OrganizationID: org1.ID,
+				},
+			},
+		},
+		projectsByID: map[string]*cache.P{
+			project0.ID: &project0,
+			project1.ID: &project1,
+			project2.ID: &project2,
+		},
+		projectsByOrganizationID: map[string][]cache.P{
+			org0.ID: {project0, project1},
+			org1.ID: {project2},
+		},
+		projectsByUserID: map[string][]cache.PU{
+			userID: {
+				{
+					ProjectID: project0.ID,
+					Role:      uv1.ProjectRole_PROJECT_ROLE_OWNER,
+				},
+				{
+					ProjectID: project1.ID,
+					Role:      uv1.ProjectRole_PROJECT_ROLE_MEMBER,
+				},
+			},
+		},
+	}
+
+	tcs := []struct {
+		name               string
+		requestedOrgID     string
+		requestedProjectID string
+		want               *projectAndRoles
+		wantErr            bool
+	}{
+		{
+			name:               "requested project id p0",
+			requestedOrgID:     "",
+			requestedProjectID: project0.ID,
+			want: &projectAndRoles{
+				project:     &project0,
+				orgRole:     uv1.OrganizationRole_ORGANIZATION_ROLE_READER,
+				projectRole: uv1.ProjectRole_PROJECT_ROLE_OWNER,
+			},
+		},
+		{
+			name:               "requested project id p1",
+			requestedOrgID:     "",
+			requestedProjectID: project1.ID,
+			want: &projectAndRoles{
+				project:     &project1,
+				orgRole:     uv1.OrganizationRole_ORGANIZATION_ROLE_READER,
+				projectRole: uv1.ProjectRole_PROJECT_ROLE_MEMBER,
+			},
+		},
+		{
+			name:               "requested project id p2",
+			requestedOrgID:     "",
+			requestedProjectID: project2.ID,
+			want: &projectAndRoles{
+				project:     &project2,
+				orgRole:     uv1.OrganizationRole_ORGANIZATION_ROLE_OWNER,
+				projectRole: uv1.ProjectRole_PROJECT_ROLE_UNSPECIFIED,
+			},
+		},
+		{
+			name:               "uknown requested project id",
+			requestedOrgID:     "",
+			requestedProjectID: "unknown",
+			wantErr:            true,
+		},
+		{
+			name:               "requested org id o0",
+			requestedOrgID:     org0.ID,
+			requestedProjectID: "",
+			want: &projectAndRoles{
+				project:     &project0,
+				orgRole:     uv1.OrganizationRole_ORGANIZATION_ROLE_READER,
+				projectRole: uv1.ProjectRole_PROJECT_ROLE_OWNER,
+			},
+		},
+		{
+			name:               "requested org id o1",
+			requestedOrgID:     org1.ID,
+			requestedProjectID: "",
+			want: &projectAndRoles{
+				project:     &project2,
+				orgRole:     uv1.OrganizationRole_ORGANIZATION_ROLE_OWNER,
+				projectRole: uv1.ProjectRole_PROJECT_ROLE_UNSPECIFIED,
+			},
+		},
+		{
+			name:               "requested org id and project id",
+			requestedOrgID:     org0.ID,
+			requestedProjectID: project0.ID,
+			want: &projectAndRoles{
+				project:     &project0,
+				orgRole:     uv1.OrganizationRole_ORGANIZATION_ROLE_READER,
+				projectRole: uv1.ProjectRole_PROJECT_ROLE_OWNER,
+			},
+		},
+		{
+			name:               "mismatching requested org id and project id",
+			requestedOrgID:     org0.ID,
+			requestedProjectID: project2.ID,
+			wantErr:            true,
+		},
+		{
+			name:               "no project id and org id",
+			requestedOrgID:     "",
+			requestedProjectID: "",
+			want: &projectAndRoles{
+				project:     &project0,
+				orgRole:     uv1.OrganizationRole_ORGANIZATION_ROLE_READER,
+				projectRole: uv1.ProjectRole_PROJECT_ROLE_OWNER,
+			},
+		},
+	}
+
+	for _, tc := range tcs {
+		t.Run(tc.name, func(t *testing.T) {
+			srv := &Server{
+				cache: cache,
+			}
+			resp, err := srv.findAssociatedProjectAndRoles(userID, tc.requestedOrgID, tc.requestedProjectID)
+			if tc.wantErr {
+				assert.Error(t, err)
+				return
+			}
+			assert.NoError(t, err)
+			assert.Equal(t, *tc.want.project, *resp.project)
+			assert.Equal(t, tc.want.orgRole, resp.orgRole)
+			assert.Equal(t, tc.want.projectRole, resp.projectRole)
+		})
+	}
+}
+
 type fakeTokenIntrospector struct {
 	is *dex.Introspection
 }
