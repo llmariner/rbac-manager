@@ -18,14 +18,6 @@ roleScopesMap:
   - api.files.write
   - api.users.api_keys.read
   - api.users.api_keys.write
-  - api.organizations.read
-  - api.organizations.write
-  - api.organizations.users.write
-  - api.organizations.users.read
-  - api.organizations.projects.read
-  - api.organizations.projects.write
-  - api.organizations.projects.users.write
-  - api.organizations.projects.users.read
   projectOwner:
   - api.model.read
   - api.model.write
@@ -35,10 +27,6 @@ roleScopesMap:
   - api.files.write
   - api.users.api_keys.read
   - api.users.api_keys.write
-  - api.organizations.read
-  - api.organizations.projects.read
-  - api.organizations.projects.users.write
-  - api.organizations.projects.users.read
   projectMember:
   - api.model.read
   - api.model.write
@@ -48,9 +36,7 @@ roleScopesMap:
   - api.files.write
   - api.users.api_keys.read
   - api.users.api_keys.write
-  - api.organizations.read
-  - api.organizations.projects.read
-  - api.organizations.projects.users.read
+
 
 debug:
   apiKeyRole: projectMember

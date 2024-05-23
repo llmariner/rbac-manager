@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	v1 "github.com/llm-operator/rbac-manager/api/v1"
 	"github.com/llm-operator/rbac-manager/server/internal/cache"
@@ -49,6 +50,19 @@ func (s *Server) Authorize(ctx context.Context, req *v1.AuthorizeRequest) (*v1.A
 
 	if !is.Active {
 		return &v1.AuthorizeResponse{Authorized: false}, nil
+	}
+
+	if strings.HasPrefix(req.AccessResource, "api.organizations") {
+		// Do not check further as the resource is not project-scoped, and we cannot tell an associated project.
+		// We let the caller perform additional check.
+		return &v1.AuthorizeResponse{
+			Authorized: true,
+			User: &v1.User{
+				Id: is.Extra.Email,
+			},
+			Organization: &v1.Organization{},
+			Project:      &v1.Project{},
+		}, nil
 	}
 
 	pr, err := s.findAssociatedProjectAndRoles(is.Extra.Email, req.OrganizationId, req.ProjectId)
