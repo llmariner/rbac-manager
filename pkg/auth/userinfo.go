@@ -16,7 +16,8 @@ type UserInfo struct {
 	KubernetesNamespace string
 }
 
-func appendUserInfoToContext(ctx context.Context, info UserInfo) context.Context {
+// AppendUserInfoToContext appends the user info to the context.
+func AppendUserInfoToContext(ctx context.Context, info UserInfo) context.Context {
 	return context.WithValue(ctx, userInfoKey{}, &info)
 }
 
