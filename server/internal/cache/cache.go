@@ -154,7 +154,9 @@ func (c *Store) GetProjectsByUserID(userID string) []PU {
 // Sync synchronizes the cache.
 func (c *Store) Sync(ctx context.Context, interval time.Duration) error {
 	if err := c.updateCache(ctx); err != nil {
-		return err
+		// Gracefully ignore the error.
+		// TODO(kenji): Make the pod unready.
+		log.Printf("Failed to update the cache: %s. Ignoring.", err)
 	}
 
 	ticker := time.NewTicker(interval)
