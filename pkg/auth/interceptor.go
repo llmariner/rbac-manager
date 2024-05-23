@@ -106,7 +106,7 @@ func (a *Interceptor) Unary() grpc.UnaryServerInterceptor {
 		}
 
 		// TODO(aya): revisit this after implement org management
-		ctx = appendUserInfoToContext(ctx, newUserInfoFromAuthorizeResponse(aresp))
+		ctx = AppendUserInfoToContext(ctx, newUserInfoFromAuthorizeResponse(aresp))
 		return handler(ctx, req)
 	}
 }
