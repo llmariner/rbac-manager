@@ -14,6 +14,8 @@ roleScopesMap:
   - api.model.write
   - api.fine_tuning.jobs.read
   - api.fine_tuning.jobs.write
+  - api.workspaces.notebooks.read
+  - api.workspaces.notebooks.write
   - api.files.read
   - api.files.write
   - api.users.api_keys.read
@@ -31,6 +33,8 @@ roleScopesMap:
   - api.model.write
   - api.fine_tuning.jobs.read
   - api.fine_tuning.jobs.write
+  - api.workspaces.notebooks.read
+  - api.workspaces.notebooks.write
   - api.files.read
   - api.files.write
   - api.users.api_keys.read
@@ -44,6 +48,8 @@ roleScopesMap:
   - api.model.write
   - api.fine_tuning.jobs.read
   - api.fine_tuning.jobs.write
+  - api.workspaces.notebooks.read
+  - api.workspaces.notebooks.write
   - api.files.read
   - api.files.write
   - api.users.api_keys.read
