@@ -35,8 +35,7 @@ roleScopesMap:
   - api.files.write
   - api.users.api_keys.read
   - api.users.api_keys.write
-  # TODO(kenji): Revisit. Other resources are scoped by a single project (e.g., view all models in a given project), but
-  # "projects" are not scoped (e.g., view all projects where I'm a member).
+  - api.organizations.read
   - api.organizations.projects.read
   - api.organizations.projects.users.write
   - api.organizations.projects.users.read
@@ -49,8 +48,7 @@ roleScopesMap:
   - api.files.write
   - api.users.api_keys.read
   - api.users.api_keys.write
-  # TODO(kenji): Revisit. Other resources are scoped by a single project (e.g., view all models in a given project), but
-  # "projects" are not scoped (e.g., view all projects where I'm a member).
+  - api.organizations.read
   - api.organizations.projects.read
   - api.organizations.projects.users.read
 
