@@ -18,8 +18,6 @@ roleScopesMap:
   - api.workspaces.notebooks.write
   - api.files.read
   - api.files.write
-  - api.users.api_keys.read
-  - api.users.api_keys.write
   projectOwner:
   - api.model.read
   - api.model.write
@@ -29,8 +27,6 @@ roleScopesMap:
   - api.workspaces.notebooks.write
   - api.files.read
   - api.files.write
-  - api.users.api_keys.read
-  - api.users.api_keys.write
   projectMember:
   - api.model.read
   - api.model.write
@@ -40,9 +36,6 @@ roleScopesMap:
   - api.workspaces.notebooks.write
   - api.files.read
   - api.files.write
-  - api.users.api_keys.read
-  - api.users.api_keys.write
-
 
 debug:
   apiKeyRole: projectMember
