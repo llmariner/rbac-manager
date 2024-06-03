@@ -75,7 +75,7 @@ type Interceptor struct {
 // Unary returns a unary server interceptor.
 func (a *Interceptor) Unary() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp any, err error) {
-		token, err := extractTokenFromContext(ctx)
+		token, err := ExtractTokenFromContext(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -161,7 +161,8 @@ func (a *Interceptor) authorize(
 	})
 }
 
-func extractTokenFromContext(ctx context.Context) (string, error) {
+// ExtractTokenFromContext extracts a token from a context.
+func ExtractTokenFromContext(ctx context.Context) (string, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return "", status.Errorf(codes.InvalidArgument, "missing metadata")
