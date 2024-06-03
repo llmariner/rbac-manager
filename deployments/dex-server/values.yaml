@@ -35,7 +35,7 @@ admin:
 image:
   repository: dexidp/dex
   pullPolicy: IfNotPresent
-  tag: latest
+  tag: v2.39.1-distroless
 
 envsubst:
   image:
