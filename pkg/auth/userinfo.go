@@ -14,6 +14,7 @@ type UserInfo struct {
 	OrganizationID      string
 	ProjectID           string
 	KubernetesNamespace string
+	TenantID            string
 }
 
 // AppendUserInfoToContext appends the user info to the context.
@@ -33,5 +34,6 @@ func newUserInfoFromAuthorizeResponse(resp *v1.AuthorizeResponse) UserInfo {
 		OrganizationID:      resp.Organization.Id,
 		ProjectID:           resp.Project.Id,
 		KubernetesNamespace: resp.Project.KubernetesNamespace,
+		TenantID:            resp.TenantId,
 	}
 }
