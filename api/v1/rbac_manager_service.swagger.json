@@ -58,6 +58,9 @@
         },
         "project": {
           "$ref": "#/definitions/v1Project"
+        },
+        "tenantId": {
+          "type": "string"
         }
       }
     },

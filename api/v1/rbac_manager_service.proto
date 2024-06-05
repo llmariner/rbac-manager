@@ -18,6 +18,7 @@ message AuthorizeResponse {
   User user = 2;
   Organization organization = 3;
   Project project = 4;
+  string tenant_id = 5;
 }
 
 message User {
