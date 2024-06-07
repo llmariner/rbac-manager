@@ -40,6 +40,8 @@ roleScopesMap:
   - api.files.read
   - api.files.write
 
+defaultTenantId: default-tenant-id
+
 debug:
   apiKeyRole: projectMember
 

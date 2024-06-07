@@ -12,10 +12,6 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// fakeTenantID is a fake tenant ID.
-// TODO(kenji): Replace this with a real tenant ID we implement multi-tenancy support.
-const fakeTenantID = "fake-tenant-id"
-
 // Authorize authorizes the given token and scope.
 func (s *Server) Authorize(ctx context.Context, req *v1.AuthorizeRequest) (*v1.AuthorizeResponse, error) {
 	if req.Token == "" {
@@ -44,7 +40,7 @@ func (s *Server) Authorize(ctx context.Context, req *v1.AuthorizeRequest) (*v1.A
 				Id:                  key.ProjectID,
 				KubernetesNamespace: project.KubernetesNamespace,
 			},
-			TenantId: fakeTenantID,
+			TenantId: s.defaultTenantID,
 		}, nil
 	}
 
@@ -67,7 +63,7 @@ func (s *Server) Authorize(ctx context.Context, req *v1.AuthorizeRequest) (*v1.A
 			},
 			Organization: &v1.Organization{},
 			Project:      &v1.Project{},
-			TenantId:     fakeTenantID,
+			TenantId:     s.defaultTenantID,
 		}, nil
 	}
 
@@ -89,7 +85,7 @@ func (s *Server) Authorize(ctx context.Context, req *v1.AuthorizeRequest) (*v1.A
 			Id:                  pr.project.ID,
 			KubernetesNamespace: pr.project.KubernetesNamespace,
 		},
-		TenantId: fakeTenantID,
+		TenantId: s.defaultTenantID,
 	}, nil
 }
 
