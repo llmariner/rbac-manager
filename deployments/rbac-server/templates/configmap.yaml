@@ -14,5 +14,6 @@ data:
       clusterManagerServerInternalAddr: {{ .Values.cache.cluster<ManagerServerInternalAddr }}
     roleScopesMap:
       {{- toYaml .Values.roleScopesMap | nindent 6 }}
+    defaultTenantId: {{ .Values.defaultTenantId }}
     debug:
       {{- toYaml .Values.debug | nindent 6 }}
