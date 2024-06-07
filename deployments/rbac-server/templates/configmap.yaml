@@ -11,7 +11,7 @@ data:
     cache:
       syncInterval: {{ .Values.cache.syncInterval }}
       userManagerServerInternalAddr: {{ .Values.cache.userManagerServerInternalAddr }}
-      clusterManagerServerInternalAddr: {{ .Values.cache.cluster<ManagerServerInternalAddr }}
+      clusterManagerServerInternalAddr: {{ .Values.cache.clusterManagerServerInternalAddr }}
     roleScopesMap:
       {{- toYaml .Values.roleScopesMap | nindent 6 }}
     defaultTenantId: {{ .Values.defaultTenantId }}
