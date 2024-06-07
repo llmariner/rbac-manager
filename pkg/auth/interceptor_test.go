@@ -2,7 +2,6 @@ package auth
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"net/url"
 	"testing"
@@ -128,5 +127,8 @@ func (f *fakeInternalServerClient) Authorize(ctx context.Context, in *v1.Authori
 }
 
 func (f *fakeInternalServerClient) AuthorizeWorker(ctx context.Context, in *v1.AuthorizeWorkerRequest, opts ...grpc.CallOption) (*v1.AuthorizeWorkerResponse, error) {
-	return nil, fmt.Errorf("not implemented")
+	return &v1.AuthorizeWorkerResponse{
+		Authorized: true,
+		Cluster:    &v1.Cluster{Id: "c0"},
+	}, nil
 }
