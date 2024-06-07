@@ -26,8 +26,10 @@ message AuthorizeWorkerRequest {
 }
 
 message AuthorizeWorkerResponse {
-  string cluster_id = 1;
-  string tenant_id = 2;
+  bool authorized = 1;
+
+  Cluster cluster = 2;
+  string tenant_id = 3;
 }
 
 message User {
@@ -41,6 +43,10 @@ message Organization {
 message Project {
   string id = 1;
   string kubernetes_namespace = 2;
+}
+
+message Cluster {
+  string id = 1;
 }
 
 service RbacInternalService {

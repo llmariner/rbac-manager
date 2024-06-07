@@ -6,17 +6,23 @@ import (
 	"sync"
 	"time"
 
+	cv1 "github.com/llm-operator/cluster-manager/api/v1"
 	"github.com/llm-operator/rbac-manager/server/internal/config"
 	uv1 "github.com/llm-operator/user-manager/api/v1"
 	"google.golang.org/grpc"
 )
 
-// K represents a role associated with an API key.
+// K represents an API key.
 type K struct {
 	Role           string
 	UserID         string
 	OrganizationID string
 	ProjectID      string
+}
+
+// C represents a cluster.
+type C struct {
+	ID string
 }
 
 // O represents an organization.
@@ -52,14 +58,23 @@ type userInfoLister interface {
 	ListProjectUsers(ctx context.Context, in *uv1.ListProjectUsersRequest, opts ...grpc.CallOption) (*uv1.ListProjectUsersResponse, error)
 }
 
+type clusterInfoLister interface {
+	ListClusters(ctx context.Context, in *cv1.ListClustersRequest, opts ...grpc.CallOption) (*cv1.ListClustersResponse, error)
+}
+
 // NewStore creates a new cache store.
 func NewStore(
 	userInfoLister userInfoLister,
+	clusterInfoLister clusterInfoLister,
 	debug *config.DebugConfig,
 ) *Store {
 	return &Store{
-		userInfoLister:  userInfoLister,
+		userInfoLister:    userInfoLister,
+		clusterInfoLister: clusterInfoLister,
+
 		apiKeysBySecret: map[string]*K{},
+
+		clustersByRegistrationKey: map[string]*C{},
 
 		orgsByID:     map[string]*O{},
 		orgsByUserID: map[string][]OU{},
@@ -74,10 +89,14 @@ func NewStore(
 
 // Store is a cache for API keys and organization users.
 type Store struct {
-	userInfoLister userInfoLister
+	userInfoLister    userInfoLister
+	clusterInfoLister clusterInfoLister
 
 	// apiKeysBySecret is a set of API keys, keyed by its secret.
 	apiKeysBySecret map[string]*K
+
+	// clustersByRegistrationKey is a set of clusters, keyed by its registration key.
+	clustersByRegistrationKey map[string]*C
 
 	// orgsByID is a set of organizations, keyed by its ID.
 	orgsByID map[string]*O
@@ -106,6 +125,18 @@ func (c *Store) GetAPIKeyBySecret(secret string) (*K, bool) {
 		return nil, false
 	}
 	return k, true
+}
+
+// GetClusterByRegistrationKey returns a cluster by its registration key.
+func (c *Store) GetClusterByRegistrationKey(key string) (*C, bool) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	cluster, ok := c.clustersByRegistrationKey[key]
+	if !ok {
+		return nil, false
+	}
+	return cluster, true
 }
 
 // GetOrganizationByID returns an organization by its ID.
@@ -186,6 +217,17 @@ func (c *Store) updateCache(ctx context.Context) error {
 		}
 	}
 
+	cresp, err := c.clusterInfoLister.ListClusters(ctx, &cv1.ListClustersRequest{})
+	if err != nil {
+		return err
+	}
+	cs := map[string]*C{}
+	for _, c := range cresp.Data {
+		cs[c.RegistrationKey] = &C{
+			ID: c.Id,
+		}
+	}
+
 	orgs, err := c.userInfoLister.ListOrganizations(ctx, &uv1.ListOrganizationsRequest{})
 	if err != nil {
 		return err
@@ -244,6 +286,8 @@ func (c *Store) updateCache(ctx context.Context) error {
 	defer c.mu.Unlock()
 
 	c.apiKeysBySecret = m
+
+	c.clustersByRegistrationKey = cs
 
 	c.orgsByID = orgsByID
 	c.orgsByUserID = orgsByUserID

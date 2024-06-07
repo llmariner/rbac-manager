@@ -14,6 +14,8 @@ import (
 type cacheGetter interface {
 	GetAPIKeyBySecret(secret string) (*cache.K, bool)
 
+	GetClusterByRegistrationKey(key string) (*cache.C, bool)
+
 	GetOrganizationByID(organizationID string) (*cache.O, bool)
 	GetOrganizationsByUserID(userID string) []cache.OU
 

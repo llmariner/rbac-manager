@@ -44,8 +44,9 @@ type DebugConfig struct {
 
 // CacheConfig is the API key cache configuration.
 type CacheConfig struct {
-	SyncInterval                  time.Duration `yaml:"syncInterval"`
-	UserManagerServerInternalAddr string        `yaml:"userManagerServerInternalAddr"`
+	SyncInterval                     time.Duration `yaml:"syncInterval"`
+	UserManagerServerInternalAddr    string        `yaml:"userManagerServerInternalAddr"`
+	ClusterManagerServerInternalAddr string        `yaml:"clusterManagerServerInternalAddr"`
 }
 
 func (c *CacheConfig) validate() error {
@@ -54,6 +55,9 @@ func (c *CacheConfig) validate() error {
 	}
 	if c.UserManagerServerInternalAddr == "" {
 		return fmt.Errorf("userManagerServerInternalAddr must be set")
+	}
+	if c.ClusterManagerServerInternalAddr == "" {
+		return fmt.Errorf("clusterManagerServerInternalAddr must be set")
 	}
 	return nil
 }

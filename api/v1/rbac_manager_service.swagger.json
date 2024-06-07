@@ -67,10 +67,21 @@
     "v1AuthorizeWorkerResponse": {
       "type": "object",
       "properties": {
-        "clusterId": {
-          "type": "string"
+        "authorized": {
+          "type": "boolean"
+        },
+        "cluster": {
+          "$ref": "#/definitions/v1Cluster"
         },
         "tenantId": {
+          "type": "string"
+        }
+      }
+    },
+    "v1Cluster": {
+      "type": "object",
+      "properties": {
+        "id": {
           "type": "string"
         }
       }
