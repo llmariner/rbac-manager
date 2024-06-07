@@ -18,6 +18,8 @@ roleScopesMap:
   - api.workspaces.notebooks.write
   - api.files.read
   - api.files.write
+  - api.clusters.read
+  - api.clusters.write
   projectOwner:
   - api.model.read
   - api.model.write
