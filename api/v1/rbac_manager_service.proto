@@ -21,6 +21,15 @@ message AuthorizeResponse {
   string tenant_id = 5;
 }
 
+message AuthorizeWorkerRequest {
+  string token = 1;
+}
+
+message AuthorizeWorkerResponse {
+  string cluster_id = 1;
+  string tenant_id = 2;
+}
+
 message User {
   string id = 1;
 }
@@ -36,4 +45,7 @@ message Project {
 
 service RbacInternalService {
   rpc Authorize(AuthorizeRequest) returns (AuthorizeResponse);
+
+  // AuthorizeWorker authorizes requests from worker clusters.
+  rpc AuthorizeWorker(AuthorizeWorkerRequest) returns (AuthorizeWorkerResponse);
 }

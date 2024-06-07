@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/url"
 	"testing"
@@ -124,4 +125,8 @@ func (f *fakeInternalServerClient) Authorize(ctx context.Context, in *v1.Authori
 		Organization: &v1.Organization{Id: "o0"},
 		Project:      &v1.Project{Id: "p0"},
 	}, nil
+}
+
+func (f *fakeInternalServerClient) AuthorizeWorker(ctx context.Context, in *v1.AuthorizeWorkerRequest, opts ...grpc.CallOption) (*v1.AuthorizeWorkerResponse, error) {
+	return nil, fmt.Errorf("not implemented")
 }

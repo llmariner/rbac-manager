@@ -64,6 +64,17 @@
         }
       }
     },
+    "v1AuthorizeWorkerResponse": {
+      "type": "object",
+      "properties": {
+        "clusterId": {
+          "type": "string"
+        },
+        "tenantId": {
+          "type": "string"
+        }
+      }
+    },
     "v1Organization": {
       "type": "object",
       "properties": {
