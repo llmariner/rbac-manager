@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	cv1 "github.com/llm-operator/cluster-manager/api/v1"
 	"github.com/llm-operator/rbac-manager/server/internal/config"
 	uv1 "github.com/llm-operator/user-manager/api/v1"
 	"github.com/stretchr/testify/assert"
@@ -11,7 +12,7 @@ import (
 )
 
 func TestCache(t *testing.T) {
-	l := &fakeUserInfoLister{
+	ul := &fakeUserInfoLister{
 		apikeys: &uv1.ListAPIKeysResponse{
 			Data: []*uv1.APIKey{
 				{
@@ -83,7 +84,23 @@ func TestCache(t *testing.T) {
 			},
 		},
 	}
-	c := NewStore(l, &config.DebugConfig{
+
+	cl := &fakeClusterInfoLister{
+		clusters: &cv1.ListClustersResponse{
+			Data: []*cv1.Cluster{
+				{
+					Id:              "cid0",
+					RegistrationKey: "rkey0",
+				},
+				{
+					Id:              "cid1",
+					RegistrationKey: "rkey1",
+				},
+			},
+		},
+	}
+
+	c := NewStore(ul, cl, &config.DebugConfig{
 		APIKeyRole: "role",
 	})
 
@@ -113,6 +130,21 @@ func TestCache(t *testing.T) {
 
 		assert.True(t, ok)
 		assert.Equal(t, v.Role, got.Role)
+	}
+
+	wantClusters := map[string]*C{
+		"rkey0": {
+			ID: "cid0",
+		},
+		"rkey1": {
+			ID: "cid1",
+		},
+	}
+
+	for k, v := range wantClusters {
+		got, ok := c.GetClusterByRegistrationKey(k)
+		assert.True(t, ok)
+		assert.Equal(t, v.ID, got.ID)
 	}
 
 	wantOrgs := map[string]*O{
@@ -222,6 +254,15 @@ func (l *fakeUserInfoLister) ListOrganizationUsers(ctx context.Context, in *uv1.
 func (l *fakeUserInfoLister) ListProjects(ctx context.Context, in *uv1.ListProjectsRequest, opts ...grpc.CallOption) (*uv1.ListProjectsResponse, error) {
 	return l.projects, nil
 }
+
 func (l *fakeUserInfoLister) ListProjectUsers(ctx context.Context, in *uv1.ListProjectUsersRequest, opts ...grpc.CallOption) (*uv1.ListProjectUsersResponse, error) {
 	return l.projectusers, nil
+}
+
+type fakeClusterInfoLister struct {
+	clusters *cv1.ListClustersResponse
+}
+
+func (l *fakeClusterInfoLister) ListClusters(ctx context.Context, in *cv1.ListClustersRequest, opts ...grpc.CallOption) (*cv1.ListClustersResponse, error) {
+	return l.clusters, nil
 }

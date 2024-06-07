@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	cv1 "github.com/llm-operator/cluster-manager/api/v1"
 	"github.com/llm-operator/rbac-manager/server/internal/cache"
 	"github.com/llm-operator/rbac-manager/server/internal/config"
 	"github.com/llm-operator/rbac-manager/server/internal/server"
@@ -50,8 +51,20 @@ func run(ctx context.Context, c *config.Config) error {
 	if err != nil {
 		return err
 	}
+	uClient := uv1.NewUsersInternalServiceClient(conn)
+
+	conn, err = grpc.Dial(
+		c.CacheConfig.ClusterManagerServerInternalAddr,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		return err
+	}
+	cClient := cv1.NewClustersInternalServiceClient(conn)
+
 	cstore := cache.NewStore(
-		uv1.NewUsersInternalServiceClient(conn),
+		uClient,
+		cClient,
 		&c.Debug,
 	)
 	errCh := make(chan error)

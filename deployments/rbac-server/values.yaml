@@ -7,6 +7,7 @@ internalGrpcPort: 8082
 cache:
   syncInterval: 10s
   userManagerServerInternalAddr: user-manager-server-internal-grpc:8082
+  clusterManagerServerInternalAddr: cluster-manager-server-internal-grpc:8082
 
 roleScopesMap:
   organizationOwner:

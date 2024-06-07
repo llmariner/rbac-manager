@@ -375,6 +375,8 @@ func (f *fakeTokenIntrospector) TokenIntrospect(token string) (*dex.Introspectio
 type fakeCacheGetter struct {
 	apikeys map[string]*cache.K
 
+	clusters map[string]*cache.C
+
 	orgsByID     map[string]*cache.O
 	orgsByUserID map[string][]cache.OU
 
@@ -386,6 +388,11 @@ type fakeCacheGetter struct {
 func (c *fakeCacheGetter) GetAPIKeyBySecret(secret string) (*cache.K, bool) {
 	k, ok := c.apikeys[secret]
 	return k, ok
+}
+
+func (c *fakeCacheGetter) GetClusterByRegistrationKey(key string) (*cache.C, bool) {
+	cl, ok := c.clusters[key]
+	return cl, ok
 }
 
 func (c *fakeCacheGetter) GetOrganizationByID(organizationID string) (*cache.O, bool) {
