@@ -2,6 +2,8 @@ package auth
 
 import (
 	"context"
+	"net/http"
+	"net/url"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -24,4 +26,23 @@ func TestWorkerUnary(t *testing.T) {
 	resp, err := interceptorFunc(ctx, nil, info, handler)
 	assert.NoError(t, err)
 	assert.Equal(t, "ok", resp)
+}
+
+func TestWorkerInterceptHTTPRequest(t *testing.T) {
+	interceptor := &WorkerInterceptor{
+		client: &fakeInternalServerClient{
+			t: t,
+		},
+	}
+
+	req := &http.Request{
+		Method: http.MethodGet,
+		Header: http.Header{"Authorization": []string{"Bearer token"}},
+		URL:    &url.URL{},
+	}
+
+	statusCode, clusterInfo, err := interceptor.InterceptHTTPRequest(req)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, statusCode)
+	assert.NotNil(t, clusterInfo)
 }

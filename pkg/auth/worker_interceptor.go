@@ -2,6 +2,8 @@ package auth
 
 import (
 	"context"
+	"fmt"
+	"net/http"
 
 	rbacv1 "github.com/llm-operator/rbac-manager/api/v1"
 	"google.golang.org/grpc"
@@ -47,4 +49,22 @@ func (a *WorkerInterceptor) Unary() grpc.UnaryServerInterceptor {
 		ctx = AppendClusterInfoToContext(ctx, newClusterInfoFromAuthorizeResponse(aresp))
 		return handler(ctx, req)
 	}
+}
+
+// InterceptHTTPRequest intercepts an HTTP request and returns an HTTP status code.
+func (a *WorkerInterceptor) InterceptHTTPRequest(req *http.Request) (int, ClusterInfo, error) {
+	token, found := extractTokenFromHeader(req.Header)
+	if !found {
+		return http.StatusUnauthorized, ClusterInfo{}, fmt.Errorf("missing authorization")
+	}
+
+	aresp, err := a.client.AuthorizeWorker(req.Context(), &rbacv1.AuthorizeWorkerRequest{Token: token})
+	if err != nil {
+		return http.StatusInternalServerError, ClusterInfo{}, fmt.Errorf("failed to authorize: %v", err)
+	}
+	if !aresp.Authorized {
+		return http.StatusUnauthorized, ClusterInfo{}, fmt.Errorf("permission denied")
+	}
+
+	return http.StatusOK, newClusterInfoFromAuthorizeResponse(aresp), nil
 }
