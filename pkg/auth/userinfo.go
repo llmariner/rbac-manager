@@ -8,13 +8,19 @@ import (
 
 type userInfoKey struct{}
 
+// AssignedKubernetesEnv represents the assigned Kubernetes environment.
+type AssignedKubernetesEnv struct {
+	ClusterID string
+	Namespace string
+}
+
 // UserInfo manages the user info.
 type UserInfo struct {
-	UserID              string
-	OrganizationID      string
-	ProjectID           string
-	KubernetesNamespace string
-	TenantID            string
+	UserID                 string
+	OrganizationID         string
+	ProjectID              string
+	AssignedKubernetesEnvs []AssignedKubernetesEnv
+	TenantID               string
 }
 
 // AppendUserInfoToContext appends the user info to the context.
@@ -29,11 +35,18 @@ func ExtractUserInfoFromContext(ctx context.Context) (*UserInfo, bool) {
 }
 
 func newUserInfoFromAuthorizeResponse(resp *v1.AuthorizeResponse) UserInfo {
+	var envs []AssignedKubernetesEnv
+	for _, env := range resp.Project.AssignedKubernetesEnvs {
+		envs = append(envs, AssignedKubernetesEnv{
+			ClusterID: env.ClusterId,
+			Namespace: env.Namespace,
+		})
+	}
 	return UserInfo{
-		UserID:              resp.User.Id,
-		OrganizationID:      resp.Organization.Id,
-		ProjectID:           resp.Project.Id,
-		KubernetesNamespace: resp.Project.KubernetesNamespace,
-		TenantID:            resp.TenantId,
+		UserID:                 resp.User.Id,
+		OrganizationID:         resp.Organization.Id,
+		ProjectID:              resp.Project.Id,
+		AssignedKubernetesEnvs: envs,
+		TenantID:               resp.TenantId,
 	}
 }

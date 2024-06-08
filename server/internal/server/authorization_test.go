@@ -458,6 +458,16 @@ func (c *fakeCacheGetter) GetClusterByRegistrationKey(key string) (*cache.C, boo
 	return cl, ok
 }
 
+func (c *fakeCacheGetter) GetClustersByTenantID(tenantID string) []cache.C {
+	var clusters []cache.C
+	for _, cl := range c.clusters {
+		if cl.TenantID == tenantID {
+			clusters = append(clusters, *cl)
+		}
+	}
+	return clusters
+}
+
 func (c *fakeCacheGetter) GetOrganizationByID(organizationID string) (*cache.O, bool) {
 	o, ok := c.orgsByID[organizationID]
 	return o, ok

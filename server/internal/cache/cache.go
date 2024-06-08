@@ -85,6 +85,7 @@ func NewStore(
 		apiKeysBySecret: map[string]*K{},
 
 		clustersByRegistrationKey: map[string]*C{},
+		clustersByTenantID:        map[string][]C{},
 
 		orgsByID:     map[string]*O{},
 		orgsByUserID: map[string][]OU{},
@@ -107,6 +108,9 @@ type Store struct {
 
 	// clustersByRegistrationKey is a set of clusters, keyed by its registration key.
 	clustersByRegistrationKey map[string]*C
+
+	// clustersByTenantID is a set of clusters, keyed by its tenant ID.
+	clustersByTenantID map[string][]C
 
 	// orgsByID is a set of organizations, keyed by its ID.
 	orgsByID map[string]*O
@@ -150,6 +154,14 @@ func (c *Store) GetClusterByRegistrationKey(key string) (*C, bool) {
 		return nil, false
 	}
 	return cluster, true
+}
+
+// GetClustersByTenantID returns clusters by its tenant ID.
+func (c *Store) GetClustersByTenantID(tenantID string) []C {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	return c.clustersByTenantID[tenantID]
 }
 
 // GetOrganizationByID returns an organization by its ID.
@@ -244,11 +256,14 @@ func (c *Store) updateCache(ctx context.Context) error {
 		return err
 	}
 	cs := map[string]*C{}
-	for _, c := range cresp.Clusters {
-		cs[c.Cluster.RegistrationKey] = &C{
-			ID:       c.Cluster.Id,
-			TenantID: c.TenantId,
+	csByTenantID := map[string][]C{}
+	for _, cluster := range cresp.Clusters {
+		c := C{
+			ID:       cluster.Cluster.Id,
+			TenantID: cluster.TenantId,
 		}
+		cs[cluster.Cluster.RegistrationKey] = &c
+		csByTenantID[cluster.TenantId] = append(csByTenantID[cluster.TenantId], c)
 	}
 
 	orgs, err := c.userInfoLister.ListInternalOrganizations(ctx, &uv1.ListInternalOrganizationsRequest{})
@@ -333,6 +348,7 @@ func (c *Store) updateCache(ctx context.Context) error {
 	c.apiKeysBySecret = m
 
 	c.clustersByRegistrationKey = cs
+	c.clustersByTenantID = csByTenantID
 
 	c.orgsByID = orgsByID
 	c.orgsByUserID = orgsByUserID

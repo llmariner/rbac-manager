@@ -37,8 +37,8 @@ func (s *Server) Authorize(ctx context.Context, req *v1.AuthorizeRequest) (*v1.A
 			User:         &v1.User{Id: key.UserID},
 			Organization: &v1.Organization{Id: key.OrganizationID},
 			Project: &v1.Project{
-				Id:                  key.ProjectID,
-				KubernetesNamespace: project.KubernetesNamespace,
+				Id:                     key.ProjectID,
+				AssignedKubernetesEnvs: s.assignedKubernetesEnvs(project.KubernetesNamespace, key.TenantID),
 			},
 			TenantId: key.TenantID,
 		}, nil
@@ -87,8 +87,8 @@ func (s *Server) Authorize(ctx context.Context, req *v1.AuthorizeRequest) (*v1.A
 			Id: pr.project.OrganizationID,
 		},
 		Project: &v1.Project{
-			Id:                  pr.project.ID,
-			KubernetesNamespace: pr.project.KubernetesNamespace,
+			Id:                     pr.project.ID,
+			AssignedKubernetesEnvs: s.assignedKubernetesEnvs(pr.project.KubernetesNamespace, u.TenantID),
 		},
 		TenantId: u.TenantID,
 	}, nil
@@ -284,6 +284,18 @@ func (s *Server) findAssociatedProjectID(
 	}
 
 	return "", fmt.Errorf("unable to identify a project for the user")
+}
+
+func (s *Server) assignedKubernetesEnvs(namespace, tenantID string) []*v1.Project_AssignedKubernetesEnv {
+	// TODO(kenji): Revisit. Currently we allow the user to access the project namespace for all registered clusters.
+	var envs []*v1.Project_AssignedKubernetesEnv
+	for _, c := range s.cache.GetClustersByTenantID(tenantID) {
+		envs = append(envs, &v1.Project_AssignedKubernetesEnv{
+			ClusterId: c.ID,
+			Namespace: namespace,
+		})
+	}
+	return envs
 }
 
 func toScope(req *v1.AuthorizeRequest) string {
