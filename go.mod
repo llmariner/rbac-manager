@@ -4,7 +4,7 @@ go 1.22.2
 
 require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.0
-	github.com/llm-operator/cluster-manager v0.2.0
+	github.com/llm-operator/cluster-manager v0.4.0
 	github.com/llm-operator/user-manager v0.40.0
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.9.0

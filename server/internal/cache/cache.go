@@ -22,7 +22,8 @@ type K struct {
 
 // C represents a cluster.
 type C struct {
-	ID string
+	ID       string
+	TenantID string
 }
 
 // O represents an organization.
@@ -59,7 +60,7 @@ type userInfoLister interface {
 }
 
 type clusterInfoLister interface {
-	ListClusters(ctx context.Context, in *cv1.ListClustersRequest, opts ...grpc.CallOption) (*cv1.ListClustersResponse, error)
+	ListInternalClusters(ctx context.Context, in *cv1.ListInternalClustersRequest, opts ...grpc.CallOption) (*cv1.ListInternalClustersResponse, error)
 }
 
 // NewStore creates a new cache store.
@@ -217,14 +218,15 @@ func (c *Store) updateCache(ctx context.Context) error {
 		}
 	}
 
-	cresp, err := c.clusterInfoLister.ListClusters(ctx, &cv1.ListClustersRequest{})
+	cresp, err := c.clusterInfoLister.ListInternalClusters(ctx, &cv1.ListInternalClustersRequest{})
 	if err != nil {
 		return err
 	}
 	cs := map[string]*C{}
-	for _, c := range cresp.Data {
-		cs[c.RegistrationKey] = &C{
-			ID: c.Id,
+	for _, c := range cresp.Clusters {
+		cs[c.Cluster.RegistrationKey] = &C{
+			ID:       c.Cluster.Id,
+			TenantID: c.TenantId,
 		}
 	}
 
