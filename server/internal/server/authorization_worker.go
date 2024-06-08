@@ -24,6 +24,6 @@ func (s *Server) AuthorizeWorker(ctx context.Context, req *v1.AuthorizeWorkerReq
 	return &v1.AuthorizeWorkerResponse{
 		Authorized: true,
 		Cluster:    &v1.Cluster{Id: c.ID},
-		TenantId:   s.defaultTenantID,
+		TenantId:   c.TenantID,
 	}, nil
 }

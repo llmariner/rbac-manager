@@ -86,15 +86,21 @@ func TestCache(t *testing.T) {
 	}
 
 	cl := &fakeClusterInfoLister{
-		clusters: &cv1.ListClustersResponse{
-			Data: []*cv1.Cluster{
+		clusters: &cv1.ListInternalClustersResponse{
+			Clusters: []*cv1.InternalCluster{
 				{
-					Id:              "cid0",
-					RegistrationKey: "rkey0",
+					Cluster: &cv1.Cluster{
+						Id:              "cid0",
+						RegistrationKey: "rkey0",
+					},
+					TenantId: "tid0",
 				},
 				{
-					Id:              "cid1",
-					RegistrationKey: "rkey1",
+					Cluster: &cv1.Cluster{
+						Id:              "cid1",
+						RegistrationKey: "rkey1",
+					},
+					TenantId: "tid0",
 				},
 			},
 		},
@@ -260,9 +266,9 @@ func (l *fakeUserInfoLister) ListProjectUsers(ctx context.Context, in *uv1.ListP
 }
 
 type fakeClusterInfoLister struct {
-	clusters *cv1.ListClustersResponse
+	clusters *cv1.ListInternalClustersResponse
 }
 
-func (l *fakeClusterInfoLister) ListClusters(ctx context.Context, in *cv1.ListClustersRequest, opts ...grpc.CallOption) (*cv1.ListClustersResponse, error) {
+func (l *fakeClusterInfoLister) ListInternalClusters(ctx context.Context, in *cv1.ListInternalClustersRequest, opts ...grpc.CallOption) (*cv1.ListInternalClustersResponse, error) {
 	return l.clusters, nil
 }
