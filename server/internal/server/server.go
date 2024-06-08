@@ -22,6 +22,8 @@ type cacheGetter interface {
 	GetProjectsByOrganizationID(organizationID string) []cache.P
 	GetProjectByID(projectID string) (*cache.P, bool)
 	GetProjectsByUserID(userID string) []cache.PU
+
+	GetUserByID(id string) (*cache.U, bool)
 }
 
 type tokenIntrospector interface {
@@ -29,15 +31,13 @@ type tokenIntrospector interface {
 }
 
 // New returns a new Server.
-func New(issuerURL string, cache cacheGetter, roleScopes map[string][]string, defaultTenantID string) *Server {
+func New(issuerURL string, cache cacheGetter, roleScopes map[string][]string) *Server {
 	return &Server{
 		tokenIntrospector: dex.NewDefaultClient(issuerURL),
 
 		cache: cache,
 
 		roleScopesMapper: roleScopes,
-
-		defaultTenantID: defaultTenantID,
 	}
 }
 
@@ -50,8 +50,6 @@ type Server struct {
 	cache cacheGetter
 
 	roleScopesMapper map[string][]string
-
-	defaultTenantID string
 }
 
 // Run starts the gRPC server.

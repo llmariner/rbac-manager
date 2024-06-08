@@ -40,7 +40,7 @@ func (s *Server) Authorize(ctx context.Context, req *v1.AuthorizeRequest) (*v1.A
 				Id:                  key.ProjectID,
 				KubernetesNamespace: project.KubernetesNamespace,
 			},
-			TenantId: s.defaultTenantID,
+			TenantId: key.TenantID,
 		}, nil
 	}
 
@@ -50,6 +50,11 @@ func (s *Server) Authorize(ctx context.Context, req *v1.AuthorizeRequest) (*v1.A
 	}
 
 	if !is.Active {
+		return &v1.AuthorizeResponse{Authorized: false}, nil
+	}
+
+	u, ok := s.cache.GetUserByID(is.Extra.Email)
+	if !ok {
 		return &v1.AuthorizeResponse{Authorized: false}, nil
 	}
 
@@ -63,7 +68,7 @@ func (s *Server) Authorize(ctx context.Context, req *v1.AuthorizeRequest) (*v1.A
 			},
 			Organization: &v1.Organization{},
 			Project:      &v1.Project{},
-			TenantId:     s.defaultTenantID,
+			TenantId:     u.TenantID,
 		}, nil
 	}
 
@@ -85,7 +90,7 @@ func (s *Server) Authorize(ctx context.Context, req *v1.AuthorizeRequest) (*v1.A
 			Id:                  pr.project.ID,
 			KubernetesNamespace: pr.project.KubernetesNamespace,
 		},
-		TenantId: s.defaultTenantID,
+		TenantId: u.TenantID,
 	}, nil
 }
 

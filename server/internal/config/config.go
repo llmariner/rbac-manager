@@ -19,8 +19,6 @@ type Config struct {
 	// RoleScopesMap maps a role name to a list of scopes.
 	RoleScopesMap map[string][]string `yaml:"roleScopesMap"`
 
-	DefaultTenantID string `yaml:"defaultTenantId"`
-
 	Debug DebugConfig `yaml:"debug"`
 }
 
@@ -31,9 +29,6 @@ func (c *Config) Validate() error {
 	}
 	if c.IssuerURL == "" {
 		return fmt.Errorf("issuerUrl must be set")
-	}
-	if c.DefaultTenantID == "" {
-		return fmt.Errorf("defaultTenantId must be set")
 	}
 	if err := c.CacheConfig.validate(); err != nil {
 		return fmt.Errorf("cache: %s", err)

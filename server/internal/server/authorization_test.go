@@ -31,6 +31,7 @@ func TestAuthorize(t *testing.T) {
 		orgsByUserID             map[string][]cache.OU
 		projectsByID             map[string]*cache.P
 		projectsByOrganizationID map[string][]cache.P
+		usersByID                map[string]*cache.U
 		is                       *dex.Introspection
 		want                     bool
 	}{
@@ -52,7 +53,8 @@ func TestAuthorize(t *testing.T) {
 					KubernetesNamespace: "ns",
 				},
 			},
-			want: true,
+			usersByID: map[string]*cache.U{},
+			want:      true,
 		},
 		{
 			name: "unauthorized with invalid role in API key",
@@ -71,7 +73,8 @@ func TestAuthorize(t *testing.T) {
 					KubernetesNamespace: "ns",
 				},
 			},
-			want: false,
+			usersByID: map[string]*cache.U{},
+			want:      false,
 		},
 		{
 			name: "authorized with dex",
@@ -108,6 +111,12 @@ func TestAuthorize(t *testing.T) {
 						OrganizationID:      "my-org",
 						KubernetesNamespace: "ns",
 					},
+				},
+			},
+			usersByID: map[string]*cache.U{
+				"my-user": {
+					ID:       "my-user",
+					TenantID: "t0",
 				},
 			},
 			is: &dex.Introspection{
@@ -167,6 +176,51 @@ func TestAuthorize(t *testing.T) {
 			},
 			want: false,
 		},
+		{
+			name: "authorized with no-user",
+			req: &v1.AuthorizeRequest{
+				Token:          "jwt",
+				AccessResource: "api.object",
+				Capability:     "read",
+			},
+			apikeys: map[string]*cache.K{},
+			orgsByID: map[string]*cache.O{
+				"my-org": {
+					ID: "my-org",
+				},
+			},
+			orgsByUserID: map[string][]cache.OU{
+				"my-user": {
+					{
+						Role:           uv1.OrganizationRole_ORGANIZATION_ROLE_OWNER,
+						OrganizationID: "my-org",
+					},
+				},
+			},
+			projectsByID: map[string]*cache.P{
+				"my-project": {
+					ID:                  "my-project",
+					OrganizationID:      "my-org",
+					KubernetesNamespace: "ns",
+				},
+			},
+			projectsByOrganizationID: map[string][]cache.P{
+				"my-org": {
+					{
+						ID:                  "my-project",
+						OrganizationID:      "my-org",
+						KubernetesNamespace: "ns",
+					},
+				},
+			},
+			is: &dex.Introspection{
+				Active: true,
+				Extra: dex.IntrospectionExtra{
+					Email: "my-user",
+				},
+			},
+			want: false,
+		},
 	}
 
 	for _, tc := range tcs {
@@ -181,6 +235,7 @@ func TestAuthorize(t *testing.T) {
 					orgsByUserID:             tc.orgsByUserID,
 					projectsByID:             tc.projectsByID,
 					projectsByOrganizationID: tc.projectsByOrganizationID,
+					usersByID:                tc.usersByID,
 				},
 				roleScopesMapper: roleScopesMap,
 			}
@@ -251,6 +306,12 @@ func TestFindAssociatedProjectAndRoles(t *testing.T) {
 					ProjectID: project1.ID,
 					Role:      uv1.ProjectRole_PROJECT_ROLE_MEMBER,
 				},
+			},
+		},
+		usersByID: map[string]*cache.U{
+			userID: {
+				ID:       userID,
+				TenantID: "t0",
 			},
 		},
 	}
@@ -383,6 +444,8 @@ type fakeCacheGetter struct {
 	projectsByID             map[string]*cache.P
 	projectsByOrganizationID map[string][]cache.P
 	projectsByUserID         map[string][]cache.PU
+
+	usersByID map[string]*cache.U
 }
 
 func (c *fakeCacheGetter) GetAPIKeyBySecret(secret string) (*cache.K, bool) {
@@ -415,4 +478,9 @@ func (c *fakeCacheGetter) GetProjectByID(projectID string) (*cache.P, bool) {
 
 func (c *fakeCacheGetter) GetProjectsByUserID(userID string) []cache.PU {
 	return c.projectsByUserID[userID]
+}
+
+func (c *fakeCacheGetter) GetUserByID(id string) (*cache.U, bool) {
+	u, ok := c.usersByID[id]
+	return u, ok
 }

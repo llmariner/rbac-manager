@@ -13,31 +13,43 @@ import (
 
 func TestCache(t *testing.T) {
 	ul := &fakeUserInfoLister{
-		apikeys: &uv1.ListAPIKeysResponse{
-			Data: []*uv1.APIKey{
+		apikeys: &uv1.ListInternalAPIKeysResponse{
+			ApiKeys: []*uv1.InternalAPIKey{
 				{
-					Id:           "id0",
-					Secret:       "s0",
-					User:         &uv1.User{Id: "u0"},
-					Organization: &uv1.Organization{Id: "o0"},
-					Project:      &uv1.Project{Id: "p0"},
+					ApiKey: &uv1.APIKey{
+						Id:           "id0",
+						Secret:       "s0",
+						User:         &uv1.User{Id: "u0"},
+						Organization: &uv1.Organization{Id: "o0"},
+						Project:      &uv1.Project{Id: "p0"},
+					},
+					TenantId: "tid0",
 				},
 				{
-					Id:           "id1",
-					Secret:       "s1",
-					User:         &uv1.User{Id: "u1"},
-					Organization: &uv1.Organization{Id: "o1"},
-					Project:      &uv1.Project{Id: "p1"},
+					ApiKey: &uv1.APIKey{
+						Id:           "id1",
+						Secret:       "s1",
+						User:         &uv1.User{Id: "u1"},
+						Organization: &uv1.Organization{Id: "o1"},
+						Project:      &uv1.Project{Id: "p1"},
+					},
+					TenantId: "tid1",
 				},
 			},
 		},
-		orgs: &uv1.ListOrganizationsResponse{
-			Organizations: []*uv1.Organization{
+		orgs: &uv1.ListInternalOrganizationsResponse{
+			Organizations: []*uv1.InternalOrganization{
 				{
-					Id: "o0",
+					Organization: &uv1.Organization{
+						Id: "o0",
+					},
+					TenantId: "tid0",
 				},
 				{
-					Id: "o1",
+					Organization: &uv1.Organization{
+						Id: "o1",
+					},
+					TenantId: "tid0",
 				},
 			},
 		},
@@ -155,10 +167,12 @@ func TestCache(t *testing.T) {
 
 	wantOrgs := map[string]*O{
 		"o0": {
-			ID: "o0",
+			ID:       "o0",
+			TenantID: "tid0",
 		},
 		"o1": {
-			ID: "o1",
+			ID:       "o1",
+			TenantID: "tid0",
 		},
 	}
 	for id, want := range wantOrgs {
@@ -235,21 +249,33 @@ func TestCache(t *testing.T) {
 		assert.True(t, ok)
 		assert.Equal(t, want, got)
 	}
+
+	wantUsers := map[string]*U{
+		"u0": {
+			ID:       "u0",
+			TenantID: "tid0",
+		},
+	}
+	for id, want := range wantUsers {
+		got, ok := c.GetUserByID(id)
+		assert.True(t, ok)
+		assert.Equal(t, *want, *got)
+	}
 }
 
 type fakeUserInfoLister struct {
-	apikeys      *uv1.ListAPIKeysResponse
-	orgs         *uv1.ListOrganizationsResponse
+	apikeys      *uv1.ListInternalAPIKeysResponse
+	orgs         *uv1.ListInternalOrganizationsResponse
 	orgusers     *uv1.ListOrganizationUsersResponse
 	projects     *uv1.ListProjectsResponse
 	projectusers *uv1.ListProjectUsersResponse
 }
 
-func (l *fakeUserInfoLister) ListAPIKeys(ctx context.Context, in *uv1.ListAPIKeysRequest, opts ...grpc.CallOption) (*uv1.ListAPIKeysResponse, error) {
+func (l *fakeUserInfoLister) ListInternalAPIKeys(ctx context.Context, in *uv1.ListInternalAPIKeysRequest, opts ...grpc.CallOption) (*uv1.ListInternalAPIKeysResponse, error) {
 	return l.apikeys, nil
 }
 
-func (l *fakeUserInfoLister) ListOrganizations(ctx context.Context, in *uv1.ListOrganizationsRequest, opts ...grpc.CallOption) (*uv1.ListOrganizationsResponse, error) {
+func (l *fakeUserInfoLister) ListInternalOrganizations(ctx context.Context, in *uv1.ListInternalOrganizationsRequest, opts ...grpc.CallOption) (*uv1.ListInternalOrganizationsResponse, error) {
 	return l.orgs, nil
 }
 
