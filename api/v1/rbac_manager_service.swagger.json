@@ -17,6 +17,17 @@
   ],
   "paths": {},
   "definitions": {
+    "ProjectAssignedKubernetesEnv": {
+      "type": "object",
+      "properties": {
+        "clusterId": {
+          "type": "string"
+        },
+        "namespace": {
+          "type": "string"
+        }
+      }
+    },
     "protobufAny": {
       "type": "object",
       "properties": {
@@ -100,8 +111,11 @@
         "id": {
           "type": "string"
         },
-        "kubernetesNamespace": {
-          "type": "string"
+        "assignedKubernetesEnvs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ProjectAssignedKubernetesEnv"
+          }
         }
       }
     },

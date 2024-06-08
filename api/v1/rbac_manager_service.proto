@@ -42,7 +42,12 @@ message Organization {
 
 message Project {
   string id = 1;
-  string kubernetes_namespace = 2;
+
+  message AssignedKubernetesEnv {
+    string cluster_id = 1;
+    string namespace = 2;
+  }
+  repeated AssignedKubernetesEnv assigned_kubernetes_envs = 2;
 }
 
 message Cluster {

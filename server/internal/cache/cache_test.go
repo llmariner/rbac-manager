@@ -164,6 +164,22 @@ func TestCache(t *testing.T) {
 		assert.True(t, ok)
 		assert.Equal(t, v.ID, got.ID)
 	}
+	wantClustersByTenantID := map[string][]C{
+		"tid0": {
+			{
+				ID:       "cid0",
+				TenantID: "tid0",
+			},
+			{
+				ID:       "cid1",
+				TenantID: "tid0",
+			},
+		},
+	}
+	for k, want := range wantClustersByTenantID {
+		got := c.GetClustersByTenantID(k)
+		assert.ElementsMatch(t, want, got)
+	}
 
 	wantOrgs := map[string]*O{
 		"o0": {
