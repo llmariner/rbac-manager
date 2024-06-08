@@ -2,6 +2,7 @@ package cache
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"sync"
 	"time"
@@ -18,6 +19,7 @@ type K struct {
 	UserID         string
 	OrganizationID string
 	ProjectID      string
+	TenantID       string
 }
 
 // C represents a cluster.
@@ -28,7 +30,8 @@ type C struct {
 
 // O represents an organization.
 type O struct {
-	ID string
+	ID       string
+	TenantID string
 }
 
 // OU represents a role associated with a organization user.
@@ -51,9 +54,15 @@ type PU struct {
 	OrganizationID string
 }
 
+// U represents a user.
+type U struct {
+	ID       string
+	TenantID string
+}
+
 type userInfoLister interface {
-	ListAPIKeys(ctx context.Context, in *uv1.ListAPIKeysRequest, opts ...grpc.CallOption) (*uv1.ListAPIKeysResponse, error)
-	ListOrganizations(ctx context.Context, in *uv1.ListOrganizationsRequest, opts ...grpc.CallOption) (*uv1.ListOrganizationsResponse, error)
+	ListInternalAPIKeys(ctx context.Context, in *uv1.ListInternalAPIKeysRequest, opts ...grpc.CallOption) (*uv1.ListInternalAPIKeysResponse, error)
+	ListInternalOrganizations(ctx context.Context, in *uv1.ListInternalOrganizationsRequest, opts ...grpc.CallOption) (*uv1.ListInternalOrganizationsResponse, error)
 	ListOrganizationUsers(ctx context.Context, in *uv1.ListOrganizationUsersRequest, opts ...grpc.CallOption) (*uv1.ListOrganizationUsersResponse, error)
 	ListProjects(ctx context.Context, in *uv1.ListProjectsRequest, opts ...grpc.CallOption) (*uv1.ListProjectsResponse, error)
 	ListProjectUsers(ctx context.Context, in *uv1.ListProjectUsersRequest, opts ...grpc.CallOption) (*uv1.ListProjectUsersResponse, error)
@@ -110,6 +119,9 @@ type Store struct {
 	projectsByOrganizationID map[string][]P
 	// projectsByUserID is a set of project users, keyed by its user ID.
 	projectsByUserID map[string][]PU
+
+	// usersByID is a set of users, keyed by its ID.
+	usersByID map[string]*U
 
 	mu sync.RWMutex
 
@@ -178,6 +190,14 @@ func (c *Store) GetProjectsByUserID(userID string) []PU {
 	return c.projectsByUserID[userID]
 }
 
+// GetUserByID returns a user by its ID.
+func (c *Store) GetUserByID(userID string) (*U, bool) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	u, ok := c.usersByID[userID]
+	return u, ok
+}
+
 // Sync synchronizes the cache.
 func (c *Store) Sync(ctx context.Context, interval time.Duration) error {
 	if err := c.updateCache(ctx); err != nil {
@@ -202,19 +222,20 @@ func (c *Store) Sync(ctx context.Context, interval time.Duration) error {
 }
 
 func (c *Store) updateCache(ctx context.Context) error {
-	resp, err := c.userInfoLister.ListAPIKeys(ctx, &uv1.ListAPIKeysRequest{})
+	resp, err := c.userInfoLister.ListInternalAPIKeys(ctx, &uv1.ListInternalAPIKeysRequest{})
 	if err != nil {
 		return err
 	}
 
 	m := map[string]*K{}
-	for _, apiKey := range resp.Data {
-		m[apiKey.Secret] = &K{
+	for _, apiKey := range resp.ApiKeys {
+		m[apiKey.ApiKey.Secret] = &K{
 			// TODO(kenji): Fill this properly.
 			Role:           c.apiKeyRole,
-			UserID:         apiKey.User.Id,
-			OrganizationID: apiKey.Organization.Id,
-			ProjectID:      apiKey.Project.Id,
+			UserID:         apiKey.ApiKey.User.Id,
+			OrganizationID: apiKey.ApiKey.Organization.Id,
+			ProjectID:      apiKey.ApiKey.Project.Id,
+			TenantID:       apiKey.TenantId,
 		}
 	}
 
@@ -230,7 +251,7 @@ func (c *Store) updateCache(ctx context.Context) error {
 		}
 	}
 
-	orgs, err := c.userInfoLister.ListOrganizations(ctx, &uv1.ListOrganizationsRequest{})
+	orgs, err := c.userInfoLister.ListInternalOrganizations(ctx, &uv1.ListInternalOrganizationsRequest{})
 	if err != nil {
 		return err
 	}
@@ -249,8 +270,10 @@ func (c *Store) updateCache(ctx context.Context) error {
 
 	orgsByID := map[string]*O{}
 	for _, org := range orgs.Organizations {
-		orgsByID[org.Id] = &O{
-			ID: org.Id,
+		id := org.Organization.Id
+		orgsByID[id] = &O{
+			ID:       id,
+			TenantID: org.TenantId,
 		}
 	}
 
@@ -284,6 +307,26 @@ func (c *Store) updateCache(ctx context.Context) error {
 		})
 	}
 
+	usersByID := map[string]*U{}
+	for _, user := range orgUsers.Users {
+		o, ok := orgsByID[user.OrganizationId]
+		if !ok {
+			return fmt.Errorf("organization %s not found for user %s", user.OrganizationId, user.UserId)
+		}
+
+		if existing, ok := usersByID[user.UserId]; ok {
+			if existing.TenantID != o.TenantID {
+				return fmt.Errorf("user %s has multiple tenant IDs", user.UserId)
+			}
+			continue
+		}
+
+		usersByID[user.UserId] = &U{
+			ID:       user.UserId,
+			TenantID: o.TenantID,
+		}
+	}
+
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -297,6 +340,8 @@ func (c *Store) updateCache(ctx context.Context) error {
 	c.projectsByID = projectsByID
 	c.projectsByOrganizationID = projectsByOrganizationID
 	c.projectsByUserID = projectsByUserID
+
+	c.usersByID = usersByID
 
 	return nil
 }
