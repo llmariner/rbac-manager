@@ -27,16 +27,24 @@ data:
       skipApprovalScreen: true
       passwordConnector: local
 
+    {{- with .Values.staticClient }}
+    {{- if .id }}
     staticClients:
-    - id: {{ .Values.client.id }}
+    - id: {{ .id }}
       redirectURIs:
-      - {{ .Values.client.redirectUrl }}
-      name: {{ .Values.client.name }}
-      secret: {{ .Values.client.secret }}
+      - {{ .redirectUrl }}
+      name: {{ .name }}
+      secret: {{ .secret }}
+   {{- end }}
+   {{- end }}
 
-    enablePasswordDB: true
+    enablePasswordDB: {{ .Values.enablePasswordDb }}
+    {{- with .Values.staticPassword }}
+    {{- if .id }}
     staticPasswords:
-    - userID: {{ .Values.admin.id }}
-      username: {{ .Values.admin.user }}
-      email: {{ .Values.admin.email }}
-      hash: {{ .Values.admin.password }}
+    - userID: {{ .id }}
+      username: {{ .user }}
+      email: {{ .email }}
+      hash: {{ .password }}
+   {{- end }}
+   {{- end }}
