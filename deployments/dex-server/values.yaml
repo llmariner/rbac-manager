@@ -22,10 +22,16 @@ internalGrpcPort: 8082
 database:
   database: dex
 
+connectors:
+
 oauth2:
-  passwordConnector: local
+  passwordConnector:
+    enable: true
+    value: local
+  responseTypes:
 
 staticClient:
+  enable: true
   id: llm-operator
   name: LLM Operator
   secret: ZXhhbXBsZS1hcHAtc2VjcmV0
@@ -34,6 +40,7 @@ staticClient:
 enablePasswordDb: true
 
 staticPassword:
+  enable: true
   id: 08a8684b-db88-4b73-90a9-3cd1661f5466
   name: admin
   email: admin@example.com
@@ -49,6 +56,5 @@ envsubst:
   image:
     repository: public.ecr.aws/v8n3t7y5/llm-operator/envsubst
     pullPolicy: IfNotPresent
-
 
 replicaCount: 1

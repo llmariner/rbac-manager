@@ -25,26 +25,36 @@ data:
 
     oauth2:
       skipApprovalScreen: true
-      passwordConnector: {{ .Values.oauth2.passwordConnector }}
+      {{- with .Values.oauth2.passwordConnector }}
+      {{- if .enable }}
+      passwordConnector: {{ .value}}
+      {{- end }}
+      {{- end }}
+      responseTypes: {{ .Values.oauth2.responseTypes }}
+      alwaysShowLoginScreen: false
+
+    connectors:
+    {{- toYaml .Values.connectors | nindent 4 }}
 
     {{- with .Values.staticClient }}
-    {{- if .id }}
+    {{- if .enable }}
     staticClients:
     - id: {{ .id }}
       redirectURIs:
       - {{ .redirectUrl }}
       name: {{ .name }}
       secret: {{ .secret }}
-   {{- end }}
-   {{- end }}
+    {{- end }}
+    {{- end }}
 
     enablePasswordDB: {{ .Values.enablePasswordDb }}
+
     {{- with .Values.staticPassword }}
-    {{- if .id }}
+    {{- if .enable }}
     staticPasswords:
     - userID: {{ .id }}
-      username: {{ .user }}
+      username: {{ .name }}
       email: {{ .email }}
       hash: {{ .password }}
-   {{- end }}
-   {{- end }}
+    {{- end }}
+    {{- end }}
