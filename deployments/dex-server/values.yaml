@@ -8,6 +8,10 @@ global:
 
   ingress:
     ingressClassName:
+    annotations:
+    tls:
+      hosts:
+      secretName:
 
   auth:
     oidcIssuerUrl:
@@ -17,6 +21,9 @@ internalGrpcPort: 8082
 
 database:
   database: dex
+
+oauth2:
+  passwordConnector: local
 
 staticClient:
   id: llm-operator

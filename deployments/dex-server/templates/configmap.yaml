@@ -25,7 +25,7 @@ data:
 
     oauth2:
       skipApprovalScreen: true
-      passwordConnector: local
+      passwordConnector: {{ .Values.oauth2.passwordConnector }}
 
     {{- with .Values.staticClient }}
     {{- if .id }}
