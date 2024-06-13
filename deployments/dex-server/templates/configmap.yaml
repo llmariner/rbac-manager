@@ -33,8 +33,10 @@ data:
       responseTypes: {{ .Values.oauth2.responseTypes }}
       alwaysShowLoginScreen: false
 
+    {{- with .connectors }}
     connectors:
-    {{- toYaml .Values.connectors | nindent 4 }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 
     {{- with .Values.staticClient }}
     {{- if .enable }}
