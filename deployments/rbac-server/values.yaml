@@ -19,6 +19,8 @@ roleScopesMap:
   - api.workspaces.notebooks.write
   - api.files.read
   - api.files.write
+  - api.vector-stores.read
+  - api.vector-stores.write
   - api.clusters.read
   - api.clusters.write
   projectOwner:
@@ -30,6 +32,8 @@ roleScopesMap:
   - api.workspaces.notebooks.write
   - api.files.read
   - api.files.write
+  - api.vector-stores.read
+  - api.vector-stores.write
   projectMember:
   - api.model.read
   - api.model.write
@@ -39,6 +43,8 @@ roleScopesMap:
   - api.workspaces.notebooks.write
   - api.files.read
   - api.files.write
+  - api.vector-stores.read
+  - api.vector-stores.write
 
 debug:
   apiKeyRole: projectMember
