@@ -42,7 +42,7 @@ staticClient:
     name: LLM Operator
     secret: o15FQlUB8SeOOBiw3Pg5vD5p
     redirectURIs:
-    - http://127.0.0.1:8080/v1/sessions/callback
+    - http://localhost:8080/v1/sessions/callback
 
 enablePasswordDb: true
 
