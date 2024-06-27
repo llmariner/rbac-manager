@@ -41,11 +41,7 @@ data:
     {{- with .Values.staticClient }}
     {{- if .enable }}
     staticClients:
-    - id: {{ .id }}
-      redirectURIs:
-      - {{ .redirectUrl }}
-      name: {{ .name }}
-      secret: {{ .secret }}
+    {{- toYaml .clients | nindent 4 }}
     {{- end }}
     {{- end }}
 
