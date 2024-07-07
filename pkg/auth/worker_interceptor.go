@@ -51,6 +51,36 @@ func (a *WorkerInterceptor) Unary() grpc.UnaryServerInterceptor {
 	}
 }
 
+type serverStream struct {
+	grpc.ServerStream
+	ctx context.Context
+}
+
+func (s *serverStream) Context() context.Context {
+	return s.ctx
+}
+
+// Stream returns a stream server interceptor.
+func (a *WorkerInterceptor) Stream() grpc.StreamServerInterceptor {
+	return func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+		ctx := ss.Context()
+		token, err := ExtractTokenFromContext(ctx)
+		if err != nil {
+			return err
+		}
+		aresp, err := a.client.AuthorizeWorker(ctx, &rbacv1.AuthorizeWorkerRequest{Token: token})
+		if err != nil {
+			return status.Errorf(codes.Internal, "failed to authorize: %v", err)
+		}
+		if !aresp.Authorized {
+			return status.Errorf(codes.PermissionDenied, "permission denied")
+		}
+
+		ctx = AppendClusterInfoToContext(ctx, newClusterInfoFromAuthorizeResponse(aresp))
+		return handler(srv, &serverStream{ServerStream: ss, ctx: ctx})
+	}
+}
+
 // InterceptHTTPRequest intercepts an HTTP request and returns an HTTP status code.
 func (a *WorkerInterceptor) InterceptHTTPRequest(req *http.Request) (int, ClusterInfo, error) {
 	token, found := extractTokenFromHeader(req.Header)
