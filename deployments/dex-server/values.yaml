@@ -61,7 +61,7 @@ image:
 
 envsubst:
   image:
-    repository: public.ecr.aws/v8n3t7y5/llm-operator/envsubst
+    repository: public.ecr.aws/cloudnatix/llm-operator/envsubst
     pullPolicy: IfNotPresent
 
 replicaCount: 1
