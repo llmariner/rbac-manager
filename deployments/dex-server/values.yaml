@@ -59,6 +59,11 @@ image:
   pullPolicy: IfNotPresent
   tag: v2.39.1-distroless
 
+podAnnotations:
+nodeSelector:
+affinity:
+tolerations:
+
 envsubst:
   image:
     repository: public.ecr.aws/cloudnatix/llm-operator/envsubst
