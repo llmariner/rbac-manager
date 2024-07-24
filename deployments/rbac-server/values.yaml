@@ -17,6 +17,8 @@ roleScopesMap:
   - api.fine_tuning.jobs.write
   - api.workspaces.notebooks.read
   - api.workspaces.notebooks.write
+  - api.batch.jobs.read
+  - api.batch.jobs.write
   - api.files.read
   - api.files.write
   - api.vector-stores.read
@@ -30,6 +32,8 @@ roleScopesMap:
   - api.fine_tuning.jobs.write
   - api.workspaces.notebooks.read
   - api.workspaces.notebooks.write
+  - api.batch.jobs.read
+  - api.batch.jobs.write 
   - api.files.read
   - api.files.write
   - api.vector-stores.read
@@ -41,6 +45,8 @@ roleScopesMap:
   - api.fine_tuning.jobs.write
   - api.workspaces.notebooks.read
   - api.workspaces.notebooks.write
+  - api.batch.jobs.read
+  - api.batch.jobs.write 
   - api.files.read
   - api.files.write
   - api.vector-stores.read
