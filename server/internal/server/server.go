@@ -9,6 +9,8 @@ import (
 	"github.com/llm-operator/rbac-manager/server/internal/cache"
 	"github.com/llm-operator/rbac-manager/server/internal/dex"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/health"
+	"google.golang.org/grpc/health/grpc_health_v1"
 )
 
 type cacheGetter interface {
@@ -57,6 +59,11 @@ type Server struct {
 func (s *Server) Run(ctx context.Context, port int) error {
 	serv := grpc.NewServer()
 	v1.RegisterRbacInternalServiceServer(serv, s)
+
+	healthCheck := health.NewServer()
+	healthCheck.SetServingStatus("", grpc_health_v1.HealthCheckResponse_SERVING)
+	grpc_health_v1.RegisterHealthServer(serv, healthCheck)
+
 	return listenAndServe(serv, port)
 }
 

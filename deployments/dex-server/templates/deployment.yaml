@@ -19,8 +19,12 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
       initContainers:
       - name: envsubst
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 12 }}
         image: "{{ .Values.envsubst.image.repository }}:{{ default .Chart.Version .Values.version }}"
         args:
         - /bin/sh
@@ -40,6 +44,8 @@ spec:
           mountPath: /processed-config
       containers:
       - name: dex
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 10 }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         args:
@@ -57,6 +63,12 @@ spec:
         - name: processed-config
           mountPath: /etc/config
           readOnly: true
+        - name: tmp
+          mountPath: /tmp
+        livenessProbe:
+          {{- toYaml .Values.livenessProbe | nindent 10 }}
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -74,4 +86,6 @@ spec:
         configMap:
           name: {{ include "dex-server.fullname" . }}
       - name: processed-config
+        emptyDir:
+      - name: tmp
         emptyDir:
