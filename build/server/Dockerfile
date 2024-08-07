@@ -1,11 +1,12 @@
-FROM --platform=$BUILDPLATFORM golang:1.22 AS builder
+FROM --platform=$BUILDPLATFORM golang:1.22 as builder
 ARG TARGETARCH
 
 WORKDIR /workspace
 COPY . .
 
 ENV GOCACHE=/root/gocache
-RUN --mount=type=cache,target=${GOCACHE} \
+RUN \
+    --mount=type=cache,target=${GOCACHE} \
     --mount=type=cache,target=/go/pkg/mod \
     go mod download
 
@@ -14,8 +15,10 @@ RUN --mount=type=cache,target=${GOCACHE} \
     CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} GO111MODULE=on make build-server
 
 FROM --platform=$BUILDPLATFORM gcr.io/distroless/static:nonroot
+ARG TARGETARCH
 
 WORKDIR /run
+
 COPY --from=builder /workspace/bin/server .
 
 ENTRYPOINT ["./server"]

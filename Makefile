@@ -18,8 +18,8 @@ build-server:
 
 .PHONY: build-docker-server
 build-docker-server:
-	docker build --check --build-arg TARGETARCH=amd64 -t llm-operator/rbac-server:latest -f build/server/Dockerfile .
+	docker build --build-arg TARGETARCH=amd64 -t llm-operator/rbac-server:latest -f build/server/Dockerfile .
 
 .PHONY: build-docker-envsubst
 build-docker-envsubst:
-	docker build --check --build-arg TARGETARCH=amd64 -t llm-operator/envsubst:latest -f build/envsubst/Dockerfile .
+	docker build --build-arg TARGETARCH=amd64 -t llm-operator/envsubst:latest -f build/envsubst/Dockerfile .
