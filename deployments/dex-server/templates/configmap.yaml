@@ -56,3 +56,8 @@ data:
       hash: {{ .password }}
     {{- end }}
     {{- end }}
+
+    {{- with .Values.expiry }}
+    expiry:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
