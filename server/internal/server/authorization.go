@@ -8,6 +8,7 @@ import (
 	v1 "github.com/llm-operator/rbac-manager/api/v1"
 	"github.com/llm-operator/rbac-manager/server/internal/cache"
 	uv1 "github.com/llm-operator/user-manager/api/v1"
+	"github.com/llm-operator/user-manager/pkg/userid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -53,7 +54,8 @@ func (s *Server) Authorize(ctx context.Context, req *v1.AuthorizeRequest) (*v1.A
 		return &v1.AuthorizeResponse{Authorized: false}, nil
 	}
 
-	u, ok := s.cache.GetUserByID(is.Extra.Email)
+	userID := userid.Normalize(is.Extra.Email)
+	u, ok := s.cache.GetUserByID(userID)
 	if !ok {
 		return &v1.AuthorizeResponse{Authorized: false}, nil
 	}
@@ -72,7 +74,7 @@ func (s *Server) Authorize(ctx context.Context, req *v1.AuthorizeRequest) (*v1.A
 		}, nil
 	}
 
-	pr, err := s.findAssociatedProjectAndRoles(is.Extra.Email, req.OrganizationId, req.ProjectId)
+	pr, err := s.findAssociatedProjectAndRoles(userID, req.OrganizationId, req.ProjectId)
 	if err != nil {
 		// TODO(kenji): Return a more specific error?
 		return &v1.AuthorizeResponse{Authorized: false}, nil
