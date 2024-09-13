@@ -66,7 +66,7 @@ func (s *Server) Authorize(ctx context.Context, req *v1.AuthorizeRequest) (*v1.A
 		return &v1.AuthorizeResponse{
 			Authorized: true,
 			User: &v1.User{
-				Id: is.Extra.Email,
+				Id: userID,
 			},
 			Organization: &v1.Organization{},
 			Project:      &v1.Project{},
@@ -83,7 +83,7 @@ func (s *Server) Authorize(ctx context.Context, req *v1.AuthorizeRequest) (*v1.A
 	return &v1.AuthorizeResponse{
 		Authorized: s.authorized(toScope(req), pr.orgRole, pr.projectRole),
 		User: &v1.User{
-			Id: is.Extra.Email,
+			Id: userID,
 		},
 		Organization: &v1.Organization{
 			Id: pr.project.OrganizationID,
