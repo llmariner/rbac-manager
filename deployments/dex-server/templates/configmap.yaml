@@ -20,7 +20,7 @@ data:
           rootCert: {{ .Values.global.database.ssl.rootCert }}
 
         # The following configurations are used by database-creator
-	username: {{ .Values.global.database.username }}
+        username: {{ .Values.global.database.username }}
         passwordEnvName: DB_PASSWORD
         createDatabase: {{ .Values.global.database.createDatabase }}
         originalDatabase: {{ .Values.global.database.originalDatabase }}
