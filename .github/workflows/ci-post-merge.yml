@@ -68,7 +68,7 @@ jobs:
     - name: Build, tag, and push database-creator to Amazon ECR
       uses: docker/build-push-action@v5
       with:
-        file: ./build/envsubst/Dockerfile
+        file: ./build/database-creator/Dockerfile
         push: true
         platforms: linux/amd64,linux/arm64
         tags: |
