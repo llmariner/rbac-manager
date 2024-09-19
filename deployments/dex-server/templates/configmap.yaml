@@ -15,8 +15,12 @@ data:
         database: {{ .Values.database.database }}
         user: {{ .Values.global.database.username }}
         password: $PASSWORD_ENV_VAR
+        passwordEnvName: DB_PASSWORD
         ssl:
           mode: {{ .Values.global.database.ssl.mode }}
+          rootCert: {{ .Values.global.database.ssl.rootCert }}
+        createDatabase: {{ .Values.global.database.createDatabase }}
+        originalDatabase: {{ .Values.global.database.originalDatabase }}
 
     web:
       http: 0.0.0.0:{{ .Values.httpPort }}
