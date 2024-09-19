@@ -5,6 +5,8 @@ global:
     username:
     ssl:
       mode:
+    createDatabase:
+    originalDatabase:
 
   ingress:
     ingressClassName:
@@ -63,6 +65,11 @@ podAnnotations:
 nodeSelector:
 affinity:
 tolerations:
+
+databaseCreator:
+  image:
+    repository: public.ecr.aws/cloudnatix/llm-operator/database-creator
+    pullPolicy: IfNotPresent
 
 envsubst:
   image:

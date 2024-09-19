@@ -22,6 +22,24 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       initContainers:
+      - name: database-creator
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 12 }}
+        image: "{{ .Values.databaseCreator.image.repository }}:{{ default .Chart.Version .Values.version }}"
+        args:
+        - run
+        - --config
+        - /etc/config/config.yaml
+        env:
+        - name: PASSWORD_ENV_VAR
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.global.databaseSecret.name }}
+              key: {{ .Values.global.databaseSecret.key }}
+        volumeMounts:
+        - name: original-config
+          mountPath: /config
+          readOnly: true
       - name: envsubst
         securityContext:
           {{- toYaml .Values.securityContext | nindent 12 }}

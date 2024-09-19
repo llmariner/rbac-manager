@@ -65,6 +65,15 @@ jobs:
         tags: |
           public.ecr.aws/v8n3t7y5/llm-operator/envsubst:${{ needs.update-tag.outputs.new_version }}
           public.ecr.aws/v8n3t7y5/llm-operator/envsubst:latest
+    - name: Build, tag, and push database-creator to Amazon ECR
+      uses: docker/build-push-action@v5
+      with:
+        file: ./build/envsubst/Dockerfile
+        push: true
+        platforms: linux/amd64,linux/arm64
+        tags: |
+          public.ecr.aws/v8n3t7y5/llm-operator/database-creator:${{ needs.update-tag.outputs.new_version }}
+          public.ecr.aws/v8n3t7y5/llm-operator/database-creator:latest
     - name: Build, tag, and push server to Amazon ECR
       uses: docker/build-push-action@v5
       with:
