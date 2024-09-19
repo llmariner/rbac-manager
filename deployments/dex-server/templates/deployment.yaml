@@ -31,14 +31,14 @@ spec:
         - --config
         - /etc/config/config.yaml
         env:
-        - name: PASSWORD_ENV_VAR
+        - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:
               name: {{ .Values.global.databaseSecret.name }}
               key: {{ .Values.global.databaseSecret.key }}
         volumeMounts:
         - name: original-config
-          mountPath: /config
+          mountPath: /etc/config
           readOnly: true
       - name: envsubst
         securityContext:
