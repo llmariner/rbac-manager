@@ -77,7 +77,7 @@ func run(ctx context.Context, c *config.Config) error {
 	// TODO(kenji): Consider revisit this.
 
 	go func() {
-		srv := server.New(c.IssuerURL, cstore, c.RoleScopesMap)
+		srv := server.New(c.DexServerAddr, cstore, c.RoleScopesMap)
 		errCh <- srv.Run(ctx, c.InternalGRPCPort)
 	}()
 

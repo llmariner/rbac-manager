@@ -7,7 +7,7 @@ metadata:
 data:
   config.yaml: |
     internalGrpcPort: {{ .Values.internalGrpcPort }}
-    issuerUrl: {{ .Values.global.auth.oidcIssuerUrl }}
+    dexServerAddr: {{ .Values.global.auth.dexServerAddr }}
     cache:
       syncInterval: {{ .Values.cache.syncInterval }}
       userManagerServerInternalAddr: {{ .Values.cache.userManagerServerInternalAddr }}

@@ -34,9 +34,9 @@ type tokenIntrospector interface {
 }
 
 // New returns a new Server.
-func New(issuerURL string, cache cacheGetter, roleScopes map[string][]string) *Server {
+func New(dexServerAddr string, cache cacheGetter, roleScopes map[string][]string) *Server {
 	return &Server{
-		tokenIntrospector: dex.NewDefaultClient(issuerURL),
+		tokenIntrospector: dex.NewDefaultClient(dexServerAddr),
 
 		cache: cache,
 

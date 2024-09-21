@@ -1,8 +1,8 @@
+internalGrpcPort: 8082
+
 global:
   auth:
-    oidcIssuerUrl:
-
-internalGrpcPort: 8082
+    dexServerAddr:
 
 cache:
   syncInterval: 10s
@@ -33,7 +33,7 @@ roleScopesMap:
   - api.workspaces.notebooks.read
   - api.workspaces.notebooks.write
   - api.batch.jobs.read
-  - api.batch.jobs.write 
+  - api.batch.jobs.write
   - api.files.read
   - api.files.write
   - api.vector-stores.read
@@ -46,7 +46,7 @@ roleScopesMap:
   - api.workspaces.notebooks.read
   - api.workspaces.notebooks.write
   - api.batch.jobs.read
-  - api.batch.jobs.write 
+  - api.batch.jobs.write
   - api.files.read
   - api.files.write
   - api.vector-stores.read
@@ -84,7 +84,7 @@ livenessProbe:
 podSecurityContext:
   fsGroup: 2000
 securityContext:
-  readOnlyRootFilesystem: true  
+  readOnlyRootFilesystem: true
   capabilities:
     drop:
     - ALL

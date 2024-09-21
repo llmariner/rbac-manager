@@ -27,18 +27,18 @@ type IntrospectionExtra struct {
 }
 
 // NewDefaultClient returns a new default client.
-func NewDefaultClient(issuerURL string) Client {
-	return &defaultClient{issuerURL: issuerURL}
+func NewDefaultClient(dexServerAddr string) Client {
+	return &defaultClient{dexServerAddr: dexServerAddr}
 }
 
 type defaultClient struct {
-	issuerURL string
+	dexServerAddr string
 }
 
 // TokenIntrospect introspects the given token.
 func (c *defaultClient) TokenIntrospect(token string) (*Introspection, error) {
 	resp, err := http.PostForm(
-		fmt.Sprintf("%s/token/introspect", c.issuerURL),
+		fmt.Sprintf("http://%s/token/introspect", c.dexServerAddr),
 		url.Values{"token": {token}})
 	if err != nil {
 		return nil, err
