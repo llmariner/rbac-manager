@@ -38,7 +38,7 @@ type defaultClient struct {
 // TokenIntrospect introspects the given token.
 func (c *defaultClient) TokenIntrospect(token string) (*Introspection, error) {
 	resp, err := http.PostForm(
-		fmt.Sprintf("http://%s/token/introspect", c.dexServerAddr),
+		fmt.Sprintf("http://%s/v1/dex/token/introspect", c.dexServerAddr),
 		url.Values{"token": {token}})
 	if err != nil {
 		return nil, err
