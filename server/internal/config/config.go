@@ -12,7 +12,7 @@ import (
 type Config struct {
 	InternalGRPCPort int `yaml:"internalGrpcPort"`
 
-	IssuerURL string `yaml:"issuerUrl"`
+	DexServerAddr string `yaml:"dexServerAddr"`
 
 	CacheConfig CacheConfig `yaml:"cache"`
 
@@ -27,8 +27,8 @@ func (c *Config) Validate() error {
 	if c.InternalGRPCPort <= 0 {
 		return fmt.Errorf("internalGrpcPort must be greater than 0")
 	}
-	if c.IssuerURL == "" {
-		return fmt.Errorf("issuerUrl must be set")
+	if c.DexServerAddr == "" {
+		return fmt.Errorf("dexServerAddr must be set")
 	}
 	if err := c.CacheConfig.validate(); err != nil {
 		return fmt.Errorf("cache: %s", err)
