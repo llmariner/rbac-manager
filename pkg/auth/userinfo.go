@@ -3,7 +3,7 @@ package auth
 import (
 	"context"
 
-	v1 "github.com/llm-operator/rbac-manager/api/v1"
+	v1 "github.com/llmariner/rbac-manager/api/v1"
 )
 
 type userInfoKey struct{}

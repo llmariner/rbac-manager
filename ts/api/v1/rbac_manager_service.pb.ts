@@ -55,9 +55,9 @@ export type Cluster = {
 
 export class RbacInternalService {
   static Authorize(req: AuthorizeRequest, initReq?: fm.InitReq): Promise<AuthorizeResponse> {
-    return fm.fetchReq<AuthorizeRequest, AuthorizeResponse>(`/llmoperator.rbac.server.v1.RbacInternalService/Authorize`, {...initReq, method: "POST", body: JSON.stringify(req)})
+    return fm.fetchReq<AuthorizeRequest, AuthorizeResponse>(`/llmariner.rbac.server.v1.RbacInternalService/Authorize`, {...initReq, method: "POST", body: JSON.stringify(req)})
   }
   static AuthorizeWorker(req: AuthorizeWorkerRequest, initReq?: fm.InitReq): Promise<AuthorizeWorkerResponse> {
-    return fm.fetchReq<AuthorizeWorkerRequest, AuthorizeWorkerResponse>(`/llmoperator.rbac.server.v1.RbacInternalService/AuthorizeWorker`, {...initReq, method: "POST", body: JSON.stringify(req)})
+    return fm.fetchReq<AuthorizeWorkerRequest, AuthorizeWorkerResponse>(`/llmariner.rbac.server.v1.RbacInternalService/AuthorizeWorker`, {...initReq, method: "POST", body: JSON.stringify(req)})
   }
 }

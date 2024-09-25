@@ -1,4 +1,4 @@
-module github.com/llm-operator/rbac-manager/hack/cmd
+module github.com/llmariner/rbac-manager/hack/cmd
 
 go 1.22.2
 

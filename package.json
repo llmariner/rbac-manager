@@ -1,5 +1,5 @@
 {
-  "name": "@llm-operator-types/rbac-manager",
+  "name": "@llmariner-types/rbac-manager",
   "version": "1.0.0",
   "description": "rbac-manager",
   "main": "dist/index.js",
@@ -17,12 +17,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/llm-operator/rbac-manager.git"
+    "url": "git+https://github.com/llmariner/rbac-manager.git"
   },
-  "author": "llm-operator",
+  "author": "llmariner",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/llm-operator/rbac-manager/issues"
+    "url": "https://github.com/llmariner/rbac-manager/issues"
   },
-  "homepage": "https://github.com/llm-operator/rbac-manager#readme"
+  "homepage": "https://github.com/llmariner/rbac-manager#readme"
 }
