@@ -5,10 +5,10 @@ import (
 	"log"
 
 	cv1 "github.com/llm-operator/cluster-manager/api/v1"
-	"github.com/llm-operator/rbac-manager/server/internal/cache"
-	"github.com/llm-operator/rbac-manager/server/internal/config"
-	"github.com/llm-operator/rbac-manager/server/internal/server"
 	uv1 "github.com/llm-operator/user-manager/api/v1"
+	"github.com/llmariner/rbac-manager/server/internal/cache"
+	"github.com/llmariner/rbac-manager/server/internal/config"
+	"github.com/llmariner/rbac-manager/server/internal/server"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"

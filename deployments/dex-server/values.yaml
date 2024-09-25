@@ -52,12 +52,12 @@ tolerations:
 
 databaseCreator:
   image:
-    repository: public.ecr.aws/cloudnatix/llm-operator/database-creator
+    repository: public.ecr.aws/cloudnatix/llmariner/database-creator
     pullPolicy: IfNotPresent
 
 envsubst:
   image:
-    repository: public.ecr.aws/cloudnatix/llm-operator/envsubst
+    repository: public.ecr.aws/cloudnatix/llmariner/envsubst
     pullPolicy: IfNotPresent
 
 replicaCount: 1

@@ -49,7 +49,7 @@ jobs:
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
-        role-to-assume: arn:aws:iam::803339316953:role/github-actions-ecr-push-llm-operators
+        role-to-assume: arn:aws:iam::803339316953:role/github-actions-ecr-push-llmariners
         aws-region: us-east-1
     - name: Login to Amazon ECR
       id: login-ecr
@@ -63,8 +63,8 @@ jobs:
         push: true
         platforms: linux/amd64,linux/arm64
         tags: |
-          public.ecr.aws/v8n3t7y5/llm-operator/envsubst:${{ needs.update-tag.outputs.new_version }}
-          public.ecr.aws/v8n3t7y5/llm-operator/envsubst:latest
+          public.ecr.aws/v8n3t7y5/llmariner/envsubst:${{ needs.update-tag.outputs.new_version }}
+          public.ecr.aws/v8n3t7y5/llmariner/envsubst:latest
     - name: Build, tag, and push database-creator to Amazon ECR
       uses: docker/build-push-action@v5
       with:
@@ -72,8 +72,8 @@ jobs:
         push: true
         platforms: linux/amd64,linux/arm64
         tags: |
-          public.ecr.aws/v8n3t7y5/llm-operator/database-creator:${{ needs.update-tag.outputs.new_version }}
-          public.ecr.aws/v8n3t7y5/llm-operator/database-creator:latest
+          public.ecr.aws/v8n3t7y5/llmariner/database-creator:${{ needs.update-tag.outputs.new_version }}
+          public.ecr.aws/v8n3t7y5/llmariner/database-creator:latest
     - name: Build, tag, and push server to Amazon ECR
       uses: docker/build-push-action@v5
       with:
@@ -81,8 +81,8 @@ jobs:
         push: true
         platforms: linux/amd64,linux/arm64
         tags: |
-          public.ecr.aws/v8n3t7y5/llm-operator/rbac-server:${{ needs.update-tag.outputs.new_version }}
-          public.ecr.aws/v8n3t7y5/llm-operator/rbac-server:latest
+          public.ecr.aws/v8n3t7y5/llmariner/rbac-server:${{ needs.update-tag.outputs.new_version }}
+          public.ecr.aws/v8n3t7y5/llmariner/rbac-server:latest
 
   publish-helm-chart:
     runs-on: ubuntu-latest
@@ -94,7 +94,7 @@ jobs:
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
-        role-to-assume: arn:aws:iam::803339316953:role/github-actions-ecr-push-llm-operators
+        role-to-assume: arn:aws:iam::803339316953:role/github-actions-ecr-push-llmariners
         aws-region: us-east-1
     - name: Login to Amazon ECR
       id: login-ecr
@@ -106,8 +106,8 @@ jobs:
     - name: build and push dex-server helm chart
       run: |
         helm package --version ${{ needs.update-tag.outputs.new_version }} ./deployments/dex-server
-        helm push dex-server-${{ needs.update-tag.outputs.new_version }}.tgz oci://public.ecr.aws/v8n3t7y5/llm-operator-charts
+        helm push dex-server-${{ needs.update-tag.outputs.new_version }}.tgz oci://public.ecr.aws/v8n3t7y5/llmariner-charts
     - name: build and push rbac-server helm chart
       run: |
         helm package --version ${{ needs.update-tag.outputs.new_version }} ./deployments/rbac-server
-        helm push rbac-server-${{ needs.update-tag.outputs.new_version }}.tgz oci://public.ecr.aws/v8n3t7y5/llm-operator-charts
+        helm push rbac-server-${{ needs.update-tag.outputs.new_version }}.tgz oci://public.ecr.aws/v8n3t7y5/llmariner-charts

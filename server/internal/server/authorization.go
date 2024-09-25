@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"strings"
 
-	v1 "github.com/llm-operator/rbac-manager/api/v1"
-	"github.com/llm-operator/rbac-manager/server/internal/cache"
 	uv1 "github.com/llm-operator/user-manager/api/v1"
 	"github.com/llm-operator/user-manager/pkg/userid"
+	v1 "github.com/llmariner/rbac-manager/api/v1"
+	"github.com/llmariner/rbac-manager/server/internal/cache"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

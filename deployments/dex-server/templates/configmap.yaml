@@ -46,7 +46,7 @@ data:
     {{- end }}
 
     staticClients:
-    - id: llm-operator
+    - id: llmariner
       name: LLM Operator
       secret: ZXhhbXBsZS1hcHAtc2VjcmV0
       redirectURIs:

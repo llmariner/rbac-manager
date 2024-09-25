@@ -4,10 +4,10 @@ import (
 	"context"
 	"testing"
 
-	v1 "github.com/llm-operator/rbac-manager/api/v1"
-	"github.com/llm-operator/rbac-manager/server/internal/cache"
-	"github.com/llm-operator/rbac-manager/server/internal/dex"
 	uv1 "github.com/llm-operator/user-manager/api/v1"
+	v1 "github.com/llmariner/rbac-manager/api/v1"
+	"github.com/llmariner/rbac-manager/server/internal/cache"
+	"github.com/llmariner/rbac-manager/server/internal/dex"
 	"github.com/stretchr/testify/assert"
 )
 

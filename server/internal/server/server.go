@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"net"
 
-	v1 "github.com/llm-operator/rbac-manager/api/v1"
-	"github.com/llm-operator/rbac-manager/server/internal/cache"
-	"github.com/llm-operator/rbac-manager/server/internal/dex"
+	v1 "github.com/llmariner/rbac-manager/api/v1"
+	"github.com/llmariner/rbac-manager/server/internal/cache"
+	"github.com/llmariner/rbac-manager/server/internal/dex"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"

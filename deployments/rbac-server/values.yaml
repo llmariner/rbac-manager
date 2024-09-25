@@ -58,7 +58,7 @@ debug:
 replicaCount: 1
 
 image:
-  repository: public.ecr.aws/cloudnatix/llm-operator/rbac-server
+  repository: public.ecr.aws/cloudnatix/llmariner/rbac-server
   pullPolicy: IfNotPresent
 
 podAnnotations:

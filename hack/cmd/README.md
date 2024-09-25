@@ -9,7 +9,7 @@ helm install dex -n auth deployments/dex-server --create-namespace
 ```
 
 > [!NOTE]
-> see [llm-operator](https://github.com/llm-operator/llm-operator/tree/main/hack) for the kong installation.
+> see [llmariner](https://github.com/llmariner/llmariner/tree/main/hack) for the kong installation.
 
 ## Get id token
 

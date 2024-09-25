@@ -8,8 +8,8 @@ import (
 	"time"
 
 	cv1 "github.com/llm-operator/cluster-manager/api/v1"
-	"github.com/llm-operator/rbac-manager/server/internal/config"
 	uv1 "github.com/llm-operator/user-manager/api/v1"
+	"github.com/llmariner/rbac-manager/server/internal/config"
 	"google.golang.org/grpc"
 )
 

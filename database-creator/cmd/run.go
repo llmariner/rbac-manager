@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 
-	"github.com/llm-operator/common/pkg/db"
+	"github.com/llmariner/common/pkg/db"
 	"github.com/spf13/cobra"
 )
 

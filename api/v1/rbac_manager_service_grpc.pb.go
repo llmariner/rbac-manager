@@ -33,7 +33,7 @@ func NewRbacInternalServiceClient(cc grpc.ClientConnInterface) RbacInternalServi
 
 func (c *rbacInternalServiceClient) Authorize(ctx context.Context, in *AuthorizeRequest, opts ...grpc.CallOption) (*AuthorizeResponse, error) {
 	out := new(AuthorizeResponse)
-	err := c.cc.Invoke(ctx, "/llmoperator.rbac.server.v1.RbacInternalService/Authorize", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/llmariner.rbac.server.v1.RbacInternalService/Authorize", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +42,7 @@ func (c *rbacInternalServiceClient) Authorize(ctx context.Context, in *Authorize
 
 func (c *rbacInternalServiceClient) AuthorizeWorker(ctx context.Context, in *AuthorizeWorkerRequest, opts ...grpc.CallOption) (*AuthorizeWorkerResponse, error) {
 	out := new(AuthorizeWorkerResponse)
-	err := c.cc.Invoke(ctx, "/llmoperator.rbac.server.v1.RbacInternalService/AuthorizeWorker", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/llmariner.rbac.server.v1.RbacInternalService/AuthorizeWorker", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +92,7 @@ func _RbacInternalService_Authorize_Handler(srv interface{}, ctx context.Context
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/llmoperator.rbac.server.v1.RbacInternalService/Authorize",
+		FullMethod: "/llmariner.rbac.server.v1.RbacInternalService/Authorize",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(RbacInternalServiceServer).Authorize(ctx, req.(*AuthorizeRequest))
@@ -110,7 +110,7 @@ func _RbacInternalService_AuthorizeWorker_Handler(srv interface{}, ctx context.C
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/llmoperator.rbac.server.v1.RbacInternalService/AuthorizeWorker",
+		FullMethod: "/llmariner.rbac.server.v1.RbacInternalService/AuthorizeWorker",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(RbacInternalServiceServer).AuthorizeWorker(ctx, req.(*AuthorizeWorkerRequest))
@@ -122,7 +122,7 @@ func _RbacInternalService_AuthorizeWorker_Handler(srv interface{}, ctx context.C
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var RbacInternalService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "llmoperator.rbac.server.v1.RbacInternalService",
+	ServiceName: "llmariner.rbac.server.v1.RbacInternalService",
 	HandlerType: (*RbacInternalServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

@@ -1,12 +1,12 @@
-module github.com/llm-operator/rbac-manager
+module github.com/llmariner/rbac-manager
 
 go 1.22.2
 
 require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.0
 	github.com/llm-operator/cluster-manager v0.4.0
-	github.com/llm-operator/common v0.6.0
 	github.com/llm-operator/user-manager v0.79.0
+	github.com/llmariner/common v0.7.0
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.9.0
 	google.golang.org/grpc v1.63.2

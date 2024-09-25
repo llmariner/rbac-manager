@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"strings"
 
-	rbacv1 "github.com/llm-operator/rbac-manager/api/v1"
+	rbacv1 "github.com/llmariner/rbac-manager/api/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"

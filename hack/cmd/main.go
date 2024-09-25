@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	defaultClientID     = "llm-operator"
+	defaultClientID     = "llmariner"
 	defaultClientSecret = "ZXhhbXBsZS1hcHAtc2VjcmV0"
 	defaultRedirectURI  = "http://127.0.0.1:5555/callback"
 	defaultIssuerURL    = "http://kong-kong-proxy.kong/v1/dex"
