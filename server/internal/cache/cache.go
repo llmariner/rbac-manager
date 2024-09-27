@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	cv1 "github.com/llm-operator/cluster-manager/api/v1"
+	cv1 "github.com/llmariner/cluster-manager/api/v1"
 	uv1 "github.com/llmariner/user-manager/api/v1"
 	"github.com/llmariner/rbac-manager/server/internal/config"
 	"google.golang.org/grpc"

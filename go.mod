@@ -4,7 +4,7 @@ go 1.22.2
 
 require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.0
-	github.com/llm-operator/cluster-manager v0.4.0
+	github.com/llmariner/cluster-manager v0.23.0
 	github.com/llmariner/common v0.7.0
 	github.com/llmariner/user-manager v0.86.0
 	github.com/spf13/cobra v1.8.0
