@@ -5,7 +5,7 @@ import (
 	"log"
 
 	cv1 "github.com/llm-operator/cluster-manager/api/v1"
-	uv1 "github.com/llm-operator/user-manager/api/v1"
+	uv1 "github.com/llmariner/user-manager/api/v1"
 	"github.com/llmariner/rbac-manager/server/internal/cache"
 	"github.com/llmariner/rbac-manager/server/internal/config"
 	"github.com/llmariner/rbac-manager/server/internal/server"
