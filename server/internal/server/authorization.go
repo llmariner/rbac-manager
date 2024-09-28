@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"strings"
 
-	uv1 "github.com/llmariner/user-manager/api/v1"
-	"github.com/llmariner/user-manager/pkg/userid"
 	v1 "github.com/llmariner/rbac-manager/api/v1"
 	"github.com/llmariner/rbac-manager/server/internal/cache"
+	uv1 "github.com/llmariner/user-manager/api/v1"
+	"github.com/llmariner/user-manager/pkg/userid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -34,8 +34,11 @@ func (s *Server) Authorize(ctx context.Context, req *v1.AuthorizeRequest) (*v1.A
 		}
 
 		return &v1.AuthorizeResponse{
-			Authorized:   s.authorizedAPIKey(key, toScope(req)),
-			User:         &v1.User{Id: key.UserID},
+			Authorized: s.authorizedAPIKey(key, toScope(req)),
+			User: &v1.User{
+				Id:         key.UserID,
+				InternalId: key.InternalUserID,
+			},
 			Organization: &v1.Organization{Id: key.OrganizationID},
 			Project: &v1.Project{
 				Id:                     key.ProjectID,
@@ -66,7 +69,8 @@ func (s *Server) Authorize(ctx context.Context, req *v1.AuthorizeRequest) (*v1.A
 		return &v1.AuthorizeResponse{
 			Authorized: true,
 			User: &v1.User{
-				Id: userID,
+				Id:         userID,
+				InternalId: u.InternalID,
 			},
 			Organization: &v1.Organization{},
 			Project:      &v1.Project{},
@@ -83,7 +87,8 @@ func (s *Server) Authorize(ctx context.Context, req *v1.AuthorizeRequest) (*v1.A
 	return &v1.AuthorizeResponse{
 		Authorized: s.authorized(toScope(req), pr.orgRole, pr.projectRole),
 		User: &v1.User{
-			Id: userID,
+			Id:         userID,
+			InternalId: u.InternalID,
 		},
 		Organization: &v1.Organization{
 			Id: pr.project.OrganizationID,

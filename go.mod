@@ -6,7 +6,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.0
 	github.com/llmariner/cluster-manager v0.23.0
 	github.com/llmariner/common v0.7.0
-	github.com/llmariner/user-manager v0.86.0
+	github.com/llmariner/user-manager v0.89.0
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.9.0
 	google.golang.org/grpc v1.63.2

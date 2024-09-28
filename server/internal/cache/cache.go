@@ -8,8 +8,8 @@ import (
 	"time"
 
 	cv1 "github.com/llmariner/cluster-manager/api/v1"
-	uv1 "github.com/llmariner/user-manager/api/v1"
 	"github.com/llmariner/rbac-manager/server/internal/config"
+	uv1 "github.com/llmariner/user-manager/api/v1"
 	"google.golang.org/grpc"
 )
 
@@ -17,6 +17,7 @@ import (
 type K struct {
 	Role           string
 	UserID         string
+	InternalUserID string
 	OrganizationID string
 	ProjectID      string
 	TenantID       string
@@ -56,8 +57,9 @@ type PU struct {
 
 // U represents a user.
 type U struct {
-	ID       string
-	TenantID string
+	ID         string
+	InternalID string
+	TenantID   string
 }
 
 type userInfoLister interface {
@@ -245,6 +247,7 @@ func (c *Store) updateCache(ctx context.Context) error {
 			// TODO(kenji): Fill this properly.
 			Role:           c.apiKeyRole,
 			UserID:         apiKey.ApiKey.User.Id,
+			InternalUserID: apiKey.ApiKey.User.InternalId,
 			OrganizationID: apiKey.ApiKey.Organization.Id,
 			ProjectID:      apiKey.ApiKey.Project.Id,
 			TenantID:       apiKey.TenantId,
@@ -337,8 +340,9 @@ func (c *Store) updateCache(ctx context.Context) error {
 		}
 
 		usersByID[user.UserId] = &U{
-			ID:       user.UserId,
-			TenantID: o.TenantID,
+			ID:         user.UserId,
+			InternalID: user.InternalUserId,
+			TenantID:   o.TenantID,
 		}
 	}
 
