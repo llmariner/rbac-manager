@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	cv1 "github.com/llmariner/cluster-manager/api/v1"
-	uv1 "github.com/llmariner/user-manager/api/v1"
 	"github.com/llmariner/rbac-manager/server/internal/config"
+	uv1 "github.com/llmariner/user-manager/api/v1"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 )
@@ -19,7 +19,7 @@ func TestCache(t *testing.T) {
 					ApiKey: &uv1.APIKey{
 						Id:           "id0",
 						Secret:       "s0",
-						User:         &uv1.User{Id: "u0"},
+						User:         &uv1.User{Id: "u0", InternalId: "iu0"},
 						Organization: &uv1.Organization{Id: "o0"},
 						Project:      &uv1.Project{Id: "p0"},
 					},
@@ -29,7 +29,7 @@ func TestCache(t *testing.T) {
 					ApiKey: &uv1.APIKey{
 						Id:           "id1",
 						Secret:       "s1",
-						User:         &uv1.User{Id: "u1"},
+						User:         &uv1.User{Id: "u0", InternalId: "iu1"},
 						Organization: &uv1.Organization{Id: "o1"},
 						Project:      &uv1.Project{Id: "p1"},
 					},
@@ -57,11 +57,13 @@ func TestCache(t *testing.T) {
 			Users: []*uv1.OrganizationUser{
 				{
 					UserId:         "u0",
+					InternalUserId: "iu0",
 					OrganizationId: "o0",
 					Role:           uv1.OrganizationRole_ORGANIZATION_ROLE_OWNER,
 				},
 				{
 					UserId:         "u0",
+					InternalUserId: "iu0",
 					OrganizationId: "o1",
 					Role:           uv1.OrganizationRole_ORGANIZATION_ROLE_READER,
 				},
@@ -129,11 +131,13 @@ func TestCache(t *testing.T) {
 		"s0": {
 			Role:           "role",
 			UserID:         "u0",
+			InternalUserID: "iu0",
 			OrganizationID: "o0",
 		},
 		"s1": {
 			Role:           "role",
 			UserID:         "u1",
+			InternalUserID: "iu1",
 			OrganizationID: "o1",
 		},
 		"s2": nil,
@@ -268,8 +272,9 @@ func TestCache(t *testing.T) {
 
 	wantUsers := map[string]*U{
 		"u0": {
-			ID:       "u0",
-			TenantID: "tid0",
+			ID:         "u0",
+			InternalID: "iu0",
+			TenantID:   "tid0",
 		},
 	}
 	for id, want := range wantUsers {

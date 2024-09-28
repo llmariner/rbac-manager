@@ -17,6 +17,7 @@ type AssignedKubernetesEnv struct {
 // UserInfo manages the user info.
 type UserInfo struct {
 	UserID                 string
+	InternalUserID         string
 	OrganizationID         string
 	ProjectID              string
 	AssignedKubernetesEnvs []AssignedKubernetesEnv
@@ -44,6 +45,7 @@ func newUserInfoFromAuthorizeResponse(resp *v1.AuthorizeResponse) UserInfo {
 	}
 	return UserInfo{
 		UserID:                 resp.User.Id,
+		InternalUserID:         resp.User.InternalId,
 		OrganizationID:         resp.Organization.Id,
 		ProjectID:              resp.Project.Id,
 		AssignedKubernetesEnvs: envs,

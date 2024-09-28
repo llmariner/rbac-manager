@@ -124,6 +124,9 @@
       "properties": {
         "id": {
           "type": "string"
+        },
+        "internalId": {
+          "type": "string"
         }
       }
     }

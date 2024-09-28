@@ -34,6 +34,7 @@ message AuthorizeWorkerResponse {
 
 message User {
   string id = 1;
+  string internal_id = 2;
 }
 
 message Organization {

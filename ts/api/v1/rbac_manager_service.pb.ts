@@ -33,6 +33,7 @@ export type AuthorizeWorkerResponse = {
 
 export type User = {
   id?: string
+  internalId?: string
 }
 
 export type Organization = {

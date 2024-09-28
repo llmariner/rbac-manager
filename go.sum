@@ -28,8 +28,8 @@ github.com/llmariner/cluster-manager v0.23.0 h1:yQZpa4XoKI5gwxrS+415bJR/sl++WDdD
 github.com/llmariner/cluster-manager v0.23.0/go.mod h1:4gi4f8QPXp1tu1mjlTBd54dBpaElCAQDrngE8m6tr+w=
 github.com/llmariner/common v0.7.0 h1:uLX4axt65+4Xl+3/4OXwknnH1KuYQu3uVGiShADok9U=
 github.com/llmariner/common v0.7.0/go.mod h1:nRnAyKb2tbz4mx82JH+AiUwIlFqLoGzVyv07QRr+41g=
-github.com/llmariner/user-manager v0.86.0 h1:2dwpywUEFEoAEB5lZVbJi3VtjHViMJhgp0DCJQPFCjI=
-github.com/llmariner/user-manager v0.86.0/go.mod h1:/UXF6dw0z7bZ7ZvUWKNw2XgC8BFY1B1DwRW3CKfeNcI=
+github.com/llmariner/user-manager v0.89.0 h1:TLos31X4WSLmB7r1z/AutPyuYnWktZV6RJKOhSI1D9g=
+github.com/llmariner/user-manager v0.89.0/go.mod h1:/UXF6dw0z7bZ7ZvUWKNw2XgC8BFY1B1DwRW3CKfeNcI=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/rogpeppe/go-internal v1.12.0 h1:exVL4IDcn6na9z1rAb56Vxr+CgyK3nn3O+epU5NdKM8=
