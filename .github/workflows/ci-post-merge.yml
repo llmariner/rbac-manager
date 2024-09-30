@@ -63,8 +63,8 @@ jobs:
         push: true
         platforms: linux/amd64,linux/arm64
         tags: |
-          public.ecr.aws/v8n3t7y5/llmariner/envsubst:${{ needs.update-tag.outputs.new_version }}
-          public.ecr.aws/v8n3t7y5/llmariner/envsubst:latest
+          public.ecr.aws/cloudnatix/llmariner/envsubst:${{ needs.update-tag.outputs.new_version }}
+          public.ecr.aws/cloudnatix/llmariner/envsubst:latest
     - name: Build, tag, and push database-creator to Amazon ECR
       uses: docker/build-push-action@v5
       with:
@@ -72,8 +72,8 @@ jobs:
         push: true
         platforms: linux/amd64,linux/arm64
         tags: |
-          public.ecr.aws/v8n3t7y5/llmariner/database-creator:${{ needs.update-tag.outputs.new_version }}
-          public.ecr.aws/v8n3t7y5/llmariner/database-creator:latest
+          public.ecr.aws/cloudnatix/llmariner/database-creator:${{ needs.update-tag.outputs.new_version }}
+          public.ecr.aws/cloudnatix/llmariner/database-creator:latest
     - name: Build, tag, and push server to Amazon ECR
       uses: docker/build-push-action@v5
       with:
@@ -81,8 +81,8 @@ jobs:
         push: true
         platforms: linux/amd64,linux/arm64
         tags: |
-          public.ecr.aws/v8n3t7y5/llmariner/rbac-server:${{ needs.update-tag.outputs.new_version }}
-          public.ecr.aws/v8n3t7y5/llmariner/rbac-server:latest
+          public.ecr.aws/cloudnatix/llmariner/rbac-server:${{ needs.update-tag.outputs.new_version }}
+          public.ecr.aws/cloudnatix/llmariner/rbac-server:latest
 
   publish-helm-chart:
     runs-on: ubuntu-latest
@@ -106,8 +106,8 @@ jobs:
     - name: build and push dex-server helm chart
       run: |
         helm package --version ${{ needs.update-tag.outputs.new_version }} ./deployments/dex-server
-        helm push dex-server-${{ needs.update-tag.outputs.new_version }}.tgz oci://public.ecr.aws/v8n3t7y5/llmariner-charts
+        helm push dex-server-${{ needs.update-tag.outputs.new_version }}.tgz oci://public.ecr.aws/cloudnatix/llmariner-charts
     - name: build and push rbac-server helm chart
       run: |
         helm package --version ${{ needs.update-tag.outputs.new_version }} ./deployments/rbac-server
-        helm push rbac-server-${{ needs.update-tag.outputs.new_version }}.tgz oci://public.ecr.aws/v8n3t7y5/llmariner-charts
+        helm push rbac-server-${{ needs.update-tag.outputs.new_version }}.tgz oci://public.ecr.aws/cloudnatix/llmariner-charts
