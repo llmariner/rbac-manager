@@ -62,11 +62,7 @@ func run(ctx context.Context, c *config.Config) error {
 	}
 	cClient := cv1.NewClustersInternalServiceClient(conn)
 
-	cstore := cache.NewStore(
-		uClient,
-		cClient,
-		&c.Debug,
-	)
+	cstore := cache.NewStore(uClient, cClient)
 	errCh := make(chan error)
 	go func() {
 		errCh <- cstore.Sync(ctx, c.CacheConfig.SyncInterval)

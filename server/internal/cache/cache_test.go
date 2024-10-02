@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	cv1 "github.com/llmariner/cluster-manager/api/v1"
-	"github.com/llmariner/rbac-manager/server/internal/config"
 	uv1 "github.com/llmariner/user-manager/api/v1"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
@@ -22,6 +21,9 @@ func TestCache(t *testing.T) {
 						User:         &uv1.User{Id: "u0", InternalId: "iu0"},
 						Organization: &uv1.Organization{Id: "o0"},
 						Project:      &uv1.Project{Id: "p0"},
+
+						OrganizationRole: uv1.OrganizationRole_ORGANIZATION_ROLE_OWNER,
+						ProjectRole:      uv1.ProjectRole_PROJECT_ROLE_OWNER,
 					},
 					TenantId: "tid0",
 				},
@@ -32,6 +34,9 @@ func TestCache(t *testing.T) {
 						User:         &uv1.User{Id: "u0", InternalId: "iu1"},
 						Organization: &uv1.Organization{Id: "o1"},
 						Project:      &uv1.Project{Id: "p1"},
+
+						OrganizationRole: uv1.OrganizationRole_ORGANIZATION_ROLE_READER,
+						ProjectRole:      uv1.ProjectRole_PROJECT_ROLE_MEMBER,
 					},
 					TenantId: "tid1",
 				},
@@ -120,25 +125,27 @@ func TestCache(t *testing.T) {
 		},
 	}
 
-	c := NewStore(ul, cl, &config.DebugConfig{
-		APIKeyRole: "role",
-	})
-
+	c := NewStore(ul, cl)
 	err := c.updateCache(context.Background())
 	assert.NoError(t, err)
 
 	wantKeys := map[string]*K{
 		"s0": {
-			Role:           "role",
 			UserID:         "u0",
 			InternalUserID: "iu0",
 			OrganizationID: "o0",
+
+			OrganizationRole: uv1.OrganizationRole_ORGANIZATION_ROLE_OWNER,
+			ProjectRole:      uv1.ProjectRole_PROJECT_ROLE_OWNER,
 		},
 		"s1": {
-			Role:           "role",
+
 			UserID:         "u1",
 			InternalUserID: "iu1",
 			OrganizationID: "o1",
+
+			OrganizationRole: uv1.OrganizationRole_ORGANIZATION_ROLE_READER,
+			ProjectRole:      uv1.ProjectRole_PROJECT_ROLE_MEMBER,
 		},
 		"s2": nil,
 	}
@@ -151,7 +158,9 @@ func TestCache(t *testing.T) {
 		}
 
 		assert.True(t, ok)
-		assert.Equal(t, v.Role, got.Role)
+		assert.NotNil(t, got)
+		assert.Equal(t, v.OrganizationRole, got.OrganizationRole)
+		assert.Equal(t, v.ProjectRole, got.ProjectRole)
 	}
 
 	wantClusters := map[string]*C{

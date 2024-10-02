@@ -34,7 +34,7 @@ func (s *Server) Authorize(ctx context.Context, req *v1.AuthorizeRequest) (*v1.A
 		}
 
 		return &v1.AuthorizeResponse{
-			Authorized: s.authorizedAPIKey(key, toScope(req)),
+			Authorized: s.authorized(toScope(req), key.OrganizationRole, key.ProjectRole),
 			User: &v1.User{
 				Id:         key.UserID,
 				InternalId: key.InternalUserID,
@@ -156,19 +156,6 @@ func (s *Server) authorized(
 	}
 
 	allowedScopes, ok := s.roleScopesMapper[role]
-	if !ok {
-		return false
-	}
-	for _, s := range allowedScopes {
-		if s == requestScope {
-			return true
-		}
-	}
-	return false
-}
-
-func (s *Server) authorizedAPIKey(apiKey *cache.K, requestScope string) bool {
-	allowedScopes, ok := s.roleScopesMapper[apiKey.Role]
 	if !ok {
 		return false
 	}

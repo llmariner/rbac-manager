@@ -18,8 +18,6 @@ type Config struct {
 
 	// RoleScopesMap maps a role name to a list of scopes.
 	RoleScopesMap map[string][]string `yaml:"roleScopesMap"`
-
-	Debug DebugConfig `yaml:"debug"`
 }
 
 // Validate validates the configuration.
@@ -34,12 +32,6 @@ func (c *Config) Validate() error {
 		return fmt.Errorf("cache: %s", err)
 	}
 	return nil
-}
-
-// DebugConfig specifies the debug configurations.
-type DebugConfig struct {
-	// APIKeyRole is the role name associated with the API key.
-	APIKeyRole string `yaml:"apiKeyRole"`
 }
 
 // CacheConfig is the API key cache configuration.

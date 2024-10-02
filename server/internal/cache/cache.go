@@ -8,19 +8,20 @@ import (
 	"time"
 
 	cv1 "github.com/llmariner/cluster-manager/api/v1"
-	"github.com/llmariner/rbac-manager/server/internal/config"
 	uv1 "github.com/llmariner/user-manager/api/v1"
 	"google.golang.org/grpc"
 )
 
 // K represents an API key.
 type K struct {
-	Role           string
 	UserID         string
 	InternalUserID string
 	OrganizationID string
 	ProjectID      string
 	TenantID       string
+
+	OrganizationRole uv1.OrganizationRole
+	ProjectRole      uv1.ProjectRole
 }
 
 // C represents a cluster.
@@ -78,7 +79,6 @@ type clusterInfoLister interface {
 func NewStore(
 	userInfoLister userInfoLister,
 	clusterInfoLister clusterInfoLister,
-	debug *config.DebugConfig,
 ) *Store {
 	return &Store{
 		userInfoLister:    userInfoLister,
@@ -95,8 +95,6 @@ func NewStore(
 		projectsByID:             map[string]*P{},
 		projectsByOrganizationID: map[string][]P{},
 		projectsByUserID:         map[string][]PU{},
-
-		apiKeyRole: debug.APIKeyRole,
 	}
 }
 
@@ -245,12 +243,14 @@ func (c *Store) updateCache(ctx context.Context) error {
 	for _, apiKey := range resp.ApiKeys {
 		m[apiKey.ApiKey.Secret] = &K{
 			// TODO(kenji): Fill this properly.
-			Role:           c.apiKeyRole,
 			UserID:         apiKey.ApiKey.User.Id,
 			InternalUserID: apiKey.ApiKey.User.InternalId,
 			OrganizationID: apiKey.ApiKey.Organization.Id,
 			ProjectID:      apiKey.ApiKey.Project.Id,
 			TenantID:       apiKey.TenantId,
+
+			OrganizationRole: apiKey.ApiKey.OrganizationRole,
+			ProjectRole:      apiKey.ApiKey.ProjectRole,
 		}
 	}
 

@@ -52,9 +52,6 @@ roleScopesMap:
   - api.vector-stores.read
   - api.vector-stores.write
 
-debug:
-  apiKeyRole: projectMember
-
 replicaCount: 1
 
 image:
