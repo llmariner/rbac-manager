@@ -44,8 +44,9 @@ func TestAuthorize(t *testing.T) {
 			},
 			apikeys: map[string]*cache.K{
 				"keySecret": {
-					ProjectID: "my-project",
-					Role:      "projectOwner",
+					ProjectID:        "my-project",
+					OrganizationRole: uv1.OrganizationRole_ORGANIZATION_ROLE_OWNER,
+					ProjectRole:      uv1.ProjectRole_PROJECT_ROLE_OWNER,
 				},
 			},
 			projectsByID: map[string]*cache.P{
@@ -65,7 +66,8 @@ func TestAuthorize(t *testing.T) {
 			},
 			apikeys: map[string]*cache.K{
 				"keySecret": {
-					Role: "different-role",
+					OrganizationRole: uv1.OrganizationRole_ORGANIZATION_ROLE_UNSPECIFIED,
+					ProjectRole:      uv1.ProjectRole_PROJECT_ROLE_UNSPECIFIED,
 				},
 			},
 			projectsByID: map[string]*cache.P{

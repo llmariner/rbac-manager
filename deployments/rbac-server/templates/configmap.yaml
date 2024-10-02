@@ -14,5 +14,3 @@ data:
       clusterManagerServerInternalAddr: {{ .Values.cache.clusterManagerServerInternalAddr }}
     roleScopesMap:
       {{- toYaml .Values.roleScopesMap | nindent 6 }}
-    debug:
-      {{- toYaml .Values.debug | nindent 6 }}
