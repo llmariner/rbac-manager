@@ -5,10 +5,10 @@ import (
 	"log"
 
 	cv1 "github.com/llmariner/cluster-manager/api/v1"
-	uv1 "github.com/llmariner/user-manager/api/v1"
 	"github.com/llmariner/rbac-manager/server/internal/cache"
 	"github.com/llmariner/rbac-manager/server/internal/config"
 	"github.com/llmariner/rbac-manager/server/internal/server"
+	uv1 "github.com/llmariner/user-manager/api/v1"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -44,7 +44,7 @@ var runCmd = &cobra.Command{
 func run(ctx context.Context, c *config.Config) error {
 	log.Printf("Starting internal-grpc server on port %d", c.InternalGRPCPort)
 
-	conn, err := grpc.Dial(
+	conn, err := grpc.NewClient(
 		c.CacheConfig.UserManagerServerInternalAddr,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
@@ -53,7 +53,7 @@ func run(ctx context.Context, c *config.Config) error {
 	}
 	uClient := uv1.NewUsersInternalServiceClient(conn)
 
-	conn, err = grpc.Dial(
+	conn, err = grpc.NewClient(
 		c.CacheConfig.ClusterManagerServerInternalAddr,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
