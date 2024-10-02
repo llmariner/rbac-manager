@@ -73,8 +73,14 @@ type Interceptor struct {
 }
 
 // Unary returns a unary server interceptor.
-func (a *Interceptor) Unary() grpc.UnaryServerInterceptor {
+func (a *Interceptor) Unary(excludeMethods ...string) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp any, err error) {
+		for _, m := range excludeMethods {
+			if info.FullMethod == m {
+				return handler(ctx, req)
+			}
+		}
+
 		token, err := ExtractTokenFromContext(ctx)
 		if err != nil {
 			return nil, err

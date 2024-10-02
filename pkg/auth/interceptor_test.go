@@ -62,12 +62,13 @@ func TestNewInterceptor(t *testing.T) {
 }
 
 func TestUnary(t *testing.T) {
+	client := &fakeInternalServerClient{
+		t:              t,
+		wantResource:   "test.resource",
+		wantCapability: "read",
+	}
 	interceptor := &Interceptor{
-		client: &fakeInternalServerClient{
-			t:              t,
-			wantResource:   "test.resource",
-			wantCapability: "read",
-		},
+		client: client,
 		getAccessResourceForGRPCRequest: func(fullMethod string) string {
 			return "test.resource"
 		},
@@ -76,11 +77,16 @@ func TestUnary(t *testing.T) {
 	ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs("authorization", "Bearer token"))
 	info := &grpc.UnaryServerInfo{FullMethod: "/test.server/GetTest"}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) { return "ok", nil }
-	interceptorFunc := interceptor.Unary()
 
-	resp, err := interceptorFunc(ctx, nil, info, handler)
+	resp, err := interceptor.Unary("dummy", info.FullMethod)(ctx, nil, info, handler)
 	assert.NoError(t, err)
 	assert.Equal(t, "ok", resp)
+	assert.Equal(t, 0, client.counter)
+
+	resp, err = interceptor.Unary()(ctx, nil, info, handler)
+	assert.NoError(t, err)
+	assert.Equal(t, "ok", resp)
+	assert.Equal(t, 1, client.counter)
 }
 
 func TestInterceptHTTPRequest(t *testing.T) {
@@ -112,12 +118,15 @@ type fakeInternalServerClient struct {
 
 	wantResource   string
 	wantCapability string
+
+	counter int
 }
 
 func (f *fakeInternalServerClient) Authorize(ctx context.Context, in *v1.AuthorizeRequest, opts ...grpc.CallOption) (*v1.AuthorizeResponse, error) {
 	assert.Equal(f.t, f.wantResource, in.AccessResource)
 	assert.Equal(f.t, f.wantCapability, in.Capability)
 
+	f.counter++
 	return &v1.AuthorizeResponse{
 		Authorized:   true,
 		User:         &v1.User{Id: "u0"},
