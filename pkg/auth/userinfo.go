@@ -51,6 +51,7 @@ func newUserInfoFromAuthorizeResponse(resp *v1.AuthorizeResponse) UserInfo {
 		InternalUserID:         resp.User.InternalId,
 		OrganizationID:         resp.Organization.Id,
 		ProjectID:              resp.Project.Id,
+		APIKeyID:               resp.ApiKeyId,
 		AssignedKubernetesEnvs: envs,
 		TenantID:               resp.TenantId,
 	}
