@@ -14,6 +14,8 @@ import (
 
 // K represents an API key.
 type K struct {
+	KeyID string
+
 	UserID         string
 	InternalUserID string
 	OrganizationID string
@@ -242,7 +244,8 @@ func (c *Store) updateCache(ctx context.Context) error {
 	m := map[string]*K{}
 	for _, apiKey := range resp.ApiKeys {
 		m[apiKey.ApiKey.Secret] = &K{
-			// TODO(kenji): Fill this properly.
+			KeyID: apiKey.ApiKey.Id,
+
 			UserID:         apiKey.ApiKey.User.Id,
 			InternalUserID: apiKey.ApiKey.User.InternalId,
 			OrganizationID: apiKey.ApiKey.Organization.Id,

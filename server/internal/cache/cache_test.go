@@ -131,6 +131,7 @@ func TestCache(t *testing.T) {
 
 	wantKeys := map[string]*K{
 		"s0": {
+			KeyID:          "id0",
 			UserID:         "u0",
 			InternalUserID: "iu0",
 			OrganizationID: "o0",
@@ -139,7 +140,7 @@ func TestCache(t *testing.T) {
 			ProjectRole:      uv1.ProjectRole_PROJECT_ROLE_OWNER,
 		},
 		"s1": {
-
+			KeyID:          "id1",
 			UserID:         "u1",
 			InternalUserID: "iu1",
 			OrganizationID: "o1",
@@ -159,6 +160,7 @@ func TestCache(t *testing.T) {
 
 		assert.True(t, ok)
 		assert.NotNil(t, got)
+		assert.Equal(t, v.KeyID, got.KeyID)
 		assert.Equal(t, v.OrganizationRole, got.OrganizationRole)
 		assert.Equal(t, v.ProjectRole, got.ProjectRole)
 	}

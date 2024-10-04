@@ -22,6 +22,9 @@ type UserInfo struct {
 	ProjectID              string
 	AssignedKubernetesEnvs []AssignedKubernetesEnv
 	TenantID               string
+
+	// APIKeyID is the ID of the API key. It is set only when the user is authenticated with an API key.
+	APIKeyID string
 }
 
 // AppendUserInfoToContext appends the user info to the context.

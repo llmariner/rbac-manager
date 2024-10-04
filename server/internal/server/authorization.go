@@ -45,6 +45,7 @@ func (s *Server) Authorize(ctx context.Context, req *v1.AuthorizeRequest) (*v1.A
 				AssignedKubernetesEnvs: s.assignedKubernetesEnvs(project.KubernetesNamespace, key.TenantID),
 			},
 			TenantId: key.TenantID,
+			ApiKeyId: key.KeyID,
 		}, nil
 	}
 

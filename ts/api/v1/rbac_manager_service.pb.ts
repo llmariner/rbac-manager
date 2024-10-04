@@ -19,6 +19,7 @@ export type AuthorizeResponse = {
   organization?: Organization
   project?: Project
   tenantId?: string
+  apiKeyId?: string
 }
 
 export type AuthorizeWorkerRequest = {
