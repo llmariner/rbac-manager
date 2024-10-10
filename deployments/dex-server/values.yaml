@@ -8,6 +8,10 @@ global:
     createDatabase:
     originalDatabase:
 
+  databaseSecret:
+    name:
+    key:
+
   ingress:
     ingressClassName:
     controllerUrl:
