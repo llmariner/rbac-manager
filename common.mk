@@ -35,9 +35,10 @@ go-lint-all: go-fmt go-vet go-mod-tidy go-errcheck go-lint
 
 .PHONY: go-fmt
 go-fmt:
-        @output=$$(go fmt ./...); \
-        echo $$output; \
-        test -z "$${output}"
+go-fmt:
+	@output=$$(go fmt ./...); \
+	echo $$output; \
+	test -z "$${output}"
 
 .PHONY: go-vet
 go-vet:
