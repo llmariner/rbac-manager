@@ -28,6 +28,8 @@ database:
 
 connectors:
 
+additionalStaticClients:
+
 oauth2:
   passwordConnector:
     enable: true

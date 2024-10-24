@@ -62,6 +62,9 @@ data:
       secret: o15FQlUB8SeOOBiw3Pg5vD5p
       redirectURIs:
       - {{ .Values.global.ingress.controllerUrl }}/v1/sessions/callback
+    {{- with .Values.additionalStaticClients }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 
     enablePasswordDB: {{ .Values.enablePasswordDb }}
 
