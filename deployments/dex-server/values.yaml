@@ -93,7 +93,8 @@ internalGrpcPort: 8082
 # `enablePasswordDb` flag and setting 'local' to `.oauth2.passwordConnector`.
 # For more information, see [Connectors](https://dexidp.io/docs/connectors/)
 # and [Builtin Connector](https://dexidp.io/docs/connectors/local/).
-connectors: []
+# +docs:property
+# connectors: []
 
 # Specify whether to enable the password database. It's a "virtual"
 # connector that stores login credentials in Dex's store.
@@ -117,25 +118,18 @@ oauth2:
 # A static list of passwords for the password connector. Alternatively,
 # passwords my be added/updated through the gRPC API.
 # For more information, see [Scopes and Claims](https://dexidp.io/docs/configuration/custom-scopes-claims-clients/).
-# +docs:type=array
-staticPasswords:
-- # The user ID.
-  # +docs:default=""
-  # +docs:type=string
-  id: 08a8684b-db88-4b73-90a9-3cd1661f5466
-  # The user name.
-  # +docs:default=""
-  # +docs:type=string
-  name: admin
-  # The email address.
-  # +docs:default=""
-  # +docs:type=string
-  email: admin@example.com
-  # The hasshed password string.
-  # Example: $(echo password | htpasswd -BinC 10 admin | cut -d: -f2)
-  # +docs:default=""
-  # +docs:type=string
-  password: "$2a$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W"
+#
+# For Example:
+# staticPasswords:
+# - id: my-id
+#   name: my-name
+#   email: my-email@example.com
+#   # The hasshed password string.
+#   # Example: $(echo password | htpasswd -BinC 10 admin | cut -d: -f2)
+#   password: "$2a$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W"
+#
+# +docs:property
+# staticPasswords: []
 
 # Optional additional static clients registered in Dex by default.
 # Alternatively, clients may be added through the gRPC API.
