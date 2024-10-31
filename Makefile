@@ -7,7 +7,7 @@ include common.mk
 test: go-test-all
 
 .PHONY: lint
-lint: go-lint-all git-clean-check
+lint: go-lint-all helm-lint git-clean-check
 
 .PHONY: generate
 generate: buf-generate-all typescript-compile
@@ -31,3 +31,35 @@ build-docker-database-creator:
 .PHONY: build-docker-envsubst
 build-docker-envsubst:
 	docker build --build-arg TARGETARCH=amd64 -t llmariner/envsubst:latest -f build/envsubst/Dockerfile .
+
+.PHONY: check-helm-tool
+check-helm-tool:
+	@command -v helm-tool >/dev/null 2>&1 || $(MAKE) install-helm-tool
+
+.PHONY: install-helm-tool
+install-helm-tool:
+	go install github.com/cert-manager/helm-tool@latest
+
+.PHONY: generate-chart-schema
+generate-chart-schema: generate-chart-schema-dex generate-chart-schema-rbac
+
+.PHONY: generate-chart-schema
+generate-chart-schema-dex: check-helm-tool
+	@cd ./deployments/dex-server && helm-tool schema > values.schema.json
+
+.PHONY: generate-chart-schema
+generate-chart-schema-rbac: check-helm-tool
+	@cd ./deployments/rbac-server && helm-tool schema > values.schema.json
+
+.PHONY: helm-lint
+helm-lint: helm-lint-dex helm-lint-rbac
+
+.PHONY: helm-lint-dex
+helm-lint-dex: generate-chart-schema-dex
+	cd ./deployments/dex-server && helm-tool lint
+	helm lint ./deployments/dex-server
+
+.PHONY: helm-lint-rbac
+helm-lint-rbac: generate-chart-schema-rbac
+	cd ./deployments/rbac-server && helm-tool lint
+	helm lint ./deployments/rbac-server

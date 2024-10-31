@@ -1,73 +1,266 @@
-global:
-  database:
-    host:
-    port:
-    username:
-    ssl:
-      mode:
-    createDatabase:
-    originalDatabase:
+# Default values for dex-server.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
 
+# +docs:section=Global
+
+# Global settings are used to share the values among LLMariner components.
+# dex-server is a dependency of LLMariner, so global values are
+# propagated at its installation.
+# Please see https://github.com/llmariner/llmariner/blob/main/deployments/llmariner.
+global:
+  # Specify SQL database info for the server access.
+  # Currently, only PostgreSQL is supported.
+  database:
+    # The database host name.
+    host: postgres
+    # The database port number.
+    # +docs:type=number
+    port: 5432
+    # The database user name.
+    username: ps_user
+
+    ssl:
+      # This option determines whether or with what priority a secure
+      # SSL TCP/IP connection will be negotiated with the database.
+      # For more information, see [Database Connection Control](https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNECT-SSLMODE)
+      mode: prefer
+      # Specify the name of a file containing SSL certificate authority
+      # (CA) certificate. If the file exists, the server's certificate
+      # will be verified to be signed by one of these authorities.
+      # For more information, see [Database Connection Control](https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNECT-SSLROOTCERT)
+      # +docs:property
+      # rootCert: ""
+
+    # Specify whether to create the database if it does not exist.
+    createDatabase: true
+    # Specify the original database name to connect to before creating
+    # the database. If empty, use "template1".
+    # +docs:property
+    # originalDatabase: ""
+
+  # Specify the Secret that contains a database password. The Deployment
+  # reads this secret and sets it as a environment value.
   databaseSecret:
-    name:
-    key:
+    # The secret name.
+    name: postgres
+    # The key name with a password set.
+    key: password
 
   ingress:
-    ingressClassName:
-    controllerUrl:
-    annotations:
-    tls:
-      hosts:
-      secretName:
+    # The Ingress class name.
+    ingressClassName: kong
 
-httpPort: 5556
-internalGrpcPort: 8082
+    # The URL of the ingress controller that can be accessed from
+    # outside the Kubernetes cluster. The dex-server use this for the
+    # issuer and redirect URL.
+    controllerUrl: http://localhost:8080
+
+    # Optional additional annotations to add to the Ingress.
+    # +docs:property
+    # annotations: {}
+
+    # If specified, the API accessed via Ingress will be enabled for TLS.
+    # For more information, see [Enable TLS](https://llmariner.ai/docs/setup/install/single_cluster_production/#optional-enable-tls).
+    #
+    # For example:
+    # tls:
+    #   hosts:
+    #   - api.llm.mydomain.com
+    #   secretName: api-tls
+    # 
+    # +docs:property
+    # tls:
+    #   hosts: []
+    #   secretName: ""
+
+# +docs:section=Server
 
 database:
+  # The database name for storing the dex-server data.
   database: dex
 
-connectors:
+# The HTTP port number for the public service.
+# +docs:type=number
+httpPort: 5556
+# The GRPC port number for the internal service.
+# +docs:type=number
+internalGrpcPort: 8082
 
-additionalStaticClients:
+# Connectors are used to authenticate users against upstream identity 
+# providers. Dex has a pre-configured built-in local connector, acting
+# as a “virtual” identity provider. It can be utilized by enabling the
+# `enablePasswordDb` flag and setting 'local' to `.oauth2.passwordConnector`.
+# For more information, see [Connectors](https://dexidp.io/docs/connectors/)
+# and [Builtin Connector](https://dexidp.io/docs/connectors/local/).
+connectors: []
 
-oauth2:
-  passwordConnector:
-    enable: true
-    value: local
-  responseTypes:
-
+# Specify whether to enable the password database. It's a "virtual"
+# connector that stores login credentials in Dex's store.
 enablePasswordDb: true
 
-staticPassword:
-  enable: true
+# OAuth2 flow customization options.
+# For more information, see [OAuth2](https://dexidp.io/docs/configuration/oauth2/).
+oauth2:
+  passwordConnector:
+    # Specify whether to enable the password connector.
+    enable: true
+    # Specify the connector name for password grants.
+    value: local
+
+  # Configure the desired auth flow. If no response types are supplied
+  # this value defaults to "code".
+  # +docs:default=["code"]
+  responseTypes: []
+
+# If this option isn't chosen users may be added through the gRPC API.
+# A static list of passwords for the password connector. Alternatively,
+# passwords my be added/updated through the gRPC API.
+# For more information, see [Scopes and Claims](https://dexidp.io/docs/configuration/custom-scopes-claims-clients/).
+# +docs:type=array
+staticPasswords:
+- # The user ID.
+  # +docs:default=""
+  # +docs:type=string
   id: 08a8684b-db88-4b73-90a9-3cd1661f5466
+  # The user name.
+  # +docs:default=""
+  # +docs:type=string
   name: admin
+  # The email address.
+  # +docs:default=""
+  # +docs:type=string
   email: admin@example.com
-  # bcrypt hash of the string: $(echo password | htpasswd -BinC 10 admin | cut -d: -f2)
+  # The hasshed password string.
+  # Example: $(echo password | htpasswd -BinC 10 admin | cut -d: -f2)
+  # +docs:default=""
+  # +docs:type=string
   password: "$2a$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W"
 
-image:
-  repository: dexidp/dex
-  pullPolicy: IfNotPresent
-  tag: v2.39.1-distroless
+# Optional additional static clients registered in Dex by default.
+# Alternatively, clients may be added through the gRPC API.
+# For more information, see [Scopes and Claims](https://dexidp.io/docs/configuration/custom-scopes-claims-clients/).
+# +docs:property
+# additionalStaticClients: []
 
-podAnnotations:
-nodeSelector:
-affinity:
-tolerations:
+# Optional expiration configuration for tokens, signing keys, etc.
+# For more information, see [Tokens](https://dexidp.io/docs/configuration/tokens/). 
+#
+# For Example:
+# expiry:
+#   deviceRequests: "5m"
+#   signingKeys: "6h"
+#   idTokens: "24h"
+#   refreshTokens:
+#     disableRotation: false
+#     reuseInterval: "3s"
+#     validIfNotUsedFor: "2160h" # 90 days
+#     absoluteLifetime: "3960h" # 165 days
+#
+# +docs:property
+# expiry: {}
 
-databaseCreator:
-  image:
-    repository: public.ecr.aws/cloudnatix/llmariner/database-creator
-    pullPolicy: IfNotPresent
+# Override the "dex-server.fullname" value. This value is used
+# as part of most of the names of the resources created by this Helm chart.
+# +docs:property
+# fullnameOverride: "my-dex-server"
 
-envsubst:
-  image:
-    repository: public.ecr.aws/cloudnatix/llmariner/envsubst
-    pullPolicy: IfNotPresent
+# Override the "dex-server.name" value, which is used to annotate
+# some of the resources that are created by this Chart (using "app.kubernetes.io/name").
+# +docs:property
+# nameOverride: "my-dex-server"
 
+# The number of replicas for the dex-server Deployment.
+# +docs:type=number
 replicaCount: 1
 
+# The container image of dex-server.
+image:
+  # The container image name.
+  repository: dexidp/dex
+  # Kubernetes imagePullPolicy on Deployment.
+  pullPolicy: IfNotPresent
+  # The container image tag.
+  tag: v2.39.1-distroless
+
+# database-creator runs as an init container to create a database for
+# the dex-server if it does not already exist. This container is created
+# only if the `.Values.global.database.createDatabase` flag is enabled.
+databaseCreator:
+  # The container image of database-creator.
+  image:
+    # The container image name.
+    repository: public.ecr.aws/cloudnatix/llmariner/database-creator
+    # Kubernetes imagePullPolicy on Deployment.
+    pullPolicy: IfNotPresent
+
+# envsubst creator runs as an init container to run the envsubst
+# command and substitutes environment variables in shell format strings.
+# It is used for expand the database password into the dex-server
+# configuration loaded from the Secret. 
+envsubst:
+  # The container image of envsubst.
+  image:
+    # The container image name.
+    repository: public.ecr.aws/cloudnatix/llmariner/envsubst
+    # Kubernetes imagePullPolicy on Deployment.
+    pullPolicy: IfNotPresent
+
+# Override the container image tag for databaseCreator and envsubst to
+# deploy by setting this variable.
+# If no value is set, the chart's appVersion will be used.
+# +docs:property
+# version: vX.Y.Z
+
+# Optional additional annotations to add to the Deployment Pods.
+# +docs:property
+# podAnnotations: {}
+
+# The nodeSelector on Pods tells Kubernetes to schedule Pods on the
+# nodes with matching labels.
+# For more information, see [Assigning Pods to Nodes](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/).
+# +docs:property
+# nodeSelector: {}
+
+# A Kubernetes Affinity, if required.
+# For more information, see [Assigning Pods to Nodes](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node).
+#
+# For example:
+#   affinity:
+#     nodeAffinity:
+#      requiredDuringSchedulingIgnoredDuringExecution:
+#        nodeSelectorTerms:
+#        - matchExpressions:
+#          - key: foo.bar.com/role
+#            operator: In
+#            values:
+#            - master
+#
+# +docs:property
+# affinity: {}
+
+# A list of Kubernetes Tolerations, if required.
+# For more information, see [Taints and Tolerations](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/).
+#
+# For example:
+#   tolerations:
+#   - key: foo.bar.com/role
+#     operator: Equal
+#     value: master
+#     effect: NoSchedule
+#
+# +docs:property
+# tolerations: []
+
+# Resources to provide to the dex-server pod.
+# For more information, see [Resource Management for Pods and Containers](https://kubernetes.io/docs/concepts/configuration/manage-resources-Containers/).
+#
+# For example:
+#  requests:
+#    cpu: 10m
+#    memory: 32Mi
+#
+# +docs:property
 resources:
   requests:
     cpu: "250m"
@@ -75,17 +268,40 @@ resources:
   limits:
     cpu: "250m"
 
+# LivenessProbe settings for the dex-server pod.
+# For more information, see [Liveness, Readiness, and Startup Probes](https://kubernetes.io/docs/concepts/configuration/liveness-readiness-startup-probes/)
 livenessProbe:
-  httpGet:
-    path: /v1/dex/healthz
-    port: http
-    scheme: HTTP
+  # Specify whether to enable the liveness probe.
+  enabled: true
+  # Number of seconds after the container has started before startup,
+  # liveness or readiness probes are initiated.
+  # +docs:type=number
   initialDelaySeconds: 3
-  failureThreshold: 5
+  # How often (in seconds) to perform the probe. Default to 10 seconds. 
+  # +docs:type=number
+  periodSeconds: 10
+  # Number of seconds after which the probe times out. 
+  # +docs:type=number
   timeoutSeconds: 3
+  # Minimum consecutive successes for the probe to be considered
+  # successful after having failed.
+  # +docs:type=number
+  successThreshold: 1
+  # After a probe fails `failureThreshold` times in a row, Kubernetes
+  # considers that the overall check has failed: the container is not
+  # ready/healthy/live. 
+  # +docs:type=number
+  failureThreshold: 5
 
+# Security Context for the dex-server pod.
+# For more information, see [Configure a Security Context for a Pod or Container](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/).
+# +docs:property
 podSecurityContext:
   fsGroup: 2000
+
+# Security Context for the dex-server container.
+# For more information, see [Configure a Security Context for a Pod or Container](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/).
+# +docs:property
 securityContext:
   readOnlyRootFilesystem: true
   capabilities:
@@ -93,3 +309,13 @@ securityContext:
     - ALL
   runAsNonRoot: true
   runAsUser: 1000
+
+# Additional volumes to add to the dex-server pod.
+# For more information, see [Volumes](https://kubernetes.io/docs/concepts/storage/volumes/).
+# +docs:property
+# volumes: []
+
+# Additional volume mounts to add to the dex-server container.
+# For more information, see [Volumes](https://kubernetes.io/docs/concepts/storage/volumes/).
+# +docs:property
+# volumeMounts: []

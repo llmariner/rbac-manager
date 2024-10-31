@@ -22,10 +22,12 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       initContainers:
+      {{- if .Values.global.database.createDatabase }}
       - name: database-creator
         securityContext:
           {{- toYaml .Values.securityContext | nindent 12 }}
         image: "{{ .Values.databaseCreator.image.repository }}:{{ default .Chart.Version .Values.version }}"
+        imagePullPolicy: {{ .Values.databaseCreator.image.pullPolicy }}
         args:
         - run
         - --config
@@ -40,10 +42,12 @@ spec:
         - name: original-config
           mountPath: /etc/config
           readOnly: true
+      {{- end }}
       - name: envsubst
         securityContext:
           {{- toYaml .Values.securityContext | nindent 12 }}
         image: "{{ .Values.envsubst.image.repository }}:{{ default .Chart.Version .Values.version }}"
+        imagePullPolicy: {{ .Values.envsubst.image.pullPolicy }}
         args:
         - /bin/sh
         - -c
@@ -60,6 +64,9 @@ spec:
           readOnly: true
         - name: processed-config
           mountPath: /processed-config
+        {{- with .Values.volumeMounts }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       containers:
       - name: dex
         securityContext:
@@ -83,8 +90,18 @@ spec:
           readOnly: true
         - name: tmp
           mountPath: /tmp
+        {{- if .Values.livenessProbe.enabled }}
         livenessProbe:
-          {{- toYaml .Values.livenessProbe | nindent 10 }}
+          httpGet:
+            path: /v1/dex/healthz
+            port: http
+            scheme: HTTP
+          initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+          successThreshold: {{ .Values.livenessProbe.successThreshold }}
+          failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+        {{- end }}
         resources:
           {{- toYaml .Values.resources | nindent 10 }}
       {{- with .Values.nodeSelector }}
@@ -107,3 +124,6 @@ spec:
         emptyDir:
       - name: tmp
         emptyDir:
+      {{- with .Values.volumes }}
+      {{- toYaml . | nindent 6 }}
+      {{- end }}
