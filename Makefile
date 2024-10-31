@@ -43,11 +43,11 @@ install-helm-tool:
 .PHONY: generate-chart-schema
 generate-chart-schema: generate-chart-schema-dex generate-chart-schema-rbac
 
-.PHONY: generate-chart-schema
+.PHONY: generate-chart-schema-dex
 generate-chart-schema-dex: check-helm-tool
 	@cd ./deployments/dex-server && helm-tool schema > values.schema.json
 
-.PHONY: generate-chart-schema
+.PHONY: generate-chart-schema-rbac
 generate-chart-schema-rbac: check-helm-tool
 	@cd ./deployments/rbac-server && helm-tool schema > values.schema.json
 
