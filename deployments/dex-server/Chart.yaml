@@ -1,6 +1,19 @@
 apiVersion: v2
 name: dex-server
-description: A Helm chart for dex
+description: Dex is a federated OpenID connect provider. It integrate any identity provider into your application using OpenID Connect.
+home: https://dexidp.io/
+icon: https://raw.githubusercontent.com/cncf/artwork/c21682fee7a5d667be7e5f7c3347c3094b1188cb/projects/dex/icon/color/dex-icon-color.svg
 type: application
 version: 1.1.0
-appVersion: 1.1.0
+appVersion: 2.39.1
+sources:
+  - https://github.com/dexidp/dex
+  - https://github.com/llmariner/rbac-manager
+keywords:
+  - oauth
+  - identity-provider
+  - oidc
+  - saml
+annotations:
+  "artifacthub.io/category": security
+  "artifacthub.io/license": Apache-2.0

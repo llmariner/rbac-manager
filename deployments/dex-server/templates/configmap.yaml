@@ -68,14 +68,9 @@ data:
 
     enablePasswordDB: {{ .Values.enablePasswordDb }}
 
-    {{- with .Values.staticPassword }}
-    {{- if .enable }}
+    {{- with .Values.staticPasswords }}
     staticPasswords:
-    - userID: {{ .id }}
-      username: {{ .name }}
-      email: {{ .email }}
-      hash: {{ .password }}
-    {{- end }}
+    {{- toYaml . | nindent 4 }}
     {{- end }}
 
     {{- with .Values.expiry }}
