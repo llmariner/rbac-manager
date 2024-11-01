@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/llmariner/common/pkg/db"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 // StorageConfig is the storage configuration.
