@@ -68,7 +68,7 @@ global:
     #   hosts:
     #   - api.llm.mydomain.com
     #   secretName: api-tls
-    # 
+    #
     # +docs:property
     # tls:
     #   hosts: []
@@ -87,7 +87,7 @@ httpPort: 5556
 # +docs:type=number
 internalGrpcPort: 8082
 
-# Connectors are used to authenticate users against upstream identity 
+# Connectors are used to authenticate users against upstream identity
 # providers. Dex has a pre-configured built-in local connector, acting
 # as a “virtual” identity provider. It can be utilized by enabling the
 # `enablePasswordDb` flag and setting 'local' to `.oauth2.passwordConnector`.
@@ -121,12 +121,12 @@ oauth2:
 #
 # For Example:
 # staticPasswords:
-# - id: my-id
-#   name: my-name
-#   email: my-email@example.com
+# - email: my-email@example.com
 #   # The hasshed password string.
 #   # Example: $(echo password | htpasswd -BinC 10 admin | cut -d: -f2)
-#   password: "$2a$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W"
+#   hash: "$2a$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W"
+#   username: my-name
+#   userID: my-id
 #
 # +docs:property
 # staticPasswords: []
@@ -138,7 +138,7 @@ oauth2:
 # additionalStaticClients: []
 
 # Optional expiration configuration for tokens, signing keys, etc.
-# For more information, see [Tokens](https://dexidp.io/docs/configuration/tokens/). 
+# For more information, see [Tokens](https://dexidp.io/docs/configuration/tokens/).
 #
 # For Example:
 # expiry:
@@ -191,7 +191,7 @@ databaseCreator:
 # envsubst creator runs as an init container to run the envsubst
 # command and substitutes environment variables in shell format strings.
 # It is used for expand the database password into the dex-server
-# configuration loaded from the Secret. 
+# configuration loaded from the Secret.
 envsubst:
   # The container image of envsubst.
   image:
@@ -271,10 +271,10 @@ livenessProbe:
   # liveness or readiness probes are initiated.
   # +docs:type=number
   initialDelaySeconds: 3
-  # How often (in seconds) to perform the probe. Default to 10 seconds. 
+  # How often (in seconds) to perform the probe. Default to 10 seconds.
   # +docs:type=number
   periodSeconds: 10
-  # Number of seconds after which the probe times out. 
+  # Number of seconds after which the probe times out.
   # +docs:type=number
   timeoutSeconds: 3
   # Minimum consecutive successes for the probe to be considered
@@ -283,7 +283,7 @@ livenessProbe:
   successThreshold: 1
   # After a probe fails `failureThreshold` times in a row, Kubernetes
   # considers that the overall check has failed: the container is not
-  # ready/healthy/live. 
+  # ready/healthy/live.
   # +docs:type=number
   failureThreshold: 5
 
