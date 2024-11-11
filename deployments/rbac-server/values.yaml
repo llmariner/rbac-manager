@@ -19,7 +19,7 @@ global:
 # +docs:type=number
 internalGrpcPort: 8082
 
-# Specify the cache settings for the API key, cluster and user information. 
+# Specify the cache settings for the API key, cluster and user information.
 cache:
   # The interval time for cache synchronization.
   syncInterval: 10s
@@ -46,6 +46,8 @@ roleScopesMap:
   - api.vector-stores.write
   - api.clusters.read
   - api.clusters.write
+  - api.selfuser.read
+  - api.selfuser.write
   projectOwner:
   - api.model.read
   - api.model.write
@@ -59,6 +61,8 @@ roleScopesMap:
   - api.files.write
   - api.vector-stores.read
   - api.vector-stores.write
+  - api.selfuser.read
+  - api.selfuser.write
   projectMember:
   - api.model.read
   - api.model.write
@@ -72,6 +76,8 @@ roleScopesMap:
   - api.files.write
   - api.vector-stores.read
   - api.vector-stores.write
+  - api.selfuser.read
+  - api.selfuser.write
 
 # Override the "rbac-server.fullname" value. This value is used
 # as part of most of the names of the resources created by this Helm chart.
@@ -164,10 +170,10 @@ livenessProbe:
   # liveness or readiness probes are initiated.
   # +docs:type=number
   initialDelaySeconds: 3
-  # How often (in seconds) to perform the probe. Default to 10 seconds. 
+  # How often (in seconds) to perform the probe. Default to 10 seconds.
   # +docs:type=number
   periodSeconds: 10
-  # Number of seconds after which the probe times out. 
+  # Number of seconds after which the probe times out.
   # +docs:type=number
   timeoutSeconds: 15
   # Minimum consecutive successes for the probe to be considered
@@ -176,7 +182,7 @@ livenessProbe:
   successThreshold: 1
   # After a probe fails `failureThreshold` times in a row, Kubernetes
   # considers that the overall check has failed: the container is not
-  # ready/healthy/live. 
+  # ready/healthy/live.
   # +docs:type=number
   failureThreshold: 5
 
