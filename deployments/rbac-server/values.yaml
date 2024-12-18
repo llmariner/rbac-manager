@@ -48,6 +48,8 @@ roleScopesMap:
   - api.clusters.write
   - api.selfuser.read
   - api.selfuser.write
+  - api.api_usages.read
+  - api.api_usages.write
   projectOwner:
   - api.model.read
   - api.model.write
@@ -63,6 +65,8 @@ roleScopesMap:
   - api.vector-stores.write
   - api.selfuser.read
   - api.selfuser.write
+  - api.api_usages.read
+  - api.api_usages.write
   projectMember:
   - api.model.read
   - api.model.write
@@ -78,6 +82,8 @@ roleScopesMap:
   - api.vector-stores.write
   - api.selfuser.read
   - api.selfuser.write
+  - api.api_usages.read
+  - api.api_usages.write
 
 # Override the "rbac-server.fullname" value. This value is used
 # as part of most of the names of the resources created by this Helm chart.
