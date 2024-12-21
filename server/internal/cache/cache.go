@@ -49,6 +49,7 @@ type P struct {
 	ID                  string
 	OrganizationID      string
 	KubernetesNamespace string
+	Assignments         []*uv1.ProjectAssignment
 }
 
 // PU represents a role associated with a project user.
@@ -314,6 +315,7 @@ func (c *Store) updateCache(ctx context.Context) error {
 			ID:                  p.Id,
 			OrganizationID:      oid,
 			KubernetesNamespace: p.KubernetesNamespace,
+			Assignments:         p.Assignments,
 		}
 		projectsByID[p.Id] = &val
 		projectsByOrganizationID[oid] = append(projectsByOrganizationID[oid], val)

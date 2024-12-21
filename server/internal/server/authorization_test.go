@@ -9,6 +9,7 @@ import (
 	"github.com/llmariner/rbac-manager/server/internal/dex"
 	uv1 "github.com/llmariner/user-manager/api/v1"
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/protobuf/proto"
 )
 
 func TestAuthorize(t *testing.T) {
@@ -423,6 +424,76 @@ func TestFindAssociatedProjectAndRoles(t *testing.T) {
 			assert.Equal(t, *tc.want.project, *resp.project)
 			assert.Equal(t, tc.want.orgRole, resp.orgRole)
 			assert.Equal(t, tc.want.projectRole, resp.projectRole)
+		})
+	}
+}
+
+func TestAssignedKubernetesEnvsInternal(t *testing.T) {
+	clusters := []cache.C{
+		{
+			ID: "c0",
+		},
+		{
+			ID: "c1",
+		},
+	}
+	tcs := []struct {
+		name        string
+		namespace   string
+		assignments []*uv1.ProjectAssignment
+		want        []*v1.Project_AssignedKubernetesEnv
+	}{
+		{
+			name:      "only kubernetes namespace",
+			namespace: "ns0",
+			want: []*v1.Project_AssignedKubernetesEnv{
+				{
+					ClusterId: "c0",
+					Namespace: "ns0",
+				},
+				{
+					ClusterId: "c1",
+					Namespace: "ns0",
+				},
+			},
+		},
+		{
+			name: "only assignments",
+			assignments: []*uv1.ProjectAssignment{
+				{
+					ClusterId: "",
+					Namespace: "ns0",
+				},
+				{
+					ClusterId: "c1",
+					Namespace: "ns1",
+				},
+			},
+			want: []*v1.Project_AssignedKubernetesEnv{
+				{
+					ClusterId: "c0",
+					Namespace: "ns0",
+				},
+				{
+					ClusterId: "c1",
+					Namespace: "ns1",
+				},
+				{
+					ClusterId: "c1",
+					Namespace: "ns0",
+				},
+			},
+		},
+	}
+
+	for _, tc := range tcs {
+		t.Run(tc.name, func(t *testing.T) {
+			got := assignedKubernetesEnvsInternal(tc.namespace, tc.assignments, clusters)
+			assert.Len(t, got, len(tc.want))
+			for i, g := range got {
+				w := tc.want[i]
+				assert.Truef(t, proto.Equal(w, g), "wanted %+v, but got %+v", w, g)
+			}
 		})
 	}
 }
