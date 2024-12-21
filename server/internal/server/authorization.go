@@ -41,8 +41,12 @@ func (s *Server) Authorize(ctx context.Context, req *v1.AuthorizeRequest) (*v1.A
 			},
 			Organization: &v1.Organization{Id: key.OrganizationID},
 			Project: &v1.Project{
-				Id:                     key.ProjectID,
-				AssignedKubernetesEnvs: s.assignedKubernetesEnvs(project.KubernetesNamespace, key.TenantID),
+				Id: key.ProjectID,
+				AssignedKubernetesEnvs: s.assignedKubernetesEnvs(
+					project.KubernetesNamespace,
+					project.Assignments,
+					key.TenantID,
+				),
 			},
 			TenantId: key.TenantID,
 			ApiKeyId: key.KeyID,
@@ -95,8 +99,12 @@ func (s *Server) Authorize(ctx context.Context, req *v1.AuthorizeRequest) (*v1.A
 			Id: pr.project.OrganizationID,
 		},
 		Project: &v1.Project{
-			Id:                     pr.project.ID,
-			AssignedKubernetesEnvs: s.assignedKubernetesEnvs(pr.project.KubernetesNamespace, u.TenantID),
+			Id: pr.project.ID,
+			AssignedKubernetesEnvs: s.assignedKubernetesEnvs(
+				pr.project.KubernetesNamespace,
+				pr.project.Assignments,
+				u.TenantID,
+			),
 		},
 		TenantId: u.TenantID,
 	}, nil
@@ -281,15 +289,53 @@ func (s *Server) findAssociatedProjectID(
 	return "", fmt.Errorf("unable to identify a project for the user")
 }
 
-func (s *Server) assignedKubernetesEnvs(namespace, tenantID string) []*v1.Project_AssignedKubernetesEnv {
-	// TODO(kenji): Revisit. Currently we allow the user to access the project namespace for all registered clusters.
+func (s *Server) assignedKubernetesEnvs(
+	namespace string,
+	assignments []*uv1.ProjectAssignment,
+	tenantID string,
+) []*v1.Project_AssignedKubernetesEnv {
+	clusters := s.cache.GetClustersByTenantID(tenantID)
+	return assignedKubernetesEnvsInternal(namespace, assignments, clusters)
+}
+
+func assignedKubernetesEnvsInternal(
+	namespace string,
+	assignments []*uv1.ProjectAssignment,
+	clusters []cache.C,
+) []*v1.Project_AssignedKubernetesEnv {
 	var envs []*v1.Project_AssignedKubernetesEnv
-	for _, c := range s.cache.GetClustersByTenantID(tenantID) {
-		envs = append(envs, &v1.Project_AssignedKubernetesEnv{
-			ClusterId: c.ID,
-			Namespace: namespace,
-		})
+
+	// If "namespace" is set or there is an assigment whose cluster is empty,
+	// add every registered cluster for the namespace.
+	var nssForAllClusters []string
+	if namespace != "" {
+		nssForAllClusters = append(nssForAllClusters, namespace)
 	}
+	nssByCluster := map[string]string{}
+	for _, a := range assignments {
+		if a.ClusterId == "" {
+			nssForAllClusters = append(nssForAllClusters, a.Namespace)
+		} else {
+			nssByCluster[a.ClusterId] = a.Namespace
+		}
+	}
+
+	for _, c := range clusters {
+		if ns, ok := nssByCluster[c.ID]; ok {
+			envs = append(envs, &v1.Project_AssignedKubernetesEnv{
+				ClusterId: c.ID,
+				Namespace: ns,
+			})
+		}
+
+		for _, ns := range nssForAllClusters {
+			envs = append(envs, &v1.Project_AssignedKubernetesEnv{
+				ClusterId: c.ID,
+				Namespace: ns,
+			})
+		}
+	}
+
 	return envs
 }
 
