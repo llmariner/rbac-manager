@@ -19,7 +19,9 @@ type UserInfo struct {
 	UserID                 string
 	InternalUserID         string
 	OrganizationID         string
+	OrganizationTitle      string
 	ProjectID              string
+	ProjectTitle           string
 	AssignedKubernetesEnvs []AssignedKubernetesEnv
 	TenantID               string
 
@@ -50,7 +52,9 @@ func newUserInfoFromAuthorizeResponse(resp *v1.AuthorizeResponse) UserInfo {
 		UserID:                 resp.User.Id,
 		InternalUserID:         resp.User.InternalId,
 		OrganizationID:         resp.Organization.Id,
+		OrganizationTitle:      resp.Organization.Title,
 		ProjectID:              resp.Project.Id,
+		ProjectTitle:           resp.Project.Title,
 		APIKeyID:               resp.ApiKeyId,
 		AssignedKubernetesEnvs: envs,
 		TenantID:               resp.TenantId,
