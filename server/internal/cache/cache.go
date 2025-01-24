@@ -29,12 +29,14 @@ type K struct {
 // C represents a cluster.
 type C struct {
 	ID       string
+	Name     string
 	TenantID string
 }
 
 // O represents an organization.
 type O struct {
 	ID       string
+	Title    string
 	TenantID string
 }
 
@@ -47,6 +49,7 @@ type OU struct {
 // P represents a project.
 type P struct {
 	ID                  string
+	Title               string
 	OrganizationID      string
 	KubernetesNamespace string
 	Assignments         []*uv1.ProjectAssignment
@@ -267,6 +270,7 @@ func (c *Store) updateCache(ctx context.Context) error {
 	for _, cluster := range cresp.Clusters {
 		c := C{
 			ID:       cluster.Cluster.Id,
+			Name:     cluster.Cluster.Name,
 			TenantID: cluster.TenantId,
 		}
 		cs[cluster.Cluster.RegistrationKey] = &c
@@ -295,6 +299,7 @@ func (c *Store) updateCache(ctx context.Context) error {
 		id := org.Organization.Id
 		orgsByID[id] = &O{
 			ID:       id,
+			Title:    org.Organization.Title,
 			TenantID: org.TenantId,
 		}
 	}
@@ -313,6 +318,7 @@ func (c *Store) updateCache(ctx context.Context) error {
 		oid := p.OrganizationId
 		val := P{
 			ID:                  p.Id,
+			Title:               p.Title,
 			OrganizationID:      oid,
 			KubernetesNamespace: p.KubernetesNamespace,
 			Assignments:         p.Assignments,

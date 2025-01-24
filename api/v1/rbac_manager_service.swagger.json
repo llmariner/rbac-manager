@@ -23,6 +23,9 @@
         "clusterId": {
           "type": "string"
         },
+        "clusterName": {
+          "type": "string"
+        },
         "namespace": {
           "type": "string"
         }
@@ -106,6 +109,9 @@
       "properties": {
         "id": {
           "type": "string"
+        },
+        "title": {
+          "type": "string"
         }
       }
     },
@@ -113,6 +119,9 @@
       "type": "object",
       "properties": {
         "id": {
+          "type": "string"
+        },
+        "title": {
           "type": "string"
         },
         "assignedKubernetesEnvs": {

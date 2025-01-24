@@ -32,6 +32,10 @@ func (s *Server) Authorize(ctx context.Context, req *v1.AuthorizeRequest) (*v1.A
 		if !found {
 			return &v1.AuthorizeResponse{Authorized: false}, nil
 		}
+		org, found := s.cache.GetOrganizationByID(key.OrganizationID)
+		if !found {
+			return &v1.AuthorizeResponse{Authorized: false}, nil
+		}
 
 		return &v1.AuthorizeResponse{
 			Authorized: s.authorized(toScope(req), key.OrganizationRole, key.ProjectRole),
@@ -39,9 +43,13 @@ func (s *Server) Authorize(ctx context.Context, req *v1.AuthorizeRequest) (*v1.A
 				Id:         key.UserID,
 				InternalId: key.InternalUserID,
 			},
-			Organization: &v1.Organization{Id: key.OrganizationID},
+			Organization: &v1.Organization{
+				Id:    key.OrganizationID,
+				Title: org.Title,
+			},
 			Project: &v1.Project{
-				Id: key.ProjectID,
+				Id:    key.ProjectID,
+				Title: project.Title,
 				AssignedKubernetesEnvs: s.assignedKubernetesEnvs(
 					project.KubernetesNamespace,
 					project.Assignments,
@@ -89,6 +97,11 @@ func (s *Server) Authorize(ctx context.Context, req *v1.AuthorizeRequest) (*v1.A
 		return &v1.AuthorizeResponse{Authorized: false}, nil
 	}
 
+	org, found := s.cache.GetOrganizationByID(pr.project.OrganizationID)
+	if !found {
+		return &v1.AuthorizeResponse{Authorized: false}, nil
+	}
+
 	return &v1.AuthorizeResponse{
 		Authorized: s.authorized(toScope(req), pr.orgRole, pr.projectRole),
 		User: &v1.User{
@@ -96,10 +109,12 @@ func (s *Server) Authorize(ctx context.Context, req *v1.AuthorizeRequest) (*v1.A
 			InternalId: u.InternalID,
 		},
 		Organization: &v1.Organization{
-			Id: pr.project.OrganizationID,
+			Id:    pr.project.OrganizationID,
+			Title: org.Title,
 		},
 		Project: &v1.Project{
-			Id: pr.project.ID,
+			Id:    pr.project.ID,
+			Title: pr.project.Title,
 			AssignedKubernetesEnvs: s.assignedKubernetesEnvs(
 				pr.project.KubernetesNamespace,
 				pr.project.Assignments,
@@ -323,15 +338,17 @@ func assignedKubernetesEnvsInternal(
 	for _, c := range clusters {
 		if ns, ok := nssByCluster[c.ID]; ok {
 			envs = append(envs, &v1.Project_AssignedKubernetesEnv{
-				ClusterId: c.ID,
-				Namespace: ns,
+				ClusterId:   c.ID,
+				ClusterName: c.Name,
+				Namespace:   ns,
 			})
 		}
 
 		for _, ns := range nssForAllClusters {
 			envs = append(envs, &v1.Project_AssignedKubernetesEnv{
-				ClusterId: c.ID,
-				Namespace: ns,
+				ClusterId:   c.ID,
+				ClusterName: c.Name,
+				Namespace:   ns,
 			})
 		}
 	}

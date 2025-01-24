@@ -28,13 +28,16 @@ export type User = {
 };
 export type Organization = {
     id?: string;
+    title?: string;
 };
 export type ProjectAssignedKubernetesEnv = {
     clusterId?: string;
+    clusterName?: string;
     namespace?: string;
 };
 export type Project = {
     id?: string;
+    title?: string;
     assignedKubernetesEnvs?: ProjectAssignedKubernetesEnv[];
 };
 export type Cluster = {

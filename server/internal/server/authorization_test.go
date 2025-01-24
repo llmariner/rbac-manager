@@ -46,13 +46,20 @@ func TestAuthorize(t *testing.T) {
 			apikeys: map[string]*cache.K{
 				"keySecret": {
 					ProjectID:        "my-project",
+					OrganizationID:   "my-org",
 					OrganizationRole: uv1.OrganizationRole_ORGANIZATION_ROLE_OWNER,
 					ProjectRole:      uv1.ProjectRole_PROJECT_ROLE_OWNER,
+				},
+			},
+			orgsByID: map[string]*cache.O{
+				"my-org": {
+					ID: "my-org",
 				},
 			},
 			projectsByID: map[string]*cache.P{
 				"my-project": {
 					KubernetesNamespace: "ns",
+					OrganizationID:      "my-org",
 				},
 			},
 			usersByID: map[string]*cache.U{},
@@ -71,9 +78,15 @@ func TestAuthorize(t *testing.T) {
 					ProjectRole:      uv1.ProjectRole_PROJECT_ROLE_UNSPECIFIED,
 				},
 			},
+			orgsByID: map[string]*cache.O{
+				"my-org": {
+					ID: "my-org",
+				},
+			},
 			projectsByID: map[string]*cache.P{
 				"my-project": {
 					KubernetesNamespace: "ns",
+					OrganizationID:      "my-org",
 				},
 			},
 			usersByID: map[string]*cache.U{},
