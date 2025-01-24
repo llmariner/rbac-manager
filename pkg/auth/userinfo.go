@@ -10,8 +10,9 @@ type userInfoKey struct{}
 
 // AssignedKubernetesEnv represents the assigned Kubernetes environment.
 type AssignedKubernetesEnv struct {
-	ClusterID string
-	Namespace string
+	ClusterID   string
+	ClusterName string
+	Namespace   string
 }
 
 // UserInfo manages the user info.
@@ -44,8 +45,9 @@ func newUserInfoFromAuthorizeResponse(resp *v1.AuthorizeResponse) UserInfo {
 	var envs []AssignedKubernetesEnv
 	for _, env := range resp.Project.AssignedKubernetesEnvs {
 		envs = append(envs, AssignedKubernetesEnv{
-			ClusterID: env.ClusterId,
-			Namespace: env.Namespace,
+			ClusterID:   env.ClusterId,
+			ClusterName: env.ClusterName,
+			Namespace:   env.Namespace,
 		})
 	}
 	return UserInfo{
