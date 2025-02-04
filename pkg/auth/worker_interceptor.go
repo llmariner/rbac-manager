@@ -19,7 +19,7 @@ type WorkerConfig struct {
 
 // NewWorkerInterceptor creates a new WorkerInterceptor.
 func NewWorkerInterceptor(ctx context.Context, c WorkerConfig) (*WorkerInterceptor, error) {
-	conn, err := grpc.DialContext(ctx, c.RBACServerAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(c.RBACServerAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
 	}
