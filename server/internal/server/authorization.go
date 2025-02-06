@@ -166,6 +166,8 @@ func (s *Server) authorized(
 	switch orgRole {
 	case uv1.OrganizationRole_ORGANIZATION_ROLE_OWNER:
 		role = "organizationOwner"
+	case uv1.OrganizationRole_ORGANIZATION_ROLE_TENANT_SYSTEM:
+		role = "tenantSystem"
 	case uv1.OrganizationRole_ORGANIZATION_ROLE_READER:
 		switch projectRole {
 		case uv1.ProjectRole_PROJECT_ROLE_OWNER:
