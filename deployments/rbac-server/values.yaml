@@ -31,6 +31,12 @@ cache:
 # Map a role name to a list of scopes.
 # +docs:property
 roleScopesMap:
+  tenantSystem:
+  - api.clusters.read
+  - api.fine_tuning.jobs.read
+  - api.fine_tuning.jobs.write
+  - api.k8s.clusterscope.read
+  - api.k8s.namespaced.write
   organizationOwner:
   - api.model.read
   - api.model.write
