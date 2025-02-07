@@ -56,6 +56,7 @@ export type Project = {
 
 export type Cluster = {
   id?: string
+  name?: string
 }
 
 export class RbacInternalService {

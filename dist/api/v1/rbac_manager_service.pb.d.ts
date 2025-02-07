@@ -42,6 +42,7 @@ export type Project = {
 };
 export type Cluster = {
     id?: string;
+    name?: string;
 };
 export declare class RbacInternalService {
     static Authorize(req: AuthorizeRequest, initReq?: fm.InitReq): Promise<AuthorizeResponse>;

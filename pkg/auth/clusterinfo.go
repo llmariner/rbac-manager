@@ -10,8 +10,9 @@ type clusterInfoKey struct{}
 
 // ClusterInfo manages the cluster info.
 type ClusterInfo struct {
-	ClusterID string
-	TenantID  string
+	ClusterID   string
+	ClusterName string
+	TenantID    string
 }
 
 // AppendClusterInfoToContext appends the cluster info to the context.
@@ -27,7 +28,8 @@ func ExtractClusterInfoFromContext(ctx context.Context) (*ClusterInfo, bool) {
 
 func newClusterInfoFromAuthorizeResponse(resp *v1.AuthorizeWorkerResponse) ClusterInfo {
 	return ClusterInfo{
-		ClusterID: resp.Cluster.Id,
-		TenantID:  resp.TenantId,
+		ClusterID:   resp.Cluster.Id,
+		ClusterName: resp.Cluster.Name,
+		TenantID:    resp.TenantId,
 	}
 }
