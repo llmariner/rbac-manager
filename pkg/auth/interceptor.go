@@ -42,7 +42,7 @@ type Config struct {
 
 // NewInterceptor creates a new Interceptor.
 func NewInterceptor(ctx context.Context, c Config) (*Interceptor, error) {
-	conn, err := grpc.DialContext(ctx, c.RBACServerAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(c.RBACServerAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
 	}
