@@ -17,6 +17,10 @@ func TestValidateClusterRegistrationKey(t *testing.T) {
 			isError: false,
 		},
 		{
+			key:     "default-cluster-registration-key-secret",
+			isError: false,
+		},
+		{
 			key:     "bogus",
 			isError: true,
 		},

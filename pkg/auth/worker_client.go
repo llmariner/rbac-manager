@@ -34,8 +34,13 @@ func ValidateClusterRegistrationKey() error {
 	if key == "" {
 		return fmt.Errorf("environment variable %s is not set", envVarName)
 	}
+	if key == "default-cluster-registration-key-secret" {
+		// This is the default key configured in https://github.com/llmariner/cluster-manager/blob/v1.5.3/deployments/server/values.yaml#L127.
+		// Skip the validation for backward compatibility.
+		return nil
+	}
 	if !strings.HasPrefix(key, "clusterkey-") {
-		return fmt.Errorf("invalid cluster registration key")
+		return fmt.Errorf("invalid cluster registration key: %s", key)
 	}
 	return nil
 }
