@@ -18,6 +18,9 @@ global:
 # The GRPC port number for the internal service.
 # +docs:type=number
 internalGrpcPort: 8082
+# The HTTP port number for the inference metrics serving.
+# +docs:type=number
+monitoringPort: 8083
 
 # Specify the cache settings for the API key, cluster and user information.
 cache:
@@ -100,6 +103,16 @@ roleScopesMap:
 # some of the resources that are created by this Chart (using "app.kubernetes.io/name").
 # +docs:property
 # nameOverride: "my-rbac-server"
+
+# If enabled, a `ServiceMonitor` resource is created, which is used to
+# define a scrape target for the Prometheus.
+# NOTE: To use this feature, prometheus-operator must be installed in advance.
+enableServiceMonitor: false
+
+# If enabled, a `PrometheusRule` resource is created, which is used to
+# define a alert rule for the Prometheus.
+# NOTE: To use this feature, prometheus-operator must be installed in advance.
+enablePrometheusRule: false
 
 # The number of replicas for the rbac-server Deployment.
 # +docs:type=number

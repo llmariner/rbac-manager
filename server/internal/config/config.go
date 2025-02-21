@@ -11,6 +11,7 @@ import (
 // Config is the configuration.
 type Config struct {
 	InternalGRPCPort int `yaml:"internalGrpcPort"`
+	MonitoringPort   int `yaml:"monitoringPort"`
 
 	DexServerAddr string `yaml:"dexServerAddr"`
 
@@ -24,6 +25,9 @@ type Config struct {
 func (c *Config) Validate() error {
 	if c.InternalGRPCPort <= 0 {
 		return fmt.Errorf("internalGrpcPort must be greater than 0")
+	}
+	if c.MonitoringPort <= 0 {
+		return fmt.Errorf("monitoringPort must be greater than 0")
 	}
 	if c.DexServerAddr == "" {
 		return fmt.Errorf("dexServerAddr must be set")

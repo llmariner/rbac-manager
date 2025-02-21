@@ -1,0 +1,14 @@
+{{- if .Values.enableServiceMonitor }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "rbac-server.fullname" . }}-http
+  labels:
+    {{- include "rbac-server.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "rbac-server.labels" . | nindent 6 }}
+  endpoints:
+  - port: monitoring
+{{- end }}
