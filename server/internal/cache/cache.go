@@ -133,6 +133,8 @@ type Store struct {
 	// usersByID is a set of users, keyed by its ID.
 	usersByID map[string]*U
 
+	lastSuccessfulSyncTime time.Time
+
 	mu sync.RWMutex
 
 	apiKeyRole string
@@ -214,6 +216,13 @@ func (c *Store) GetUserByID(userID string) (*U, bool) {
 	defer c.mu.RUnlock()
 	u, ok := c.usersByID[userID]
 	return u, ok
+}
+
+// GetLastSuccessfulSyncTime returns the last successful sync time.
+func (c *Store) GetLastSuccessfulSyncTime() time.Time {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return c.lastSuccessfulSyncTime
 }
 
 // Sync synchronizes the cache.
@@ -373,6 +382,8 @@ func (c *Store) updateCache(ctx context.Context) error {
 	c.projectsByUserID = projectsByUserID
 
 	c.usersByID = usersByID
+
+	c.lastSuccessfulSyncTime = time.Now()
 
 	return nil
 }

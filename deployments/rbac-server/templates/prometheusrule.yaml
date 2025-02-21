@@ -1,0 +1,20 @@
+{{- if .Values.enablePrometheusRule }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "rbac-server.fullname" . }}
+  labels:
+    {{- include "rbac-server.labels" . | nindent 4 }}
+spec:
+  groups:
+  - name: LLMariner RBAC Server alerts
+    rules:
+    - alert: RBAC Server cache sync delay
+      expr: llmariner_rbac_server_since_last_cache_sync_sec > 300
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        title: RBAC Server cache sync delay
+        description: The last successful cache sync of RBAC Server more than 5 minutes ago.
+{{- end }}

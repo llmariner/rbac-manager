@@ -2,19 +2,28 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"net/http"
+	"time"
 
+	"github.com/go-logr/stdr"
 	cv1 "github.com/llmariner/cluster-manager/api/v1"
 	"github.com/llmariner/rbac-manager/server/internal/cache"
 	"github.com/llmariner/rbac-manager/server/internal/config"
+	"github.com/llmariner/rbac-manager/server/internal/monitoring"
 	"github.com/llmariner/rbac-manager/server/internal/server"
 	uv1 "github.com/llmariner/user-manager/api/v1"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-const flagConfig = "config"
+const (
+	flagConfig               = "config"
+	monitoringRunnerInterval = 10 * time.Second
+)
 
 var runCmd = &cobra.Command{
 	Use:   "run",
@@ -42,7 +51,10 @@ var runCmd = &cobra.Command{
 }
 
 func run(ctx context.Context, c *config.Config) error {
-	log.Printf("Starting internal-grpc server on port %d", c.InternalGRPCPort)
+	logger := stdr.New(log.Default())
+	log := logger.WithName("boot")
+
+	log.Info("Starting internal-grpc server on port %d", c.InternalGRPCPort)
 
 	conn, err := grpc.NewClient(
 		c.CacheConfig.UserManagerServerInternalAddr,
@@ -75,6 +87,22 @@ func run(ctx context.Context, c *config.Config) error {
 	go func() {
 		srv := server.New(c.DexServerAddr, cstore, c.RoleScopesMap)
 		errCh <- srv.Run(ctx, c.InternalGRPCPort)
+	}()
+
+	m := monitoring.NewMetricsMonitor(cstore, logger)
+	go func() {
+		errCh <- m.Run(ctx, monitoringRunnerInterval)
+	}()
+
+	defer m.UnregisterAllCollectors()
+
+	go func() {
+		log := logger.WithName("metrics")
+		log.Info("Starting metrics server...", "port", c.MonitoringPort)
+		mux := http.NewServeMux()
+		mux.Handle("/metrics", promhttp.Handler())
+		errCh <- http.ListenAndServe(fmt.Sprintf(":%d", c.MonitoringPort), mux)
+		log.Info("Stopped metrics server")
 	}()
 
 	return <-errCh
