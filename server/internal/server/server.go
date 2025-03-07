@@ -7,9 +7,6 @@ import (
 
 	v1 "github.com/llmariner/rbac-manager/api/v1"
 	"github.com/llmariner/rbac-manager/server/internal/cache"
-	"github.com/llmariner/rbac-manager/server/internal/config"
-	"github.com/llmariner/rbac-manager/server/internal/dex"
-	"github.com/llmariner/rbac-manager/server/internal/okta"
 	"github.com/llmariner/rbac-manager/server/internal/token"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
@@ -32,20 +29,15 @@ type cacheGetter interface {
 	GetUserByID(id string) (*cache.U, bool)
 }
 
-type tokenIntrospector interface {
+// TokenIntrospector inspects the token.
+type TokenIntrospector interface {
 	TokenIntrospect(token string) (*token.Introspection, error)
 }
 
 // New returns a new Server.
-func New(c *config.Config, cache cacheGetter, roleScopes map[string][]string) *Server {
-	var f token.Client
-	if c.EnableOkta {
-		f = okta.NewDefaultClient()
-	} else {
-		f = dex.NewDefaultClient(c.DexServerAddr)
-	}
+func New(ti TokenIntrospector, cache cacheGetter, roleScopes map[string][]string) *Server {
 	return &Server{
-		tokenIntrospector: f,
+		tokenIntrospector: ti,
 
 		cache: cache,
 
@@ -57,7 +49,7 @@ func New(c *config.Config, cache cacheGetter, roleScopes map[string][]string) *S
 type Server struct {
 	v1.UnimplementedRbacInternalServiceServer
 
-	tokenIntrospector tokenIntrospector
+	tokenIntrospector TokenIntrospector
 
 	cache cacheGetter
 

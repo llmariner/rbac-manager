@@ -11,7 +11,9 @@ import (
 	cv1 "github.com/llmariner/cluster-manager/api/v1"
 	"github.com/llmariner/rbac-manager/server/internal/cache"
 	"github.com/llmariner/rbac-manager/server/internal/config"
+	"github.com/llmariner/rbac-manager/server/internal/dex"
 	"github.com/llmariner/rbac-manager/server/internal/monitoring"
+	"github.com/llmariner/rbac-manager/server/internal/okta"
 	"github.com/llmariner/rbac-manager/server/internal/server"
 	uv1 "github.com/llmariner/user-manager/api/v1"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -84,8 +86,19 @@ func run(ctx context.Context, c *config.Config) error {
 	// we intentionally avoid that here to avoid hard dependency to user-manager-server.
 	// TODO(kenji): Consider revisit this.
 
+	var ta server.TokenIntrospector
+	if c.EnableOkta {
+		var err error
+		ta, err = okta.NewDefaultClient(ctx, c.OktaJWKSURL, okta.ClientOpts{Refresh: 1 * time.Hour})
+		if err != nil {
+			return err
+		}
+	} else {
+		ta = dex.NewDefaultClient(c.DexServerAddr)
+	}
+
 	go func() {
-		srv := server.New(c, cstore, c.RoleScopesMap)
+		srv := server.New(ta, cstore, c.RoleScopesMap)
 		errCh <- srv.Run(ctx, c.InternalGRPCPort)
 	}()
 

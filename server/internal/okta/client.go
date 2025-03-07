@@ -1,24 +1,55 @@
 package okta
 
 import (
+	"context"
+	"crypto/rsa"
 	"fmt"
+	"time"
 
 	"github.com/golang-jwt/jwt"
+	"github.com/lestrrat-go/jwx/jwk"
 	"github.com/llmariner/rbac-manager/server/internal/token"
 )
 
-var _ token.Client = &defaultClient{}
+var _ token.Client = &DefaultClient{}
 
-// NewDefaultClient returns a new default client.
-func NewDefaultClient() token.Client {
-	return &defaultClient{}
+// ClientOpts are options for NewDefautlClient
+type ClientOpts struct {
+	Refresh time.Duration
 }
 
-type defaultClient struct{}
+// NewDefaultClient returns a new default client.
+func NewDefaultClient(ctx context.Context, url string, opts ClientOpts) (*DefaultClient, error) {
+	var refreshOpts []jwk.AutoRefreshOption
+	if opts.Refresh > 0 {
+		refreshOpts = append(refreshOpts, jwk.WithRefreshInterval(opts.Refresh))
+	}
+	ar := jwk.NewAutoRefresh(ctx)
+	ar.Configure(url, refreshOpts...)
+
+	// Perform an initial token refresh so the keys are cached.
+	_, err := ar.Refresh(ctx, url)
+	if err != nil {
+		return nil, err
+	}
+
+	return &DefaultClient{
+		ctx: ctx,
+		url: url,
+		ar:  ar,
+	}, nil
+}
+
+// DefaultClient is the default Okta client.
+type DefaultClient struct {
+	ctx context.Context
+	url string
+	ar  *jwk.AutoRefresh
+}
 
 // TokenIntrospect introspects the given token.
-func (c *defaultClient) TokenIntrospect(tokenStr string) (*token.Introspection, error) {
-	claims, err := getClaimsFromAccessToken(tokenStr)
+func (c *DefaultClient) TokenIntrospect(tokenStr string) (*token.Introspection, error) {
+	claims, err := c.getClaimsFromAccessToken(tokenStr)
 	if err != nil {
 		return nil, fmt.Errorf("unexpected form of claims: %s", err)
 	}
@@ -32,6 +63,7 @@ func (c *defaultClient) TokenIntrospect(tokenStr string) (*token.Introspection, 
 	if err != nil {
 		return nil, fmt.Errorf("could not get user ID: %s", err)
 	}
+	fmt.Printf("Found email[%s], userID[%s] from claims %+v\n", email, userID, claims)
 
 	return &token.Introspection{
 		Active:  true,
@@ -43,20 +75,11 @@ func (c *defaultClient) TokenIntrospect(tokenStr string) (*token.Introspection, 
 }
 
 // getClaimsFromAccessToken gets the claims from the JWT access token.
-func getClaimsFromAccessToken(accessToken string) (jwt.MapClaims, error) {
-	// Decode the JWT token. Pass nil to keyFunc to skip
-	// validation. The access token should have already been
-	// validated by KONG gateway.
-	token, err := jwt.Parse(accessToken, nil)
+func (c *DefaultClient) getClaimsFromAccessToken(tokenStr string) (jwt.MapClaims, error) {
+	token, err := c.validate(tokenStr)
 	if err != nil {
-		// Return the error if the error is not an expected validation error.
-		ve, ok := err.(*jwt.ValidationError)
-		if !ok {
-			return nil, fmt.Errorf("failed to parse: %s", err)
-		}
-		if ve.Errors != jwt.ValidationErrorUnverifiable {
-			return nil, fmt.Errorf("unexpected validation error: %s", err)
-		}
+		return nil, err
+
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
@@ -64,6 +87,43 @@ func getClaimsFromAccessToken(accessToken string) (jwt.MapClaims, error) {
 		return nil, fmt.Errorf("unexpected form of claims: %s", err)
 	}
 	return claims, nil
+}
+
+// validate validates the incoming token string against the public key.
+func (c *DefaultClient) validate(tokenStr string) (*jwt.Token, error) {
+	set, err := c.ar.Fetch(c.ctx, c.url)
+	if err != nil {
+		return nil, err
+	}
+
+	// Validate with all keys until we find a match.
+	for i := 0; i < set.Len(); i++ {
+		key, ok := set.Get(i)
+		if !ok {
+			return nil, fmt.Errorf("idx %d out of range (keys = %d)", i, set.Len())
+		}
+
+		var rawKey interface{}
+		if err = key.Raw(&rawKey); err != nil {
+			return nil, fmt.Errorf("raw: %s", err)
+		}
+
+		switch k := rawKey.(type) {
+		case *rsa.PublicKey:
+		default:
+			return nil, fmt.Errorf("unknown key type: %T", k)
+		}
+
+		t, _ := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+			return rawKey, nil
+		})
+
+		if t != nil && t.Valid {
+			return t, nil
+		}
+	}
+
+	return nil, fmt.Errorf("no key to validate")
 }
 
 // getUserID gets the userID from the JWT claims.

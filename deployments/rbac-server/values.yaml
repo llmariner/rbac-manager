@@ -116,6 +116,8 @@ enablePrometheusRule: false
 
 # If enabled, authorization goes through Okta directly, without bypass dex.
 enableOkta: false
+# The URL of the JWKS used to verify JWT when enableOkta is set to true.
+oktaJwksUrl: ""
 
 # The number of replicas for the rbac-server Deployment.
 # +docs:type=number
