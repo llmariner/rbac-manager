@@ -54,7 +54,7 @@ func run(ctx context.Context, c *config.Config) error {
 	logger := stdr.New(log.Default())
 	log := logger.WithName("boot")
 
-	log.Info("Starting internal-grpc server on port %d", c.InternalGRPCPort)
+	log.Info("Starting internal-grpc server...", "port", c.InternalGRPCPort)
 
 	conn, err := grpc.NewClient(
 		c.CacheConfig.UserManagerServerInternalAddr,
@@ -85,7 +85,7 @@ func run(ctx context.Context, c *config.Config) error {
 	// TODO(kenji): Consider revisit this.
 
 	go func() {
-		srv := server.New(c.DexServerAddr, cstore, c.RoleScopesMap)
+		srv := server.New(c, cstore, c.RoleScopesMap)
 		errCh <- srv.Run(ctx, c.InternalGRPCPort)
 	}()
 

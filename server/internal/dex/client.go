@@ -6,28 +6,14 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+
+	"github.com/llmariner/rbac-manager/server/internal/token"
 )
 
-// Client is the interface for the token introspection client.
-type Client interface {
-	TokenIntrospect(token string) (*Introspection, error)
-}
-
-// Introspection is the response from the token introspection endpoint.
-type Introspection struct {
-	Active  bool               `json:"active"`
-	Subject string             `json:"sub"`
-	Extra   IntrospectionExtra `json:"ext,omitempty"`
-}
-
-// IntrospectionExtra is the extra fields that can be returned in the token introspection response.
-type IntrospectionExtra struct {
-	Email         string `json:"email,omitempty"`
-	EmailVerified *bool  `json:"email_verified,omitempty"`
-}
+var _ token.Client = &defaultClient{}
 
 // NewDefaultClient returns a new default client.
-func NewDefaultClient(dexServerAddr string) Client {
+func NewDefaultClient(dexServerAddr string) token.Client {
 	return &defaultClient{dexServerAddr: dexServerAddr}
 }
 
@@ -36,10 +22,10 @@ type defaultClient struct {
 }
 
 // TokenIntrospect introspects the given token.
-func (c *defaultClient) TokenIntrospect(token string) (*Introspection, error) {
+func (c *defaultClient) TokenIntrospect(tokenStr string) (*token.Introspection, error) {
 	resp, err := http.PostForm(
 		fmt.Sprintf("http://%s/v1/dex/token/introspect", c.dexServerAddr),
-		url.Values{"token": {token}})
+		url.Values{"token": {tokenStr}})
 	if err != nil {
 		return nil, err
 	}
@@ -51,8 +37,7 @@ func (c *defaultClient) TokenIntrospect(token string) (*Introspection, error) {
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("failed to introspect token: %s", resp.Status)
 	}
-
-	var is Introspection
+	var is token.Introspection
 	if err := json.NewDecoder(resp.Body).Decode(&is); err != nil {
 		return nil, err
 	}
