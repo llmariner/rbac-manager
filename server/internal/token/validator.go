@@ -145,7 +145,11 @@ func getUserID(claims jwt.MapClaims) (string, error) {
 func getEmail(claims jwt.MapClaims) (string, error) {
 	email, ok := claims["email"]
 	if !ok {
-		return "", nil
+		// Fall back to "sub" claim. This is mainly for CloudNatix
+		email, ok = claims["sub"]
+		if !ok {
+			return "", fmt.Errorf("no \"uid\" or \"sub\" claim found in the token")
+		}
 	}
 
 	v, ok := email.(string)
