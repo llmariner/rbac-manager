@@ -6,7 +6,7 @@ import (
 
 	v1 "github.com/llmariner/rbac-manager/api/v1"
 	"github.com/llmariner/rbac-manager/server/internal/cache"
-	"github.com/llmariner/rbac-manager/server/internal/dex"
+	"github.com/llmariner/rbac-manager/server/internal/token"
 	uv1 "github.com/llmariner/user-manager/api/v1"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/protobuf/proto"
@@ -33,7 +33,7 @@ func TestAuthorize(t *testing.T) {
 		projectsByID             map[string]*cache.P
 		projectsByOrganizationID map[string][]cache.P
 		usersByID                map[string]*cache.U
-		is                       *dex.Introspection
+		is                       *token.Introspection
 		want                     bool
 	}{
 		{
@@ -135,9 +135,9 @@ func TestAuthorize(t *testing.T) {
 					TenantID: "t0",
 				},
 			},
-			is: &dex.Introspection{
+			is: &token.Introspection{
 				Active: true,
-				Extra: dex.IntrospectionExtra{
+				Extra: token.IntrospectionExtra{
 					Email: "my-user",
 				},
 			},
@@ -151,9 +151,9 @@ func TestAuthorize(t *testing.T) {
 				Capability:     "read",
 			},
 			apikeys: map[string]*cache.K{},
-			is: &dex.Introspection{
+			is: &token.Introspection{
 				Active: false,
-				Extra: dex.IntrospectionExtra{
+				Extra: token.IntrospectionExtra{
 					Email: "my-user",
 				},
 			},
@@ -167,9 +167,9 @@ func TestAuthorize(t *testing.T) {
 				Capability:     "read",
 			},
 			apikeys: map[string]*cache.K{},
-			is: &dex.Introspection{
+			is: &token.Introspection{
 				Active: true,
-				Extra: dex.IntrospectionExtra{
+				Extra: token.IntrospectionExtra{
 					Email: "different-user",
 				},
 			},
@@ -184,9 +184,9 @@ func TestAuthorize(t *testing.T) {
 				Capability:     "read",
 			},
 			apikeys: map[string]*cache.K{},
-			is: &dex.Introspection{
+			is: &token.Introspection{
 				Active: true,
-				Extra: dex.IntrospectionExtra{
+				Extra: token.IntrospectionExtra{
 					Email: "my-user",
 				},
 			},
@@ -229,9 +229,9 @@ func TestAuthorize(t *testing.T) {
 					},
 				},
 			},
-			is: &dex.Introspection{
+			is: &token.Introspection{
 				Active: true,
-				Extra: dex.IntrospectionExtra{
+				Extra: token.IntrospectionExtra{
 					Email: "my-user",
 				},
 			},
@@ -512,10 +512,10 @@ func TestAssignedKubernetesEnvsInternal(t *testing.T) {
 }
 
 type fakeTokenIntrospector struct {
-	is *dex.Introspection
+	is *token.Introspection
 }
 
-func (f *fakeTokenIntrospector) TokenIntrospect(token string) (*dex.Introspection, error) {
+func (f *fakeTokenIntrospector) TokenIntrospect(token string) (*token.Introspection, error) {
 	return f.is, nil
 }
 

@@ -15,6 +15,8 @@ type Config struct {
 
 	DexServerAddr string `yaml:"dexServerAddr"`
 
+	EnableOkta bool `yaml:"enableOkta"`
+
 	CacheConfig CacheConfig `yaml:"cache"`
 
 	// RoleScopesMap maps a role name to a list of scopes.

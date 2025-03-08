@@ -114,6 +114,9 @@ enableServiceMonitor: false
 # NOTE: To use this feature, prometheus-operator must be installed in advance.
 enablePrometheusRule: false
 
+# If enabled, authorization goes through Okta directly, without bypass dex.
+enableOkta: false
+
 # The number of replicas for the rbac-server Deployment.
 # +docs:type=number
 replicaCount: 1
