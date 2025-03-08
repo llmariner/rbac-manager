@@ -8,7 +8,6 @@ data:
   config.yaml: |
     internalGrpcPort: {{ .Values.internalGrpcPort }}
     monitoringPort: {{ .Values.monitoringPort }}
-    dexServerAddr: {{ .Values.global.auth.dexServerAddr }}
     jwksUrl: {{ .Values.jwksUrl }}
     cache:
       syncInterval: {{ .Values.cache.syncInterval }}
