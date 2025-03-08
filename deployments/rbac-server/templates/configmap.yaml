@@ -9,8 +9,7 @@ data:
     internalGrpcPort: {{ .Values.internalGrpcPort }}
     monitoringPort: {{ .Values.monitoringPort }}
     dexServerAddr: {{ .Values.global.auth.dexServerAddr }}
-    enableOkta: {{ .Values.enableOkta }}
-    oktaJwksUrl: {{ .Values.oktaJwksUrl }}
+    jwksUrl: {{ .Values.jwksUrl }}
     cache:
       syncInterval: {{ .Values.cache.syncInterval }}
       userManagerServerInternalAddr: {{ .Values.cache.userManagerServerInternalAddr }}
