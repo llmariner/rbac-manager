@@ -1,4 +1,4 @@
-package okta
+package token
 
 import (
 	"context"
@@ -8,18 +8,15 @@ import (
 
 	"github.com/golang-jwt/jwt"
 	"github.com/lestrrat-go/jwx/jwk"
-	"github.com/llmariner/rbac-manager/server/internal/token"
 )
 
-var _ token.Client = &DefaultClient{}
-
-// ClientOpts are options for NewDefautlClient
-type ClientOpts struct {
+// ValidatorOpts are options for NewDefautlValidator
+type ValidatorOpts struct {
 	Refresh time.Duration
 }
 
-// NewDefaultClient returns a new default client.
-func NewDefaultClient(ctx context.Context, url string, opts ClientOpts) (*DefaultClient, error) {
+// NewValidator returns a new default client.
+func NewValidator(ctx context.Context, url string, opts ValidatorOpts) (*Validator, error) {
 	var refreshOpts []jwk.AutoRefreshOption
 	if opts.Refresh > 0 {
 		refreshOpts = append(refreshOpts, jwk.WithRefreshInterval(opts.Refresh))
@@ -33,23 +30,23 @@ func NewDefaultClient(ctx context.Context, url string, opts ClientOpts) (*Defaul
 		return nil, err
 	}
 
-	return &DefaultClient{
+	return &Validator{
 		ctx: ctx,
 		url: url,
 		ar:  ar,
 	}, nil
 }
 
-// DefaultClient is the default Okta client.
-type DefaultClient struct {
+// Validator is the default Okta client.
+type Validator struct {
 	ctx context.Context
 	url string
 	ar  *jwk.AutoRefresh
 }
 
 // TokenIntrospect introspects the given token.
-func (c *DefaultClient) TokenIntrospect(tokenStr string) (*token.Introspection, error) {
-	claims, err := c.getClaimsFromAccessToken(tokenStr)
+func (v *Validator) TokenIntrospect(tokenStr string) (*Introspection, error) {
+	claims, err := v.getClaimsFromAccessToken(tokenStr)
 	if err != nil {
 		return nil, fmt.Errorf("unexpected form of claims: %s", err)
 	}
@@ -65,18 +62,18 @@ func (c *DefaultClient) TokenIntrospect(tokenStr string) (*token.Introspection, 
 	}
 	fmt.Printf("Found email[%s], userID[%s] from claims %+v\n", email, userID, claims)
 
-	return &token.Introspection{
+	return &Introspection{
 		Active:  true,
 		Subject: userID,
-		Extra: token.IntrospectionExtra{
+		Extra: IntrospectionExtra{
 			Email: email,
 		},
 	}, nil
 }
 
 // getClaimsFromAccessToken gets the claims from the JWT access token.
-func (c *DefaultClient) getClaimsFromAccessToken(tokenStr string) (jwt.MapClaims, error) {
-	token, err := c.validate(tokenStr)
+func (v *Validator) getClaimsFromAccessToken(tokenStr string) (jwt.MapClaims, error) {
+	token, err := v.validate(tokenStr)
 	if err != nil {
 		return nil, err
 
@@ -90,8 +87,8 @@ func (c *DefaultClient) getClaimsFromAccessToken(tokenStr string) (jwt.MapClaims
 }
 
 // validate validates the incoming token string against the public key.
-func (c *DefaultClient) validate(tokenStr string) (*jwt.Token, error) {
-	set, err := c.ar.Fetch(c.ctx, c.url)
+func (v *Validator) validate(tokenStr string) (*jwt.Token, error) {
+	set, err := v.ar.Fetch(v.ctx, v.url)
 	if err != nil {
 		return nil, err
 	}
@@ -145,10 +142,8 @@ func getUserID(claims jwt.MapClaims) (string, error) {
 }
 
 // getEmail gets the email from the JWT claims.
-// We get email only when the claims contain "sub" in ID token.
-// Claims contain no "sub" only when requests are made by Cluster Controller).
 func getEmail(claims jwt.MapClaims) (string, error) {
-	email, ok := claims["sub"]
+	email, ok := claims["email"]
 	if !ok {
 		return "", nil
 	}

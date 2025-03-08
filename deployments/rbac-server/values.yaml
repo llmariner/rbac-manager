@@ -114,10 +114,8 @@ enableServiceMonitor: false
 # NOTE: To use this feature, prometheus-operator must be installed in advance.
 enablePrometheusRule: false
 
-# If enabled, authorization goes through Okta directly, without bypass dex.
-enableOkta: false
-# The URL of the JWKS used to verify JWT when enableOkta is set to true.
-oktaJwksUrl: ""
+# The URL of the JWKS used to verify JWT.
+jwksUrl: "http://dex-server-http:5556/dex/keys"
 
 # The number of replicas for the rbac-server Deployment.
 # +docs:type=number

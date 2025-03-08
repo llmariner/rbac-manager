@@ -1,4 +1,4 @@
-package okta
+package token
 
 import (
 	"testing"
