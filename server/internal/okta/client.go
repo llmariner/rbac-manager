@@ -18,7 +18,7 @@ type defaultClient struct{}
 
 // TokenIntrospect introspects the given token.
 func (c *defaultClient) TokenIntrospect(tokenStr string) (*token.Introspection, error) {
-	claims, err := c.getClaimsFromAccessToken(tokenStr)
+	claims, err := getClaimsFromAccessToken(tokenStr)
 	if err != nil {
 		return nil, fmt.Errorf("unexpected form of claims: %s", err)
 	}
