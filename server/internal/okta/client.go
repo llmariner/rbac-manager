@@ -23,12 +23,12 @@ func (c *defaultClient) TokenIntrospect(tokenStr string) (*token.Introspection, 
 		return nil, fmt.Errorf("unexpected form of claims: %s", err)
 	}
 
-	email, err := c.getEmail(claims)
+	email, err := getEmail(claims)
 	if err != nil {
 		return nil, fmt.Errorf("could not get email claim: %s", err)
 	}
 
-	userID, err := c.getUserID(claims)
+	userID, err := getUserID(claims)
 	if err != nil {
 		return nil, fmt.Errorf("could not get user ID: %s", err)
 	}
@@ -43,7 +43,7 @@ func (c *defaultClient) TokenIntrospect(tokenStr string) (*token.Introspection, 
 }
 
 // getClaimsFromAccessToken gets the claims from the JWT access token.
-func (c *defaultClient) getClaimsFromAccessToken(accessToken string) (jwt.MapClaims, error) {
+func getClaimsFromAccessToken(accessToken string) (jwt.MapClaims, error) {
 	// Decode the JWT token. Pass nil to keyFunc to skip
 	// validation. The access token should have already been
 	// validated by KONG gateway.
@@ -69,12 +69,12 @@ func (c *defaultClient) getClaimsFromAccessToken(accessToken string) (jwt.MapCla
 // getUserID gets the userID from the JWT claims.
 // We get userID only when the claims contain "uid" in access token, or "sub" in ID token.
 // Claims contain "uid" only when requests are made by end users (not by Cluster Controller).
-func (c *defaultClient) getUserID(claims jwt.MapClaims) (string, error) {
+func getUserID(claims jwt.MapClaims) (string, error) {
 	userID, ok := claims["uid"]
 	if !ok {
 		userID, ok = claims["sub"]
 		if !ok {
-			return "", nil
+			return "", fmt.Errorf("no \"uid\" or \"sub\" claim found in the token")
 		}
 	}
 	v, ok := userID.(string)
@@ -87,7 +87,7 @@ func (c *defaultClient) getUserID(claims jwt.MapClaims) (string, error) {
 // getEmail gets the email from the JWT claims.
 // We get email only when the claims contain "sub" in ID token.
 // Claims contain no "sub" only when requests are made by Cluster Controller).
-func (c *defaultClient) getEmail(claims jwt.MapClaims) (string, error) {
+func getEmail(claims jwt.MapClaims) (string, error) {
 	email, ok := claims["sub"]
 	if !ok {
 		return "", nil
