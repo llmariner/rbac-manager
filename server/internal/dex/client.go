@@ -10,8 +10,6 @@ import (
 	"github.com/llmariner/rbac-manager/server/internal/token"
 )
 
-var _ token.Client = &defaultClient{}
-
 // NewDefaultClient returns a new default client.
 func NewDefaultClient(dexServerAddr string) token.Client {
 	return &defaultClient{dexServerAddr: dexServerAddr}

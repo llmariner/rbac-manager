@@ -10,6 +10,7 @@ data:
     monitoringPort: {{ .Values.monitoringPort }}
     dexServerAddr: {{ .Values.global.auth.dexServerAddr }}
     enableOkta: {{ .Values.enableOkta }}
+    oktaJwksUrl: {{ .Values.oktaJwksUrl }}
     cache:
       syncInterval: {{ .Values.cache.syncInterval }}
       userManagerServerInternalAddr: {{ .Values.cache.userManagerServerInternalAddr }}

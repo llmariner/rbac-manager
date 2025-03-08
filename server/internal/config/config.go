@@ -15,7 +15,8 @@ type Config struct {
 
 	DexServerAddr string `yaml:"dexServerAddr"`
 
-	EnableOkta bool `yaml:"enableOkta"`
+	EnableOkta  bool   `yaml:"enableOkta"`
+	OktaJWKSURL string `yaml:"oktaJwksUrl"`
 
 	CacheConfig CacheConfig `yaml:"cache"`
 
@@ -33,6 +34,9 @@ func (c *Config) Validate() error {
 	}
 	if c.DexServerAddr == "" {
 		return fmt.Errorf("dexServerAddr must be set")
+	}
+	if c.EnableOkta && c.OktaJWKSURL == "" {
+		return fmt.Errorf("oktaJwksUrl must be set")
 	}
 	if err := c.CacheConfig.validate(); err != nil {
 		return fmt.Errorf("cache: %s", err)
