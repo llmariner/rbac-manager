@@ -2,7 +2,6 @@ package okta
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/llmariner/rbac-manager/server/internal/token"
@@ -19,11 +18,7 @@ type defaultClient struct{}
 
 // TokenIntrospect introspects the given token.
 func (c *defaultClient) TokenIntrospect(tokenStr string) (*token.Introspection, error) {
-	if !strings.HasPrefix(tokenStr, "Bearer ") {
-		return nil, fmt.Errorf("unexpected form of auth header")
-	}
-	accessToken := tokenStr[7:]
-	claims, err := c.getClaimsFromAccessToken(accessToken)
+	claims, err := c.getClaimsFromAccessToken(tokenStr)
 	if err != nil {
 		return nil, fmt.Errorf("unexpected form of claims: %s", err)
 	}
