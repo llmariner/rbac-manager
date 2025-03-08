@@ -37,7 +37,6 @@ func (c *defaultClient) TokenIntrospect(tokenStr string) (*token.Introspection, 
 	if err != nil {
 		return nil, fmt.Errorf("could not get user ID: %s", err)
 	}
-	fmt.Printf("Found email[%s], userID[%s] from claims %+v\n", email, userID, claims)
 
 	return &token.Introspection{
 		Active:  true,
