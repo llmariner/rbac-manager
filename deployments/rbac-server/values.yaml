@@ -2,17 +2,6 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-# +docs:section=Global
-
-# Global settings are used to share the values among LLMariner components.
-# rbac-server is a dependency of LLMariner, so global values are
-# propagated at its installation.
-# Please see https://github.com/llmariner/llmariner/blob/main/deployments/llmariner.
-global:
-  auth:
-    # The address of the dex-server to verify a token.
-    dexServerAddr: dex-server-http:5556
-
 # +docs:section=Server
 
 # The GRPC port number for the internal service.

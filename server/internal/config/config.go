@@ -31,9 +31,6 @@ func (c *Config) Validate() error {
 	if c.MonitoringPort <= 0 {
 		return fmt.Errorf("monitoringPort must be greater than 0")
 	}
-	if c.DexServerAddr == "" {
-		return fmt.Errorf("dexServerAddr must be set")
-	}
 	if c.JWKSURL == "" {
 		return fmt.Errorf("jwksUrl must be set")
 	}
