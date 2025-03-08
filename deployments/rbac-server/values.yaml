@@ -104,7 +104,7 @@ enableServiceMonitor: false
 enablePrometheusRule: false
 
 # The URL of the JWKS used to verify JWT.
-jwksUrl: "http://dex-server-http:5556/dex/keys"
+jwksUrl: "http://dex-server-http:5556/v1/dex/keys"
 
 # The number of replicas for the rbac-server Deployment.
 # +docs:type=number
