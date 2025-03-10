@@ -46,8 +46,13 @@ type Validator struct {
 
 // TokenIntrospect introspects the given token.
 func (v *Validator) TokenIntrospect(tokenStr string) (*Introspection, error) {
-	claims, err := v.getClaimsFromAccessToken(tokenStr)
+	token, err := v.validate(tokenStr)
 	if err != nil {
+		return &Introspection{Active: false}, nil
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
 		return nil, fmt.Errorf("unexpected form of claims: %s", err)
 	}
 
@@ -69,21 +74,6 @@ func (v *Validator) TokenIntrospect(tokenStr string) (*Introspection, error) {
 			Email: email,
 		},
 	}, nil
-}
-
-// getClaimsFromAccessToken gets the claims from the JWT access token.
-func (v *Validator) getClaimsFromAccessToken(tokenStr string) (jwt.MapClaims, error) {
-	token, err := v.validate(tokenStr)
-	if err != nil {
-		return nil, err
-
-	}
-
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok {
-		return nil, fmt.Errorf("unexpected form of claims: %s", err)
-	}
-	return claims, nil
 }
 
 // validate validates the incoming token string against the public key.
