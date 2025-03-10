@@ -26,8 +26,11 @@ func (s *Server) Authorize(ctx context.Context, req *v1.AuthorizeRequest) (*v1.A
 	}
 
 	// Check if the token is the API key.
-	key, ok := s.cache.GetAPIKeyBySecret(req.Token)
-	if ok {
+	if strings.HasPrefix(req.Token, "sk-") {
+		key, ok := s.cache.GetAPIKeyBySecret(req.Token)
+		if !ok {
+			return &v1.AuthorizeResponse{Authorized: false}, nil
+		}
 		project, found := s.cache.GetProjectByID(key.ProjectID)
 		if !found {
 			return &v1.AuthorizeResponse{Authorized: false}, nil
