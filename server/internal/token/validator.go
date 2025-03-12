@@ -65,7 +65,6 @@ func (v *Validator) TokenIntrospect(tokenStr string) (*Introspection, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not get user ID: %s", err)
 	}
-	fmt.Printf("Found email[%s], userID[%s] from claims %+v\n", email, userID, claims)
 
 	return &Introspection{
 		Active:  true,
