@@ -63,8 +63,8 @@ github.com/llmariner/cluster-manager v1.3.0 h1:7HyL5n3YlypWxOy4vqsCxgf35IokqJsRJ
 github.com/llmariner/cluster-manager v1.3.0/go.mod h1:zDwxICMXiP8uXwx+raFIdmWiwG8DZElpjg8BpVK33yQ=
 github.com/llmariner/common v0.15.0 h1:KkDDKXcFPMlCNOZG1vK1nKd05FYagf7CRmPtRO42htg=
 github.com/llmariner/common v0.15.0/go.mod h1:nt793i6mCLc3tpIA223EvxHLuHa/8Ft+oa4h8m5EWKE=
-github.com/llmariner/user-manager v1.9.0 h1:Uz9ciGoiJpu3cPWq1qgiDWW3LCYxMKs7BC3cvrrPzBE=
-github.com/llmariner/user-manager v1.9.0/go.mod h1:Ct8P7m10YWYt3q4QyKp5mpflTRTa6sNui1btGPIDekY=
+github.com/llmariner/user-manager v1.17.0 h1:l5ZVXoZtJk7Iy2QN0s14fl96UNDIF4vw6XNcWD9dEtU=
+github.com/llmariner/user-manager v1.17.0/go.mod h1:7ZYhWrKP59Qjmnoz2LFXTs5Qx8QkSL1OG+wZ1gJrUJw=
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 h1:C3w9PqII01/Oq1c1nUAm88MOHcQC9l5mIlSMApZMrHA=
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822/go.mod h1:+n7T8mK8HuQTcFwEeznm/DIxMOiR9yIdICNftLE1DvQ=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=

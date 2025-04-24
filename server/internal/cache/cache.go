@@ -24,6 +24,9 @@ type K struct {
 
 	OrganizationRole uv1.OrganizationRole
 	ProjectRole      uv1.ProjectRole
+
+	// ExcludedFromRateLimiting indicates whether this API key is excluded from rate limiting
+	ExcludedFromRateLimiting bool
 }
 
 // C represents a cluster.
@@ -267,6 +270,8 @@ func (c *Store) updateCache(ctx context.Context) error {
 
 			OrganizationRole: apiKey.ApiKey.OrganizationRole,
 			ProjectRole:      apiKey.ApiKey.ProjectRole,
+
+			ExcludedFromRateLimiting: apiKey.ApiKey.ExcludedFromRateLimiting,
 		}
 	}
 

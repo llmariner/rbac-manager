@@ -56,8 +56,9 @@ func (s *Server) Authorize(ctx context.Context, req *v1.AuthorizeRequest) (*v1.A
 					key.TenantID,
 				),
 			},
-			TenantId: key.TenantID,
-			ApiKeyId: key.KeyID,
+			TenantId:                 key.TenantID,
+			ApiKeyId:                 key.KeyID,
+			ExcludedFromRateLimiting: key.ExcludedFromRateLimiting,
 		}, nil
 	}
 

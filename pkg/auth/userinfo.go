@@ -28,6 +28,9 @@ type UserInfo struct {
 
 	// APIKeyID is the ID of the API key. It is set only when the user is authenticated with an API key.
 	APIKeyID string
+
+	// ExcludedFromRateLimiting indicates whether the API key is excluded from rate limiting.
+	ExcludedFromRateLimiting bool
 }
 
 // AppendUserInfoToContext appends the user info to the context.
@@ -51,14 +54,15 @@ func newUserInfoFromAuthorizeResponse(resp *v1.AuthorizeResponse) UserInfo {
 		})
 	}
 	return UserInfo{
-		UserID:                 resp.User.Id,
-		InternalUserID:         resp.User.InternalId,
-		OrganizationID:         resp.Organization.Id,
-		OrganizationTitle:      resp.Organization.Title,
-		ProjectID:              resp.Project.Id,
-		ProjectTitle:           resp.Project.Title,
-		APIKeyID:               resp.ApiKeyId,
-		AssignedKubernetesEnvs: envs,
-		TenantID:               resp.TenantId,
+		UserID:                   resp.User.Id,
+		InternalUserID:           resp.User.InternalId,
+		OrganizationID:           resp.Organization.Id,
+		OrganizationTitle:        resp.Organization.Title,
+		ProjectID:                resp.Project.Id,
+		ProjectTitle:             resp.Project.Title,
+		APIKeyID:                 resp.ApiKeyId,
+		AssignedKubernetesEnvs:   envs,
+		TenantID:                 resp.TenantId,
+		ExcludedFromRateLimiting: resp.ExcludedFromRateLimiting,
 	}
 }

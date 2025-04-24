@@ -20,6 +20,7 @@ export type AuthorizeResponse = {
   project?: Project
   tenantId?: string
   apiKeyId?: string
+  excludedFromRateLimiting?: boolean
 }
 
 export type AuthorizeWorkerRequest = {
