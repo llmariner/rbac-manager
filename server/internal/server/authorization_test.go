@@ -45,10 +45,41 @@ func TestAuthorize(t *testing.T) {
 			},
 			apikeys: map[string]*cache.K{
 				"keySecret": {
-					ProjectID:        "my-project",
-					OrganizationID:   "my-org",
-					OrganizationRole: uv1.OrganizationRole_ORGANIZATION_ROLE_OWNER,
-					ProjectRole:      uv1.ProjectRole_PROJECT_ROLE_OWNER,
+					ProjectID:                "my-project",
+					OrganizationID:           "my-org",
+					OrganizationRole:         uv1.OrganizationRole_ORGANIZATION_ROLE_OWNER,
+					ProjectRole:              uv1.ProjectRole_PROJECT_ROLE_OWNER,
+					ExcludedFromRateLimiting: false,
+				},
+			},
+			orgsByID: map[string]*cache.O{
+				"my-org": {
+					ID: "my-org",
+				},
+			},
+			projectsByID: map[string]*cache.P{
+				"my-project": {
+					KubernetesNamespace: "ns",
+					OrganizationID:      "my-org",
+				},
+			},
+			usersByID: map[string]*cache.U{},
+			want:      true,
+		},
+		{
+			name: "authorized with API key excluded from rate limiting",
+			req: &v1.AuthorizeRequest{
+				Token:          "keySecretExcluded",
+				AccessResource: "api.object",
+				Capability:     "read",
+			},
+			apikeys: map[string]*cache.K{
+				"keySecretExcluded": {
+					ProjectID:                "my-project",
+					OrganizationID:           "my-org",
+					OrganizationRole:         uv1.OrganizationRole_ORGANIZATION_ROLE_OWNER,
+					ProjectRole:              uv1.ProjectRole_PROJECT_ROLE_OWNER,
+					ExcludedFromRateLimiting: true,
 				},
 			},
 			orgsByID: map[string]*cache.O{
@@ -258,6 +289,13 @@ func TestAuthorize(t *testing.T) {
 			resp, err := srv.Authorize(context.Background(), tc.req)
 			assert.NoError(t, err)
 			assert.Equal(t, tc.want, resp.Authorized)
+			excludedFromRateLimiting := false
+			if tc.apikeys != nil {
+				if k, ok := tc.apikeys[tc.req.Token]; ok {
+					excludedFromRateLimiting = k.ExcludedFromRateLimiting
+				}
+			}
+			assert.Equal(t, excludedFromRateLimiting, resp.ExcludedFromRateLimiting)
 		})
 	}
 }

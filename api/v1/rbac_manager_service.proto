@@ -22,6 +22,9 @@ message AuthorizeResponse {
 
   // api_key_id is the id of the api key used to authorize the request. It is only set if the request was authorized using an api key.
   string api_key_id = 6;
+  
+  // indicates whether the API key used for authorization is excluded from rate limiting
+  bool excluded_from_rate_limiting = 7;
 }
 
 message AuthorizeWorkerRequest {

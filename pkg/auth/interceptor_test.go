@@ -128,10 +128,11 @@ func (f *fakeInternalServerClient) Authorize(ctx context.Context, in *v1.Authori
 
 	f.counter++
 	return &v1.AuthorizeResponse{
-		Authorized:   true,
-		User:         &v1.User{Id: "u0"},
-		Organization: &v1.Organization{Id: "o0"},
-		Project:      &v1.Project{Id: "p0"},
+		Authorized:               true,
+		User:                     &v1.User{Id: "u0"},
+		Organization:             &v1.Organization{Id: "o0"},
+		Project:                  &v1.Project{Id: "p0"},
+		ExcludedFromRateLimiting: false,
 	}, nil
 }
 
