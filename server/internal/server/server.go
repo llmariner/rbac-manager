@@ -49,6 +49,8 @@ func New(ti TokenIntrospector, cache cacheGetter, roleScopes map[string][]string
 type Server struct {
 	v1.UnimplementedRbacInternalServiceServer
 
+	srv *grpc.Server
+
 	tokenIntrospector TokenIntrospector
 
 	cache cacheGetter
@@ -65,7 +67,14 @@ func (s *Server) Run(ctx context.Context, port int) error {
 	healthCheck.SetServingStatus("", grpc_health_v1.HealthCheckResponse_SERVING)
 	grpc_health_v1.RegisterHealthServer(serv, healthCheck)
 
+	s.srv = serv
+
 	return listenAndServe(serv, port)
+}
+
+// GracefulStop stops the gRPC server gracefully.
+func (s *Server) GracefulStop() {
+	s.srv.GracefulStop()
 }
 
 // listenAndServe is a helper function for starting a gRPC server.
