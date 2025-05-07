@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/go-logr/stdr"
@@ -75,6 +78,9 @@ func run(ctx context.Context, c *config.Config) error {
 	}
 	cClient := cv1.NewClustersInternalServiceClient(conn)
 
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
+
 	cstore := cache.NewStore(uClient, cClient)
 	errCh := make(chan error)
 	go func() {
@@ -89,8 +95,8 @@ func run(ctx context.Context, c *config.Config) error {
 	if err != nil {
 		return err
 	}
+	srv := server.New(ta, cstore, c.RoleScopesMap)
 	go func() {
-		srv := server.New(ta, cstore, c.RoleScopesMap)
 		errCh <- srv.Run(ctx, c.InternalGRPCPort)
 	}()
 
@@ -110,7 +116,18 @@ func run(ctx context.Context, c *config.Config) error {
 		log.Info("Stopped metrics server")
 	}()
 
-	return <-errCh
+	select {
+	case err := <-errCh:
+		return err
+	case sig := <-sigCh:
+		log.Info("Got signal, waiting for graceful shutdown", "signal", sig, "delay", c.GracefulShutdownDelay)
+		time.Sleep(c.GracefulShutdownDelay)
+
+		log.Info("Starting graceful shutdown.")
+		srv.GracefulStop()
+
+		return nil
+	}
 }
 
 func init() {

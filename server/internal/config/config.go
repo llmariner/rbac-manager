@@ -13,6 +13,9 @@ type Config struct {
 	InternalGRPCPort int `yaml:"internalGrpcPort"`
 	MonitoringPort   int `yaml:"monitoringPort"`
 
+	// GracefulShutdownDelay is the delay before shutting down the server.
+	GracefulShutdownDelay time.Duration `yaml:"gracefulShutdownDelay"`
+
 	DexServerAddr string `yaml:"dexServerAddr"`
 
 	JWKSURL string `yaml:"jwksUrl"`
@@ -31,6 +34,10 @@ func (c *Config) Validate() error {
 	if c.MonitoringPort <= 0 {
 		return fmt.Errorf("monitoringPort must be greater than 0")
 	}
+	if c.GracefulShutdownDelay < 0 {
+		return fmt.Errorf("gracefulShutdownDelay must be greater than or equal to 0")
+	}
+
 	if c.JWKSURL == "" {
 		return fmt.Errorf("jwksUrl must be set")
 	}

@@ -8,6 +8,7 @@ data:
   config.yaml: |
     internalGrpcPort: {{ .Values.internalGrpcPort }}
     monitoringPort: {{ .Values.monitoringPort }}
+    gracefulShutdownDelay: {{ .Values.gracefulShutdownDelay }}
     jwksUrl: {{ .Values.jwksUrl }}
     cache:
       syncInterval: {{ .Values.cache.syncInterval }}
