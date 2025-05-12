@@ -104,6 +104,8 @@ func NewStore(
 		projectsByID:             map[string]*P{},
 		projectsByOrganizationID: map[string][]P{},
 		projectsByUserID:         map[string][]PU{},
+
+		initialSync: make(chan struct{}),
 	}
 }
 
@@ -141,6 +143,9 @@ type Store struct {
 	mu sync.RWMutex
 
 	apiKeyRole string
+
+	initialSync chan struct{}
+	synced      bool
 }
 
 // GetAPIKeyBySecret returns an API key by its secret.
@@ -390,5 +395,20 @@ func (c *Store) updateCache(ctx context.Context) error {
 
 	c.lastSuccessfulSyncTime = time.Now()
 
+	if !c.synced {
+		close(c.initialSync)
+	}
+	c.synced = true
+
 	return nil
+}
+
+// WaitForSync waits for the cache to be synchronized.
+func (c *Store) WaitForSync(ctx context.Context) error {
+	select {
+	case <-c.initialSync:
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	}
 }
