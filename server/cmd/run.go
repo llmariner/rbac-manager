@@ -87,6 +87,11 @@ func run(ctx context.Context, c *config.Config) error {
 		errCh <- cstore.Sync(ctx, c.CacheConfig.SyncInterval)
 	}()
 
+	// wait for the initial sync before starting the HTTP server.
+	if err := cstore.WaitForSync(ctx); err != nil {
+		return fmt.Errorf("sync cache: %s", err)
+	}
+
 	// We could wait for the cache to be populated before starting the server, but
 	// we intentionally avoid that here to avoid hard dependency to user-manager-server.
 	// TODO(kenji): Consider revisit this.

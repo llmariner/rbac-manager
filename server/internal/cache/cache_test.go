@@ -126,7 +126,13 @@ func TestCache(t *testing.T) {
 	}
 
 	c := NewStore(ul, cl)
-	err := c.updateCache(context.Background())
+	ctx := context.Background()
+	go func() {
+		err := c.updateCache(ctx)
+		assert.NoError(t, err)
+	}()
+
+	err := c.WaitForSync(ctx)
 	assert.NoError(t, err)
 
 	wantKeys := map[string]*K{
