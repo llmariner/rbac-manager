@@ -142,8 +142,6 @@ type Store struct {
 
 	mu sync.RWMutex
 
-	apiKeyRole string
-
 	initialSync chan struct{}
 	synced      bool
 }
