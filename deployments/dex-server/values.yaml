@@ -308,6 +308,18 @@ securityContext:
   runAsNonRoot: true
   runAsUser: 1000
 
+# Additional environment variables to add to the dex-server container.
+# Example:
+# env:
+#   - name: HTTP_PROXY
+#     value: "http://proxy.example.com:8080"
+#   - name: HTTPS_PROXY
+#     value: "http://proxy.example.com:8080"
+#   - name: NO_PROXY
+#     value: "localhost,127.0.0.1,.local"
+# +docs:property
+# env: []
+
 # Additional volumes to add to the dex-server pod.
 # For more information, see [Volumes](https://kubernetes.io/docs/concepts/storage/volumes/).
 # +docs:property
