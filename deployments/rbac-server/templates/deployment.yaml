@@ -48,6 +48,16 @@ spec:
         {{- with .Values.volumeMounts }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
+        {{- with .Values.rbac }}
+          {{- with .env }}
+        env:
+        {{- toYaml . | nindent 8 }}
+          {{- end }}
+          {{- with .envFrom }}
+        envFrom:
+        {{- toYaml . | nindent 8 }}
+          {{- end }}
+        {{- end }}
         {{- if .Values.livenessProbe.enabled }}
         livenessProbe:
           grpc:
