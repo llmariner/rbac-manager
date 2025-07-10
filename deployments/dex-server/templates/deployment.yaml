@@ -90,13 +90,15 @@ spec:
           readOnly: true
         - name: tmp
           mountPath: /tmp
-        {{- with .Values.dex.env }}
+        {{- with .Values.dex }}
+          {{- with .env }}
         env:
         {{- toYaml . | nindent 8 }}
-        {{- end }}
-        {{- with .Values.dex.envFrom }}
+          {{- end }}
+          {{- with .envFrom }}
         envFrom:
         {{- toYaml . | nindent 8 }}
+          {{- end }}
         {{- end }}
         {{- if .Values.livenessProbe.enabled }}
         livenessProbe:
