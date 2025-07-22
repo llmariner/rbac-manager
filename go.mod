@@ -5,7 +5,7 @@ go 1.23.1
 require (
 	github.com/go-logr/logr v1.4.2
 	github.com/go-logr/stdr v1.2.2
-	github.com/golang-jwt/jwt v3.2.2+incompatible
+	github.com/golang-jwt/jwt/v5 v5.2.3
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.0
 	github.com/lestrrat-go/jwx v1.2.30
 	github.com/llmariner/cluster-manager v1.3.0
