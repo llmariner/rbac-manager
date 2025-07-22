@@ -3,7 +3,7 @@ package token
 import (
 	"testing"
 
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v5"
 	assert "github.com/stretchr/testify/assert"
 )
 
