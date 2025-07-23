@@ -32,6 +32,8 @@ roleScopesMap:
   organizationOwner:
   - api.model.read
   - api.model.write
+  - api.global_base_model.read
+  - api.global_base_model.write
   - api.fine_tuning.jobs.read
   - api.fine_tuning.jobs.write
   - api.workspaces.notebooks.read
@@ -51,6 +53,7 @@ roleScopesMap:
   projectOwner:
   - api.model.read
   - api.model.write
+  - api.global_base_model.read
   - api.fine_tuning.jobs.read
   - api.fine_tuning.jobs.write
   - api.workspaces.notebooks.read
@@ -68,6 +71,7 @@ roleScopesMap:
   projectMember:
   - api.model.read
   - api.model.write
+  - api.global_base_model.read
   - api.fine_tuning.jobs.read
   - api.fine_tuning.jobs.write
   - api.workspaces.notebooks.read
