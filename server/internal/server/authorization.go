@@ -219,7 +219,7 @@ func (s *Server) findAssociatedProjectAndRoles(userID, requestedOrgID, requested
 
 	projectRole := uv1.ProjectRole_PROJECT_ROLE_UNSPECIFIED
 	for _, p := range userProjects {
-		if p.ProjectID == project.ID {
+		if p.Project.ID == project.ID {
 			projectRole = p.Role
 			break
 		}
@@ -280,12 +280,7 @@ func (s *Server) findAssociatedProjectID(
 			if p.OrganizationID != requestedOrgID {
 				continue
 			}
-
-			proj, ok := s.cache.GetProjectByID(p.ProjectID)
-			if !ok {
-				return "", fmt.Errorf("project %s not found", p.ProjectID)
-			}
-			projects = append(projects, *proj)
+			projects = append(projects, *p.Project)
 		}
 		if len(projects) > 0 {
 			return pickProject(projects).ID, nil
@@ -303,7 +298,11 @@ func (s *Server) findAssociatedProjectID(
 	// When neither org ID nor project ID is specified, first project where the user belongs to and then org.
 
 	if len(userProjects) > 0 {
-		return userProjects[0].ProjectID, nil
+		var projects []cache.P
+		for _, p := range userProjects {
+			projects = append(projects, *p.Project)
+		}
+		return pickProject(projects).ID, nil
 	}
 
 	var projects []cache.P
