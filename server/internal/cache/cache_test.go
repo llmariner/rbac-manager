@@ -269,16 +269,24 @@ func TestCache(t *testing.T) {
 	assert.Len(t, userprojects, 2)
 	userprojectsByProject := map[string]*PU{}
 	for _, up := range userprojects {
-		userprojectsByProject[up.ProjectID] = &up
+		userprojectsByProject[up.Project.ID] = &up
 	}
 	wantPUs := map[string]*PU{
 		"p0": {
-			Role:      uv1.ProjectRole_PROJECT_ROLE_OWNER,
-			ProjectID: "p0",
+			Role: uv1.ProjectRole_PROJECT_ROLE_OWNER,
+			Project: &P{
+				ID:                  "p0",
+				OrganizationID:      "o0",
+				KubernetesNamespace: "ns0",
+			},
 		},
 		"p1": {
-			Role:      uv1.ProjectRole_PROJECT_ROLE_MEMBER,
-			ProjectID: "p1",
+			Role: uv1.ProjectRole_PROJECT_ROLE_MEMBER,
+			Project: &P{
+				ID:                  "p1",
+				OrganizationID:      "o1",
+				KubernetesNamespace: "ns1",
+			},
 		},
 	}
 	for projectID, want := range wantPUs {

@@ -63,7 +63,7 @@ type P struct {
 // PU represents a role associated with a project user.
 type PU struct {
 	Role           uv1.ProjectRole
-	ProjectID      string
+	Project        *P
 	OrganizationID string
 }
 
@@ -350,8 +350,13 @@ func (c *Store) updateCache(ctx context.Context) error {
 
 	projectsByUserID := map[string][]PU{}
 	for _, user := range projectUsers.Users {
+		p, ok := projectsByID[user.ProjectId]
+		if !ok {
+			return fmt.Errorf("project %s not found for user %s", user.ProjectId, user.UserId)
+		}
+
 		projectsByUserID[user.UserId] = append(projectsByUserID[user.UserId], PU{
-			ProjectID:      user.ProjectId,
+			Project:        p,
 			OrganizationID: user.OrganizationId,
 			Role:           user.Role,
 		})
