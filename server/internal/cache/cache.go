@@ -38,9 +38,10 @@ type C struct {
 
 // O represents an organization.
 type O struct {
-	ID       string
-	Title    string
-	TenantID string
+	ID        string
+	Title     string
+	TenantID  string
+	IsDefault bool
 }
 
 // OU represents a role associated with a organization user.
@@ -56,6 +57,7 @@ type P struct {
 	OrganizationID      string
 	KubernetesNamespace string
 	Assignments         []*uv1.ProjectAssignment
+	IsDefault           bool
 }
 
 // PU represents a role associated with a project user.
@@ -315,9 +317,10 @@ func (c *Store) updateCache(ctx context.Context) error {
 	for _, org := range orgs.Organizations {
 		id := org.Organization.Id
 		orgsByID[id] = &O{
-			ID:       id,
-			Title:    org.Organization.Title,
-			TenantID: org.TenantId,
+			ID:        id,
+			Title:     org.Organization.Title,
+			TenantID:  org.TenantId,
+			IsDefault: org.Organization.IsDefault,
 		}
 	}
 
@@ -339,6 +342,7 @@ func (c *Store) updateCache(ctx context.Context) error {
 			OrganizationID:      oid,
 			KubernetesNamespace: p.KubernetesNamespace,
 			Assignments:         p.Assignments,
+			IsDefault:           p.IsDefault,
 		}
 		projectsByID[p.Id] = &val
 		projectsByOrganizationID[oid] = append(projectsByOrganizationID[oid], val)
