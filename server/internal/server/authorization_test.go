@@ -353,16 +353,12 @@ func TestFindAssociatedProjectAndRoles(t *testing.T) {
 		projectsByUserID: map[string][]cache.PU{
 			userID: {
 				{
-					Project: &cache.P{
-						ID: project0.ID,
-					},
-					Role: uv1.ProjectRole_PROJECT_ROLE_OWNER,
+					Project: &project0,
+					Role:    uv1.ProjectRole_PROJECT_ROLE_OWNER,
 				},
 				{
-					Project: &cache.P{
-						ID: project1.ID,
-					},
-					Role: uv1.ProjectRole_PROJECT_ROLE_MEMBER,
+					Project: &project1,
+					Role:    uv1.ProjectRole_PROJECT_ROLE_MEMBER,
 				},
 			},
 		},
