@@ -268,7 +268,6 @@ func (s *Server) findAssociatedProject(
 			return nil, fmt.Errorf("organization %s not found", requestedOrgID)
 		}
 
-		// Find the project. First find a project where the user belongs to.
 		var projects []cache.P
 		for _, p := range userProjects {
 			if p.OrganizationID != requestedOrgID {
@@ -276,15 +275,12 @@ func (s *Server) findAssociatedProject(
 			}
 			projects = append(projects, *p.Project)
 		}
-		if len(projects) > 0 {
-			return pickProject(projects), nil
-		}
+		projects = append(projects, s.cache.GetProjectsByOrganizationID(requestedOrgID)...)
 
-		// User does not belong to any project. We still need to decide a project for the k8s namespace.
-		projects = s.cache.GetProjectsByOrganizationID(requestedOrgID)
 		if len(projects) == 0 {
 			return nil, fmt.Errorf("project not found in the organization %s", requestedOrgID)
 		}
+
 		return pickProject(projects), nil
 	}
 
@@ -294,8 +290,7 @@ func (s *Server) findAssociatedProject(
 		projects = append(projects, *p.Project)
 	}
 	for _, o := range userOrgs {
-		ps := s.cache.GetProjectsByOrganizationID(o.OrganizationID)
-		projects = append(projects, ps...)
+		projects = append(projects, s.cache.GetProjectsByOrganizationID(o.OrganizationID)...)
 	}
 
 	if len(projects) == 0 {
