@@ -207,14 +207,9 @@ func (s *Server) findAssociatedProjectAndRoles(userID, requestedOrgID, requested
 	userProjects := s.cache.GetProjectsByUserID(userID)
 	userOrgs := s.cache.GetOrganizationsByUserID(userID)
 
-	projectID, err := s.findAssociatedProjectID(userID, requestedOrgID, requestedProjectID, userProjects, userOrgs)
+	project, err := s.findAssociatedProject(userID, requestedOrgID, requestedProjectID, userProjects, userOrgs)
 	if err != nil {
 		return nil, err
-	}
-
-	project, ok := s.cache.GetProjectByID(projectID)
-	if !ok {
-		return nil, fmt.Errorf("project %s not found", requestedProjectID)
 	}
 
 	projectRole := uv1.ProjectRole_PROJECT_ROLE_UNSPECIFIED
@@ -233,7 +228,7 @@ func (s *Server) findAssociatedProjectAndRoles(userID, requestedOrgID, requested
 		}
 	}
 	if orgRole == uv1.OrganizationRole_ORGANIZATION_ROLE_UNSPECIFIED {
-		return nil, fmt.Errorf("organization role not found for organizattion %q", project.OrganizationID)
+		return nil, fmt.Errorf("organization role not found for organization %q", project.OrganizationID)
 	}
 
 	return &projectAndRoles{
@@ -243,34 +238,34 @@ func (s *Server) findAssociatedProjectAndRoles(userID, requestedOrgID, requested
 	}, nil
 }
 
-func (s *Server) findAssociatedProjectID(
+func (s *Server) findAssociatedProject(
 	userID,
 	requestedOrgID,
 	requestedProjectID string,
 	userProjects []cache.PU,
 	userOrgs []cache.OU,
-) (string, error) {
+) (*cache.P, error) {
 	if requestedProjectID != "" {
 		// Use this project. Grab the role if the user belongs to the project and/or the project's organization.
 
 		// TODO(kenji): Check also if the project belongs to the user's tenant.
 		p, ok := s.cache.GetProjectByID(requestedProjectID)
 		if !ok {
-			return "", fmt.Errorf("project %s not found", requestedProjectID)
+			return nil, fmt.Errorf("project %s not found", requestedProjectID)
 		}
 		// Return an error if the specifies the org ID in the request, but the org ID does not match the org ID
 		// of the project.
 		if requestedOrgID != "" && requestedOrgID != p.OrganizationID {
-			return "", fmt.Errorf("invalid org ID (%q) and project ID (%q) combination", requestedOrgID, requestedProjectID)
+			return nil, fmt.Errorf("invalid org ID (%q) and project ID (%q) combination", requestedOrgID, requestedProjectID)
 		}
 
-		return p.ID, nil
+		return p, nil
 	}
 
 	if requestedOrgID != "" {
 		// TODO(kenji): Check also if the org belongs to the user's tenant.
 		if _, ok := s.cache.GetOrganizationByID(requestedOrgID); !ok {
-			return "", fmt.Errorf("organization %s not found", requestedOrgID)
+			return nil, fmt.Errorf("organization %s not found", requestedOrgID)
 		}
 
 		// Find the project. First find a project where the user belongs to.
@@ -282,15 +277,15 @@ func (s *Server) findAssociatedProjectID(
 			projects = append(projects, *p.Project)
 		}
 		if len(projects) > 0 {
-			return pickProject(projects).ID, nil
+			return pickProject(projects), nil
 		}
 
 		// User does not belong to any project. We still need to decide a project for the k8s namespace.
 		projects = s.cache.GetProjectsByOrganizationID(requestedOrgID)
 		if len(projects) == 0 {
-			return "", fmt.Errorf("project not found in the organization %s", requestedOrgID)
+			return nil, fmt.Errorf("project not found in the organization %s", requestedOrgID)
 		}
-		return pickProject(projects).ID, nil
+		return pickProject(projects), nil
 	}
 
 	// Neither org ID nor project ID is specified.
@@ -300,7 +295,7 @@ func (s *Server) findAssociatedProjectID(
 		for _, p := range userProjects {
 			projects = append(projects, *p.Project)
 		}
-		return pickProject(projects).ID, nil
+		return pickProject(projects), nil
 	}
 
 	var projects []cache.P
@@ -310,20 +305,20 @@ func (s *Server) findAssociatedProjectID(
 	}
 
 	if len(projects) == 0 {
-		return "", fmt.Errorf("unable to identify a project for the user")
+		return nil, fmt.Errorf("unable to identify a project for the user")
 	}
 
-	return pickProject(projects).ID, nil
+	return pickProject(projects), nil
 }
 
 // pickProject picks a project from the list. If there is a default project, pick it.
-func pickProject(projects []cache.P) cache.P {
+func pickProject(projects []cache.P) *cache.P {
 	for _, p := range projects {
 		if p.IsDefault {
-			return p
+			return &p
 		}
 	}
-	return projects[0]
+	return &projects[0]
 }
 
 func (s *Server) assignedKubernetesEnvs(
