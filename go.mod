@@ -10,7 +10,7 @@ require (
 	github.com/lestrrat-go/jwx v1.2.30
 	github.com/llmariner/cluster-manager v1.3.0
 	github.com/llmariner/common v0.15.0
-	github.com/llmariner/user-manager v1.17.0
+	github.com/llmariner/user-manager v1.24.0
 	github.com/prometheus/client_golang v1.21.0
 	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.10.0
