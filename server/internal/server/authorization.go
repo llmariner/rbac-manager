@@ -358,15 +358,21 @@ func assignedKubernetesEnvsInternal(
 	}
 
 	for _, c := range clusters {
+		var foundNS string
 		if ns, ok := nssByCluster[c.ID]; ok {
 			envs = append(envs, &v1.Project_AssignedKubernetesEnv{
 				ClusterId:   c.ID,
 				ClusterName: c.Name,
 				Namespace:   ns,
 			})
+			foundNS = ns
 		}
 
 		for _, ns := range nssForAllClusters {
+			if ns == foundNS {
+				continue
+			}
+
 			envs = append(envs, &v1.Project_AssignedKubernetesEnv{
 				ClusterId:   c.ID,
 				ClusterName: c.Name,
