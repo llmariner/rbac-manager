@@ -273,8 +273,7 @@ func (s *Server) findAssociatedProjectID(
 			return "", fmt.Errorf("organization %s not found", requestedOrgID)
 		}
 
-		// Find the project. First find a project where the user belongs to. If not found,
-		// use the first project in the org.
+		// Find the project. First find a project where the user belongs to.
 		var projects []cache.P
 		for _, p := range userProjects {
 			if p.OrganizationID != requestedOrgID {
@@ -287,7 +286,6 @@ func (s *Server) findAssociatedProjectID(
 		}
 
 		// User does not belong to any project. We still need to decide a project for the k8s namespace.
-		// Use the first one in the project.
 		projects = s.cache.GetProjectsByOrganizationID(requestedOrgID)
 		if len(projects) == 0 {
 			return "", fmt.Errorf("project not found in the organization %s", requestedOrgID)
@@ -295,7 +293,7 @@ func (s *Server) findAssociatedProjectID(
 		return pickProject(projects).ID, nil
 	}
 
-	// When neither org ID nor project ID is specified, first project where the user belongs to and then org.
+	// Neither org ID nor project ID is specified.
 
 	if len(userProjects) > 0 {
 		var projects []cache.P
@@ -311,11 +309,11 @@ func (s *Server) findAssociatedProjectID(
 		projects = append(projects, ps...)
 	}
 
-	if len(projects) > 0 {
-		return pickProject(projects).ID, nil
+	if len(projects) == 0 {
+		return "", fmt.Errorf("unable to identify a project for the user")
 	}
 
-	return "", fmt.Errorf("unable to identify a project for the user")
+	return pickProject(projects).ID, nil
 }
 
 // pickProject picks a project from the list. If there is a default project, pick it.
