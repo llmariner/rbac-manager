@@ -275,20 +275,29 @@ func (s *Server) findAssociatedProjectID(
 
 		// Find the project. First find a project where the user belongs to. If not found,
 		// use the first project in the org.
-
+		var projects []cache.P
 		for _, p := range userProjects {
-			if p.OrganizationID == requestedOrgID {
-				return p.ProjectID, nil
+			if p.OrganizationID != requestedOrgID {
+				continue
 			}
+
+			proj, ok := s.cache.GetProjectByID(p.ProjectID)
+			if !ok {
+				return "", fmt.Errorf("project %s not found", p.ProjectID)
+			}
+			projects = append(projects, *proj)
+		}
+		if len(projects) > 0 {
+			return pickProject(projects).ID, nil
 		}
 
 		// User does not belong to any project. We still need to decide a project for the k8s namespace.
 		// Use the first one in the project.
-		projects := s.cache.GetProjectsByOrganizationID(requestedOrgID)
+		projects = s.cache.GetProjectsByOrganizationID(requestedOrgID)
 		if len(projects) == 0 {
 			return "", fmt.Errorf("project not found in the organization %s", requestedOrgID)
 		}
-		return projects[0].ID, nil
+		return pickProject(projects).ID, nil
 	}
 
 	// When neither org ID nor project ID is specified, first project where the user belongs to and then org.
@@ -297,14 +306,27 @@ func (s *Server) findAssociatedProjectID(
 		return userProjects[0].ProjectID, nil
 	}
 
+	var projects []cache.P
 	for _, o := range userOrgs {
-		projects := s.cache.GetProjectsByOrganizationID(o.OrganizationID)
-		if len(projects) > 0 {
-			return projects[0].ID, nil
-		}
+		ps := s.cache.GetProjectsByOrganizationID(o.OrganizationID)
+		projects = append(projects, ps...)
+	}
+
+	if len(projects) > 0 {
+		return pickProject(projects).ID, nil
 	}
 
 	return "", fmt.Errorf("unable to identify a project for the user")
+}
+
+// pickProject picks a project from the list. If there is a default project, pick it.
+func pickProject(projects []cache.P) cache.P {
+	for _, p := range projects {
+		if p.IsDefault {
+			return p
+		}
+	}
+	return projects[0]
 }
 
 func (s *Server) assignedKubernetesEnvs(
