@@ -288,7 +288,7 @@ func (s *Server) findAssociatedProject(
 		return pickProject(projects), nil
 	}
 
-	// Neither org ID nor project ID is specified. Prefer pick up a default project from all possible projects for the user.
+	// Neither org ID nor project ID is specified. Prefer to pick up a default project from all possible projects for the user.
 	var projects []cache.P
 	for _, p := range userProjects {
 		projects = append(projects, *p.Project)
