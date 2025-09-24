@@ -288,17 +288,11 @@ func (s *Server) findAssociatedProject(
 		return pickProject(projects), nil
 	}
 
-	// Neither org ID nor project ID is specified.
-
-	if len(userProjects) > 0 {
-		var projects []cache.P
-		for _, p := range userProjects {
-			projects = append(projects, *p.Project)
-		}
-		return pickProject(projects), nil
-	}
-
+	// Neither org ID nor project ID is specified. Prefer pick up a default project from all possible projects for the user.
 	var projects []cache.P
+	for _, p := range userProjects {
+		projects = append(projects, *p.Project)
+	}
 	for _, o := range userOrgs {
 		ps := s.cache.GetProjectsByOrganizationID(o.OrganizationID)
 		projects = append(projects, ps...)
